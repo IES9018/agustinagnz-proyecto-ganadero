@@ -18,11 +18,11 @@ Desarrollar un sistema de gestión ganadera modular que permita registrar, consu
 
 El sistema contempla dos perfiles principales:
 
-Productor ganadero
+- Productor ganadero
 
 Responsable de la gestión global del establecimiento. Accede a información consolidada, toma decisiones productivas y consulta reportes operativos.
 
-Personal de campo
+- Personal de campo
 
 Encargado de la carga operativa de datos en terreno. Registra eventos sanitarios, movimientos de animales y actualización de información de stock.
 
@@ -34,71 +34,71 @@ El sistema en su primera versión incluye tres módulos principales:
 
 Registro individual de animales con información básica:
 
-identificación única
+- identificación única
 
-especie
+- especie
 
-raza
+- raza
 
-edad
+- edad
 
-estado sanitario
+- estado sanitario
 
 
 4.2 Trazabilidad y eventos
 
 Registro de eventos asociados al ciclo de vida del animal:
 
-vacunaciones
+- vacunaciones
 
-tratamientos sanitarios
+- tratamientos sanitarios
 
-movimientos entre campos o lotes
+- movimientos entre campos o lotes
 
-cambios de estado
+- cambios de estado
 
 
 4.3 Control de stock y alertas básicas
 
 Gestión de insumos operativos:
 
-alimentos
+- alimentos
 
-medicamentos
+- medicamentos
 
-insumos generales
+- insumos generales
 
 
 Sistema de alertas simples basado en umbrales:
 
-stock crítico
+- stock crítico
 
-eventos sanitarios próximos o pendientes
+- eventos sanitarios próximos o pendientes
 
 
 5. Exclusiones del sistema (MVP)
 
 Quedan fuera de la primera versión del sistema:
 
-procesamiento financiero o contabilidad formal
+- procesamiento financiero o contabilidad formal
 
-integración con organismos externos (SENASA u otros)
+- integración con organismos externos (SENASA u otros)
 
-dispositivos IoT o hardware especializado
+- dispositivos IoT o hardware especializado
 
-inteligencia artificial o analítica predictiva
+- inteligencia artificial o analítica predictiva
 
-sistemas móviles nativos
+- sistemas móviles nativos
 
-GIS o georreferenciación avanzada
+- GIS o georreferenciación avanzada
 
-interoperabilidad con sistemas oficiales
+- interoperabilidad con sistemas oficiales
 
-plataformas de comercio o mercado ganadero
+- plataformas de comercio o mercado ganadero
 
-gestión documental con validez legal
+- gestión documental con validez legal
 
-arquitectura multi-organización o multi-región
+- arquitectura multi-organización o multi-región
 
 
 Estas capacidades se consideran evolución futura.
@@ -107,27 +107,27 @@ Estas capacidades se consideran evolución futura.
 
 El sistema podrá evolucionar hacia módulos avanzados:
 
-reportes analíticos y dashboards
+- reportes analíticos y dashboards
 
-gestión económica y rentabilidad
+- gestión económica y rentabilidad
 
-administración geoespacial de campos
+- administración geoespacial de campos
 
-alertas inteligentes basadas en patrones históricos
+- alertas inteligentes basadas en patrones históricos
 
-aplicación móvil con operación en campo
+- aplicación móvil con operación en campo
 
-integración con dispositivos IoT
+- integración con dispositivos IoT
 
-modelos de inteligencia artificial aplicada al ganado
+- modelos de inteligencia artificial aplicada al ganado
 
-integración con organismos oficiales
+- integración con organismos oficiales
 
-módulo de mercado ganadero
+- módulo de mercado ganadero
 
-gestión documental avanzada
+- gestión documental avanzada
 
-escalabilidad multi-organización
+- escalabilidad multi-organización
 
 
 7. Arquitectura del sistema
