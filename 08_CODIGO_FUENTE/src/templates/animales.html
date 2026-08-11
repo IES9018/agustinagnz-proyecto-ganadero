@@ -1,127 +1,909 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
-<meta charset="UTF-8">
-<title>Animales</title>
-<link rel="stylesheet" href="../static/styles.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Gestión de Animales - Ganadapp</title>
+
+    <link rel="stylesheet" href="/static/styles.css">
 </head>
 
 <body>
 
-<header class="topbar">
-    <div class="brand">
-        <img src="../static/img/logo.png" class="logo-main">
-        <span class="brand-name">Ganadapp</span>
-    </div>
-</header>
+    <!-- =========================
+         BARRA SUPERIOR
+    ========================== -->
 
-<main class="container">
+    <header class="topbar">
 
-<h2>Gestión de Animales</h2>
+        <div class="brand">
 
-<input id="codigo" placeholder="Código">
-<input id="especie" placeholder="Especie">
-<input id="raza" placeholder="Raza">
-<input id="edad" type="number" placeholder="Edad">
-<input id="estado" placeholder="Estado">
+            <img
+                src="/static/img/logo.png"
+                alt="Ganadapp"
+                class="logo-main"
+            >
 
-<button onclick="guardarAnimal()">Guardar</button>
+            <span class="brand-name">Ganadapp</span>
 
-<table border="1" width="100%">
-<thead>
-<tr>
-<th>ID</th><th>Código</th><th>Especie</th><th>Raza</th><th>Edad</th><th>Estado</th><th>Acciones</th>
-</tr>
-</thead>
+        </div>
 
-<tbody id="lista"></tbody>
-</table>
+        <nav class="menu">
 
-</main>
+            <button onclick="location.href='/'">
+                <img src="/static/img/icon-inicio.png" alt="Inicio">
+                <span>Inicio</span>
+            </button>
 
-<script>
+            <button>
+                <img src="/static/img/icon-panel.png" alt="Panel">
+                <span>Panel Principal</span>
+            </button>
 
-const API = "/api/animales";
+            <button>
+                <img src="/static/img/icon-productores.png" alt="Productores">
+                <span>Productores</span>
+            </button>
 
-let editandoId = null;
+            <button class="active">
+                <img src="/static/img/icon-animales.png" alt="Animales">
+                <span>Gestión de Animales</span>
+            </button>
 
-function getData(){
-return {
-codigo: document.getElementById("codigo").value,
-especie: document.getElementById("especie").value,
-raza: document.getElementById("raza").value,
-edad: Number(document.getElementById("edad").value || 0),
-estado: document.getElementById("estado").value
-};
-}
+            <button onclick="location.href='/sanidad'">
+                <img src="/static/img/icon-vacunacion.png" alt="Vacunación">
+                <span>Vacunación</span>
+            </button>
 
-async function guardarAnimal(){
+            <button>
+                <img src="/static/img/icon-stock.png" alt="Stock">
+                <span>Stock de Insumos</span>
+            </button>
 
-const payload = getData();
+            <button>
+                <img src="/static/img/icon-trazabilidad.png" alt="Trazabilidad">
+                <span>Trazabilidad</span>
+            </button>
 
-if(editandoId === null){
+            <button>
+                <img src="/static/img/icon-reportes.png" alt="Reportes">
+                <span>Reportes</span>
+            </button>
 
-await fetch(API,{
-method:"POST",
-headers:{"Content-Type":"application/json"},
-body:JSON.stringify(payload)
-});
+        </nav>
 
-}else{
+    </header>
 
-await fetch(`${API}/${editandoId}`,{
-method:"PUT",
-headers:{"Content-Type":"application/json"},
-body:JSON.stringify(payload)
-});
 
-editandoId=null;
-}
+    <!-- =========================
+         CONTENIDO PRINCIPAL
+    ========================== -->
 
-listar();
-}
+    <main class="animal-page">
 
-async function listar(){
+        <!-- Encabezado -->
 
-const res = await fetch(API);
-const data = await res.json();
+        <section class="page-header">
 
-document.getElementById("lista").innerHTML = data.map(a => `
-<tr>
-<td>${a.id}</td>
-<td>${a.codigo}</td>
-<td>${a.especie}</td>
-<td>${a.raza}</td>
-<td>${a.edad}</td>
-<td>${a.estado}</td>
-<td>
-<button onclick="editar(${a.id},'${a.codigo}','${a.especie}','${a.raza}',${a.edad},'${a.estado}')">Editar</button>
-<button onclick="location.href='/sanidad?id=${a.id}'">Sanidad</button>
-<button onclick="eliminar(${a.id})">Eliminar</button>
-</td>
-</tr>
-`).join("");
-}
+            <div>
 
-function editar(id,codigo,especie,raza,edad,estado){
+                <span class="section-label">
+                    Gestión ganadera
+                </span>
 
-editandoId=id;
+                <h1>
+                    Gestión de Animales
+                </h1>
 
-document.getElementById("codigo").value=codigo;
-document.getElementById("especie").value=especie;
-document.getElementById("raza").value=raza;
-document.getElementById("edad").value=edad;
-document.getElementById("estado").value=estado;
-}
+                <p>
+                    Registre, consulte y administre los animales
+                    de su hacienda desde un único lugar.
+                </p>
 
-async function eliminar(id){
-await fetch(`${API}/${id}`,{method:"DELETE"});
-listar();
-}
+            </div>
 
-document.addEventListener("DOMContentLoaded",listar);
+            <div class="page-header-icon">
 
-</script>
+                <img
+                    src="/static/img/icon-animales.png"
+                    alt="Gestión de animales"
+                >
+
+            </div>
+
+        </section>
+
+
+        <!-- =========================
+             FORMULARIO
+        ========================== -->
+
+        <section class="animal-form-card">
+
+            <div class="card-title">
+
+                <div class="title-icon">
+                    <img
+                        src="/static/img/icon-animales.png"
+                        alt=""
+                    >
+                </div>
+
+                <div>
+
+                    <h2 id="form-title">
+                        Registrar Animal
+                    </h2>
+
+                    <p>
+                        Complete los datos del animal.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <form id="animal-form">
+
+                <div class="form-grid">
+
+                    <div class="form-group">
+
+                        <label for="codigo">
+                            Código
+                        </label>
+
+                        <input
+                            id="codigo"
+                            type="text"
+                            placeholder="Ej. BOV001"
+                            required
+                        >
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label for="especie">
+                            Especie
+                        </label>
+
+                        <input
+                            id="especie"
+                            type="text"
+                            placeholder="Ej. Bovino"
+                            required
+                        >
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label for="raza">
+                            Raza
+                        </label>
+
+                        <input
+                            id="raza"
+                            type="text"
+                            placeholder="Ej. Hereford"
+                            required
+                        >
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label for="edad">
+                            Edad
+                        </label>
+
+                        <input
+                            id="edad"
+                            type="number"
+                            min="0"
+                            placeholder="Ej. 3"
+                            required
+                        >
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label for="estado">
+                            Estado
+                        </label>
+
+                        <select id="estado" required>
+
+                            <option value="">
+                                Seleccione un estado
+                            </option>
+
+                            <option value="Sano">
+                                Sano
+                            </option>
+
+                            <option value="En observación">
+                                En observación
+                            </option>
+
+                            <option value="En tratamiento">
+                                En tratamiento
+                            </option>
+
+                            <option value="Enfermo">
+                                Enfermo
+                            </option>
+
+                        </select>
+
+                    </div>
+
+                </div>
+
+
+                <div class="form-actions">
+
+                    <button
+                        type="submit"
+                        class="btn-primary"
+                        id="save-button"
+                    >
+                        Guardar Animal
+                    </button>
+
+                    <button
+                        type="button"
+                        class="btn-secondary"
+                        id="cancel-button"
+                        onclick="cancelarEdicion()"
+                        style="display: none;"
+                    >
+                        Cancelar
+                    </button>
+
+                </div>
+
+            </form>
+
+        </section>
+
+
+        <!-- =========================
+             LISTADO
+        ========================== -->
+
+        <section class="animals-list-card">
+
+            <div class="list-header">
+
+                <div>
+
+                    <span class="section-label">
+                        Registro
+                    </span>
+
+                    <h2>
+                        Animales registrados
+                    </h2>
+
+                    <p>
+                        Listado de animales actualmente registrados
+                        en el sistema.
+                    </p>
+
+                </div>
+
+                <button
+                    class="btn-refresh"
+                    onclick="listar()"
+                >
+                    Actualizar
+                </button>
+
+            </div>
+
+
+            <div class="animal-count">
+
+                <span id="animal-count">
+                    0 animales registrados
+                </span>
+
+            </div>
+
+
+            <div class="table-container">
+
+                <table>
+
+                    <thead>
+
+                        <tr>
+
+                            <th>ID</th>
+                            <th>Código</th>
+                            <th>Especie</th>
+                            <th>Raza</th>
+                            <th>Edad</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody id="lista">
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+
+            <div
+                id="empty-message"
+                class="empty-message"
+                style="display: none;"
+            >
+
+                <img
+                    src="/static/img/icon-animales.png"
+                    alt=""
+                >
+
+                <h3>
+                    No hay animales registrados
+                </h3>
+
+                <p>
+                    Utilice el formulario superior para registrar
+                    el primer animal.
+                </p>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <!-- =========================
+         PIE DE PÁGINA
+    ========================== -->
+
+    <footer>
+
+        © 2026 Ganadapp - Soluciones de Gestión Ganadera -
+        Todos los derechos reservados
+
+    </footer>
+
+
+    <!-- =========================
+         JAVASCRIPT
+    ========================== -->
+
+    <script>
+
+        const API = "/api/animales";
+
+        let editandoId = null;
+
+
+        function obtenerDatos() {
+
+            return {
+
+                codigo:
+                    document.getElementById("codigo").value.trim(),
+
+                especie:
+                    document.getElementById("especie").value.trim(),
+
+                raza:
+                    document.getElementById("raza").value.trim(),
+
+                edad:
+                    Number(
+                        document.getElementById("edad").value
+                    ),
+
+                estado:
+                    document.getElementById("estado").value
+
+            };
+
+        }
+
+
+        async function guardarAnimal() {
+
+            const payload = obtenerDatos();
+
+            if (
+                !payload.codigo ||
+                !payload.especie ||
+                !payload.raza ||
+                !payload.estado ||
+                payload.edad < 0
+            ) {
+
+                alert("Complete correctamente todos los campos.");
+
+                return;
+
+            }
+
+
+            try {
+
+                let response;
+
+
+                if (editandoId === null) {
+
+                    response = await fetch(API, {
+
+                        method: "POST",
+
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+
+                        body: JSON.stringify(payload)
+
+                    });
+
+                } else {
+
+                    response = await fetch(
+                        `${API}/${editandoId}`,
+                        {
+
+                            method: "PUT",
+
+                            headers: {
+                                "Content-Type": "application/json"
+                            },
+
+                            body: JSON.stringify(payload)
+
+                        }
+                    );
+
+                }
+
+
+                if (!response.ok) {
+
+                    const errorText = await response.text();
+
+                    console.error(errorText);
+
+                    alert(
+                        "No fue posible guardar el animal."
+                    );
+
+                    return;
+
+                }
+
+
+                cancelarEdicion();
+
+                await listar();
+
+            } catch (error) {
+
+                console.error(error);
+
+                alert(
+                    "No se pudo conectar con el servidor."
+                );
+
+            }
+
+        }
+
+
+        async function listar() {
+
+            try {
+
+                const response = await fetch(API);
+
+                if (!response.ok) {
+
+                    throw new Error(
+                        "Error al obtener los animales"
+                    );
+
+                }
+
+
+                const data = await response.json();
+
+                const lista =
+                    document.getElementById("lista");
+
+                const emptyMessage =
+                    document.getElementById("empty-message");
+
+                const animalCount =
+                    document.getElementById("animal-count");
+
+
+                animalCount.textContent =
+                    data.length === 1
+                        ? "1 animal registrado"
+                        : `${data.length} animales registrados`;
+
+
+                if (data.length === 0) {
+
+                    lista.innerHTML = "";
+
+                    emptyMessage.style.display = "flex";
+
+                    return;
+
+                }
+
+
+                emptyMessage.style.display = "none";
+
+
+                lista.innerHTML = data.map(animal => {
+
+                    const estadoClase =
+                        obtenerClaseEstado(animal.estado);
+
+
+                    return `
+
+                        <tr>
+
+                            <td>
+                                ${animal.id}
+                            </td>
+
+                            <td class="animal-code">
+                                ${escapeHtml(animal.codigo)}
+                            </td>
+
+                            <td>
+                                ${escapeHtml(animal.especie)}
+                            </td>
+
+                            <td>
+                                ${escapeHtml(animal.raza)}
+                            </td>
+
+                            <td>
+                                ${animal.edad} años
+                            </td>
+
+                            <td>
+
+                                <span class="status ${estadoClase}">
+                                    ${escapeHtml(animal.estado)}
+                                </span>
+
+                            </td>
+
+                            <td>
+
+                                <div class="action-buttons">
+
+                                    <button
+                                        class="action-edit"
+                                        onclick="editarAnimal(${animal.id})"
+                                    >
+                                        Editar
+                                    </button>
+
+                                    <button
+                                        class="action-health"
+                                        onclick="location.href='/sanidad?id=${animal.id}'"
+                                    >
+                                        Sanidad
+                                    </button>
+
+                                    <button
+                                        class="action-delete"
+                                        onclick="eliminarAnimal(${animal.id})"
+                                    >
+                                        Eliminar
+                                    </button>
+
+                                </div>
+
+                            </td>
+
+                        </tr>
+
+                    `;
+
+                }).join("");
+
+
+            } catch (error) {
+
+                console.error(error);
+
+                document.getElementById("lista").innerHTML = `
+
+                    <tr>
+
+                        <td
+                            colspan="7"
+                            class="error-row"
+                        >
+                            No fue posible cargar los animales.
+                        </td>
+
+                    </tr>
+
+                `;
+
+            }
+
+        }
+
+
+        async function editarAnimal(id) {
+
+            try {
+
+                const response =
+                    await fetch(`${API}/${id}`);
+
+
+                if (!response.ok) {
+
+                    alert(
+                        "No fue posible obtener los datos del animal."
+                    );
+
+                    return;
+
+                }
+
+
+                const animal =
+                    await response.json();
+
+
+                editandoId = id;
+
+
+                document.getElementById("codigo").value =
+                    animal.codigo;
+
+                document.getElementById("especie").value =
+                    animal.especie;
+
+                document.getElementById("raza").value =
+                    animal.raza;
+
+                document.getElementById("edad").value =
+                    animal.edad;
+
+                document.getElementById("estado").value =
+                    animal.estado;
+
+
+                document.getElementById("form-title")
+                    .textContent =
+                    "Editar Animal";
+
+
+                document.getElementById("save-button")
+                    .textContent =
+                    "Guardar Cambios";
+
+
+                document.getElementById("cancel-button")
+                    .style.display =
+                    "inline-flex";
+
+
+                window.scrollTo({
+
+                    top: 0,
+
+                    behavior: "smooth"
+
+                });
+
+
+            } catch (error) {
+
+                console.error(error);
+
+                alert(
+                    "No fue posible cargar el animal."
+                );
+
+            }
+
+        }
+
+
+        async function eliminarAnimal(id) {
+
+            const confirmar =
+                confirm(
+                    "¿Está seguro de eliminar este animal?"
+                );
+
+
+            if (!confirmar) {
+
+                return;
+
+            }
+
+
+            try {
+
+                const response =
+                    await fetch(
+                        `${API}/${id}`,
+                        {
+                            method: "DELETE"
+                        }
+                    );
+
+
+                if (!response.ok) {
+
+                    alert(
+                        "No fue posible eliminar el animal."
+                    );
+
+                    return;
+
+                }
+
+
+                await listar();
+
+
+            } catch (error) {
+
+                console.error(error);
+
+                alert(
+                    "No se pudo conectar con el servidor."
+                );
+
+            }
+
+        }
+
+
+        function cancelarEdicion() {
+
+            editandoId = null;
+
+
+            document
+                .getElementById("animal-form")
+                .reset();
+
+
+            document
+                .getElementById("form-title")
+                .textContent =
+                "Registrar Animal";
+
+
+            document
+                .getElementById("save-button")
+                .textContent =
+                "Guardar Animal";
+
+
+            document
+                .getElementById("cancel-button")
+                .style.display =
+                "none";
+
+        }
+
+
+        function obtenerClaseEstado(estado) {
+
+            const valor =
+                String(estado || "")
+                    .toLowerCase();
+
+
+            if (
+                valor.includes("sano")
+            ) {
+
+                return "status-ok";
+
+            }
+
+
+            if (
+                valor.includes("observ")
+            ) {
+
+                return "status-warning";
+
+            }
+
+
+            if (
+                valor.includes("trat")
+            ) {
+
+                return "status-treatment";
+
+            }
+
+
+            if (
+                valor.includes("enfer")
+            ) {
+
+                return "status-danger";
+
+            }
+
+
+            return "status-default";
+
+        }
+
+
+        function escapeHtml(value) {
+
+            return String(value ?? "")
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+
+        }
+
+
+        document
+            .getElementById("animal-form")
+            .addEventListener(
+                "submit",
+                function(event) {
+
+                    event.preventDefault();
+
+                    guardarAnimal();
+
+                }
+            );
+
+
+        document.addEventListener(
+            "DOMContentLoaded",
+            listar
+        );
+
+    </script>
 
 </body>
+
 </html>

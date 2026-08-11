@@ -1,7 +1,10 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
+
 from services.animal_service import AnimalService
 
+
 router = APIRouter()
+
 service = AnimalService()
 
 
@@ -15,11 +18,40 @@ def listar_animales():
     return service.listar_animales()
 
 
-@router.delete("/api/animales/{id}")
-def eliminar_animal(animal_id: int):
-    return service.eliminar_animal(animal_id)
+@router.get("/api/animales/{animal_id}")
+def obtener_animal(animal_id: int):
+    animal = service.obtener_animal(animal_id)
+
+    if animal is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Animal no encontrado"
+        )
+
+    return animal
 
 
-@router.put("/api/animales/{id}")
+@router.put("/api/animales/{animal_id}")
 def actualizar_animal(animal_id: int, animal: dict):
-    return service.actualizar_animal(animal_id, animal)
+    resultado = service.actualizar_animal(animal_id, animal)
+
+    if resultado is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Animal no encontrado"
+        )
+
+    return resultado
+
+
+@router.delete("/api/animales/{animal_id}")
+def eliminar_animal(animal_id: int):
+    resultado = service.eliminar_animal(animal_id)
+
+    if resultado is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Animal no encontrado"
+        )
+
+    return resultado
