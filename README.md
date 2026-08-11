@@ -35,45 +35,71 @@ El sistema en su primera versión incluye tres módulos principales:
 Registro individual de animales con información básica:
 
 identificación única
+
 especie
+
 raza
+
 edad
+
 estado sanitario
+
+
 4.2 Trazabilidad y eventos
 
 Registro de eventos asociados al ciclo de vida del animal:
 
 vacunaciones
+
 tratamientos sanitarios
+
 movimientos entre campos o lotes
+
 cambios de estado
+
+
 4.3 Control de stock y alertas básicas
 
 Gestión de insumos operativos:
 
 alimentos
+
 medicamentos
+
 insumos generales
+
 
 Sistema de alertas simples basado en umbrales:
 
 stock crítico
+
 eventos sanitarios próximos o pendientes
+
 
 5. Exclusiones del sistema (MVP)
 
 Quedan fuera de la primera versión del sistema:
 
 procesamiento financiero o contabilidad formal
+
 integración con organismos externos (SENASA u otros)
+
 dispositivos IoT o hardware especializado
+
 inteligencia artificial o analítica predictiva
+
 sistemas móviles nativos
+
 GIS o georreferenciación avanzada
+
 interoperabilidad con sistemas oficiales
+
 plataformas de comercio o mercado ganadero
+
 gestión documental con validez legal
+
 arquitectura multi-organización o multi-región
+
 
 Estas capacidades se consideran evolución futura.
 
@@ -82,34 +108,55 @@ Estas capacidades se consideran evolución futura.
 El sistema podrá evolucionar hacia módulos avanzados:
 
 reportes analíticos y dashboards
+
 gestión económica y rentabilidad
+
 administración geoespacial de campos
+
 alertas inteligentes basadas en patrones históricos
+
 aplicación móvil con operación en campo
+
 integración con dispositivos IoT
+
 modelos de inteligencia artificial aplicada al ganado
+
 integración con organismos oficiales
+
 módulo de mercado ganadero
+
 gestión documental avanzada
+
 escalabilidad multi-organización
+
 
 7. Arquitectura del sistema
 
 El sistema sigue un enfoque modular orientado a dominio.
 
 enfoque arquitectónico
-arquitectura modular monolítica
-separación por capas
-dominio central: gestión de ganado y trazabilidad
-extensibilidad por módulos funcionales
-propuesta tecnológica
-backend: Python + FastAPI
-base de datos: SQLite (MVP) / PostgreSQL (evolución)
-frontend: React o Vue
-comunicación: API REST
-persistencia: modelo relacional
 
-8. Estructura del proyecto
+- arquitectura modular monolítica
+
+- separación por capas
+
+- dominio central: gestión de ganado y trazabilidad
+
+extensibilidad por módulos funcionales
+
+- propuesta tecnológica
+  
+- backend: Python + FastAPI
+  
+- base de datos: SQLite (MVP) / PostgreSQL (evolución)
+  
+- frontend: React o Vue
+  
+- comunicación: API REST
+  
+- persistencia: modelo relacional
+
+1. Estructura del proyecto
 
 El repositorio está organizado en módulos educativos y arquitectónicos:
 
