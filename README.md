@@ -1,4 +1,4 @@
-#Ganadapp
+Ganadapp
 
 Sistema de gestión ganadera para pequeños y medianos productores rurales de Malargüe (Mendoza, Argentina).
 
