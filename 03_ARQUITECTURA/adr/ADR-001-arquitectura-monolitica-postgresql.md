@@ -58,7 +58,9 @@ El resultado favorece la arquitectura monolítica modular debido a su menor comp
 
 La decisión de utilizar una arquitectura monolítica modular se refleja en los diagramas C4 del sistema.
 
-En el C4 de Contexto (Nivel 1), GanadApp se representa como un único sistema que interactúa con sus usuarios y sistemas externos.
+En el C4 de Contexto (Nivel 1), GanadApp se representa como un único sistema de software que interactúa con sus usuarios principales y con los sistemas externos definidos para el proyecto. Esta representación es coherente con la decisión de mantener una única aplicación backend, en lugar de distribuir el sistema en múltiples servicios independientes.
+
+La representación de esta decisión en el contexto general del sistema se encuentra en el diagrama C4 de Contexto (Nivel 1), que se encuentra documentado en [`c4-contexto.md`](https://github.com/Agustinagnz/ADI-Proyecto-ganadero/blob/feat/ej-02-c4-contexto/03_ARQUITECTURA/diagramas/c4-contexto.md).
 
 En el C4 de Contenedores (Nivel 2), la decisión se materializa principalmente en el contenedor **Backend API**, que centraliza la lógica de negocio y expone la API utilizada por las aplicaciones Web y Mobile. La persistencia se realiza mediante el contenedor **PostgreSQL**.
 
