@@ -1,0 +1,103 @@
+# Reglas de OpenCode - GanadApp
+
+## 1. Alcance permitido
+
+El agente puede modificar únicamente archivos dentro de:
+
+* `08_CODIGO_FUENTE/`
+
+El agente puede consultar como referencia, sin modificarlos, los contenidos de:
+
+* `07_IMPLEMENTACION/`
+* `04_MODELO_DATOS/`
+* `03_ARQUITECTURA/`
+* `02_CASOS_DE_USO/`
+* `06_INTERFAZ_USUARIO/`
+
+No modificar automáticamente documentación, diagramas, ADR, modelo de dominio, casos de uso ni prototipos ubicados fuera de `08_CODIGO_FUENTE/`.
+
+## 2. Tipos de archivos permitidos
+
+### Backend
+
+* `.py`
+* `.toml`
+* `.txt` cuando sea necesario para dependencias o configuración
+
+### Frontend
+
+* `.html`
+* `.css`
+* `.js`
+
+Los archivos de configuración adicionales solo pueden modificarse cuando sean necesarios para ejecutar o configurar la implementación existente.
+
+## 3. Estándares técnicos obligatorios
+
+### Backend
+
+* Utilizar Python.
+* Utilizar FastAPI para la API REST.
+* Mantener la arquitectura hexagonal definida en `07_IMPLEMENTACION/`.
+* Mantener separadas las capas de dominio, aplicación, infraestructura y presentación.
+* El dominio no debe depender de FastAPI, SQLAlchemy ni otros frameworks de infraestructura.
+* La capa de aplicación debe contener los casos de uso y coordinar los procesos.
+* La infraestructura debe implementar persistencia y adaptadores externos.
+* La presentación debe encargarse de exponer la API REST.
+* Utilizar `snake_case` para nombres de variables, funciones y módulos.
+* Mantener un archivo por entidad o caso de uso cuando corresponda.
+* Evitar lógica de negocio dentro de los controladores o rutas.
+
+### Frontend
+
+* Utilizar HTML5, CSS3 y JavaScript vanilla para el MVP.
+* Mantener separadas la presentación y la lógica de interacción.
+* Utilizar componentes reutilizables cuando corresponda.
+* El frontend no debe contener lógica de negocio.
+* El frontend debe consumir la API REST del backend.
+* Priorizar una implementación simple, liviana y compatible con dispositivos básicos.
+
+### Base de datos
+
+* Mantener el modelo relacional definido para el proyecto.
+* Utilizar SQLite para el MVP salvo que exista una decisión posterior documentada.
+* Mantener la persistencia aislada mediante la capa de infraestructura.
+* No acoplar las entidades del dominio directamente al mecanismo de persistencia.
+
+## 4. Prácticas prohibidas
+
+* No utilizar el tipo `any` ni introducir tipado dinámico innecesario cuando exista una alternativa explícita.
+* No agregar dependencias externas sin autorización.
+* No introducir React, Vue, TypeScript u otros frameworks como parte del MVP sin una decisión explícita.
+* No modificar la arquitectura hexagonal establecida sin autorización.
+* No colocar lógica de negocio en rutas, controladores o código de presentación.
+* No mezclar dominio con infraestructura.
+* No acceder directamente a la base de datos desde la capa de presentación.
+* No duplicar lógica existente cuando pueda reutilizarse.
+* No eliminar funcionalidades existentes sin justificación.
+* No modificar archivos fuera del alcance permitido.
+* No modificar ADR, diagramas, documentación arquitectónica o modelo de dominio como consecuencia de una tarea de implementación.
+* No instalar dependencias ni ejecutar cambios destructivos sin autorización explícita.
+
+## 5. Reglas de modificación
+
+Antes de realizar cambios, el agente debe:
+
+1. Revisar la estructura existente de `08_CODIGO_FUENTE/`.
+2. Consultar las convenciones y decisiones documentadas en `07_IMPLEMENTACION/`.
+3. Reutilizar las estructuras, componentes y funciones existentes cuando sea posible.
+4. Realizar cambios mínimos y directamente relacionados con la tarea solicitada.
+5. Mantener compatibilidad con la arquitectura y el stack tecnológico definidos para el MVP.
+6. Informar cualquier conflicto entre la tarea solicitada y las reglas arquitectónicas existentes.
+
+## 6. Criterio de consistencia
+
+Ante cualquier conflicto entre una implementación propuesta y las decisiones documentadas del proyecto, se debe priorizar:
+
+1. Decisiones arquitectónicas aceptadas.
+2. Modelo de dominio y casos de uso.
+3. Convenciones y stack definidos en `07_IMPLEMENTACION/`.
+4. Estructura existente de `08_CODIGO_FUENTE/`.
+5. Requerimiento específico de la tarea.
+
+No asumir cambios tecnológicos o arquitectónicos que no estén documentados o autorizados.
