@@ -214,3 +214,7 @@ Las reglas principales asociadas a estos contratos son:
 
 * [ ] **CA-17:** La estructura del sistema mantiene una separación modular y por capas que permita incorporar funcionalidades futuras.
 
+## Changelog
+
+### v1.0 - 2026-08-25
+Versión inicial de la especificación del proyecto.
