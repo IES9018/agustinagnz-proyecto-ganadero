@@ -178,4 +178,6 @@ El repositorio está organizado en módulos educativos y arquitectónicos:
 
 08_CODIGO_FUENTE/         implementación real del sistema
 
- 
+## 🗓️ Gestión
+
+Tablero del sprint: [Kanban](https://github.com/orgs/IES9018/projects/1)
