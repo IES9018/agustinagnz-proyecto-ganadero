@@ -1,131 +1,193 @@
 # Modelo de Dominio – Sistema Ganadapp
 
-## 1. Visión general del dominio
+## Visión general del dominio
 
 El dominio representa la gestión ganadera orientada a la trazabilidad de animales, eventos sanitarios y control de insumos en establecimientos rurales.
 
 Se modela bajo un enfoque de DDD simplificado, priorizando claridad sobre complejidad técnica.
 
 
+## Entidades principales
 
-## 2. Entidades principales
+### Usuario
+- id_usuario: int
+- nombre: string
+- email: string
+- rol: string
+- contacto: string
+- estado_activo: boolean
+- ultimo_acceso: datetime
 
-### 2.1 Animal (agregado raíz)
+### Productor
+- id_productor: int
+- nombre: string
+- documento: string
+- contacto: string
+- direccion: string
+- estado: string
 
-Entidad central del sistema.
+### Establecimiento
+- id_establecimiento: int
+- nombre: string
+- ubicacion: string
+- capacidad: int
+- estado: string
+- id_productor: int
 
-Atributos:
-- id_animal
-- codigo_identificacion
-- especie
-- raza
-- edad_aproximada
-- estado_sanitario
-- fecha_registro
+### Animal
+- id_animal: int
+- identificador: string
+- especie: string
+- raza: string
+- fecha_nacimiento: date
+- estado_sanitario: string
+- id_establecimiento: int
 
-Reglas:
-- cada animal es único dentro del sistema
-- todos los eventos se asocian a un animal
+### EventoSanitario
+- id_evento: int
+- tipo: string
+- fecha: datetime
+- descripcion: string
+- dosis: string
+- id_animal: int
+- id_usuario: int
 
+### StockInsumo
+- id_stock: int
+- tipo_insumo: string
+- cantidad: float
+- unidad: string
+- ubicacion: string
+- id_establecimiento: int
 
+---
+## Entidades vs Value Objects
 
-### 2.2 EventoSanitario
+En el modelo de dominio se distinguen objetos con identidad propia (Entidades) de objetos definidos por sus valores (Value Objects).
 
-Representa acciones realizadas sobre un animal.
+### Entidades
 
-Atributos:
-- id_evento
-- tipo_evento (vacunacion, tratamiento, movimiento, control)
-- fecha
-- descripcion
-- id_animal (FK)
+- **Usuario**: entidad porque posee una identidad propia mediante `id_usuario` y mantiene su ciclo de vida independientemente de otros objetos.
+- **Productor**: entidad porque posee una identidad propia mediante `id_productor`.
+- **Establecimiento**: entidad porque posee una identidad propia mediante `id_establecimiento`.
+- **Animal**: entidad porque posee una identidad propia mediante `id_animal` y `identificador`.
+- **EventoSanitario**: entidad porque representa un evento individual con identidad propia mediante `id_evento`.
+- **StockInsumo**: entidad porque representa el estado del stock de un insumo dentro de un establecimiento y posee identidad mediante `id_stock`.
 
-Reglas:
-- todo evento debe pertenecer a un animal existente
-- los eventos son inmutables una vez registrados
+### Value Objects
 
+- **Raza**: Value Object porque representa una característica del animal que se define por su valor y no requiere identidad propia.
+- **Dosis**: Value Object porque representa una cantidad o valor asociado a un evento sanitario y se compara por su valor.
+- **Estado sanitario**: Value Object porque representa una condición del animal definida por su valor y no por una identidad independiente.
+- **Ubicación**: Value Object porque describe dónde se encuentra un establecimiento y no posee identidad propia dentro del dominio.
+- **Contacto**: Value Object porque representa información de contacto y se define por los datos que contiene, no por una identidad independiente.
 
+## Relaciones
 
-### 2.3 InsumoStock
+- Un productor tiene muchos establecimientos
+- Un establecimiento tiene muchos animales
+- Un animal tiene muchos eventos sanitarios
+- Un usuario registra eventos sanitarios
+- Un establecimiento administra stock
 
-Representa recursos operativos.
+---
 
-Atributos:
-- id_insumo
-- nombre
-- tipo (alimento, medicamento, otro)
-- cantidad_actual
-- unidad_medida
-- umbral_minimo
+## Agregados
 
-Reglas:
-- no se permite stock negativo
-- genera alerta si cantidad < umbral_minimo
+Los agregados definen grupos de objetos de dominio que deben mantenerse consistentes como una unidad. Cada agregado posee una raíz que controla el acceso y las modificaciones de los objetos que contiene.
 
+### Agregado Animal
 
+**Raíz:** Animal
 
-### 2.4 Productor
+**Elementos agrupados:**
+- Animal
+- EventoSanitario
 
-Atributos:
-- id_productor
-- nombre
-- contacto
-- ubicacion
+El `Animal` es la raíz del agregado porque posee identidad propia y controla los eventos sanitarios asociados. Los `EventoSanitario` no deben gestionarse de forma independiente de su animal.
 
+### Agregado Establecimiento
 
+**Raíz:** Establecimiento
 
-### 2.5 PersonalCampo
+**Elementos agrupados:**
+- Establecimiento
+- Animal
+- StockInsumo
 
-Atributos:
-- id_personal
-- nombre
-- rol_operativo
+El `Establecimiento` representa el límite de consistencia para los animales y el stock administrado en él. Las operaciones que afecten estos elementos deben respetar las reglas del establecimiento.
 
+### Agregado Productor
 
+**Raíz:** Productor
 
-## 3. value objects
+**Elementos agrupados:**
+- Productor
+- Establecimiento
 
-### 3.1 EstadoSanitario
-- sano
-- en_tratamiento
-- en_observacion
-- critico
+El `Productor` es la raíz de este agregado porque es responsable de los establecimientos que administra.
 
-### 3.2 TipoEvento
-- vacunacion
-- tratamiento
-- movimiento
-- control
+### Agregado Usuario
 
-### 3.3 TipoInsumo
-- alimento
-- medicamento
-- suplemento
+**Raíz:** Usuario
 
+**Elementos agrupados:**
+- Usuario
 
+El `Usuario` constituye un agregado independiente, ya que su identidad y ciclo de vida no dependen de otros objetos del modelo.
 
-## 4. agregados
-
-### agregado: Animal
-- Animal (raíz)
-- EventoSanitario (colección interna)
-
-### agregado: InsumoStock
-- InsumoStock (raíz)
-
-
-
-## 5. Relaciones del dominio
-
-- Animal 1 ─── * EventoSanitario
-- Productor gestiona múltiples animales (lógico, no directo en dominio MVP)
-- PersonalCampo registra eventos
+---
 
 
+## Reglas de negocio
 
-## 6. Reglas de negocio globales
+Las reglas de negocio se mantienen como invariantes del dominio y deben ser protegidas por los objetos responsables de cada comportamiento.
 
-- no existen eventos sin animal asociado
-- el stock no puede ser negativo
-- todo cambio de estado sanitario debe registrarse como evento
-- el sistema mantiene trazabilidad completa por animal
+- **Animal:** todo animal debe pertenecer a un establecimiento válido y su identificador debe ser único.
+- **EventoSanitario:** todo evento sanitario debe estar asociado a un animal existente y su creación debe realizarse a través del agregado `Animal`.
+- **StockInsumo:** el stock no puede ser negativo. Esta regla se protege mediante el comportamiento `StockInsumo.AjustarStock()`, que debe rechazar cualquier operación cuyo resultado produzca una cantidad menor que cero.
+- **Historial:** no se permiten eliminaciones físicas de registros históricos; los cambios deben conservar la trazabilidad de la información.
+
+---
+
+## Diagrama ER
+
+```mermaid
+erDiagram
+
+PRODUCTOR ||--o{ ESTABLECIMIENTO : tiene
+ESTABLECIMIENTO ||--o{ ANIMAL : contiene
+ANIMAL ||--o{ EVENTO_SANITARIO : registra
+USUARIO ||--o{ EVENTO_SANITARIO : crea
+ESTABLECIMIENTO ||--o{ STOCK_INSUMO : administra
+
+PRODUCTOR {
+  int id_productor
+  string nombre
+  string documento
+}
+
+ESTABLECIMIENTO {
+  int id_establecimiento
+  string nombre
+  string ubicacion
+}
+
+ANIMAL {
+  int id_animal
+  string identificador
+  string especie
+  string raza
+}
+
+EVENTO_SANITARIO {
+  int id_evento
+  string tipo
+  datetime fecha
+}
+
+STOCK_INSUMO {
+  int id_stock
+  string tipo_insumo
+  float cantidad
+}
