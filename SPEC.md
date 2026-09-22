@@ -78,8 +78,7 @@ Las funcionalidades excluidas se consideran posibles líneas de evolución futur
 * **Frontend:** HTML + CSS + JavaScript (MVP)
 * **Comunicación:** API REST.
 * **Persistencia:** modelo relacional.
-* **Base de datos del MVP:** SQLite.
-* **Evolución prevista de base de datos:** PostgreSQL.
+* **Base de datos:** PostgreSQL.
 
 ### Arquitectura
 
@@ -95,6 +94,16 @@ El dominio central estará compuesto por la gestión del ganado y la trazabilida
 * La interfaz deberá ser simple y adecuada para usuarios de entornos rurales.
 * El sistema deberá contemplar su utilización en entornos con conectividad limitada.
 * No se incorporarán integraciones externas durante el MVP.
+
+### Restricciones arquitectónicas
+
+Las decisiones arquitectónicas del sistema se encuentran formalizadas en los siguientes Architecture Decision Records:
+
+- **ADR-001 — Selección de arquitectura monolítica con base de datos relacional (PostgreSQL):** establece la arquitectura monolítica modular y la utilización de PostgreSQL como sistema de persistencia.
+- **ADR-002 — Selección del estilo arquitectónico:** establece la utilización de una arquitectura monolítica modular como estilo arquitectónico general, considerando el tamaño del equipo, el alcance del sistema, la complejidad operativa y los plazos académicos.
+- **ADR-003 — Selección del mecanismo de persistencia:** establece PostgreSQL como mecanismo de persistencia objetivo y fundamenta su elección a partir del modelo relacional de GanadApp.
+
+Estas decisiones restringen la incorporación de nuevas tecnologías y componentes arquitectónicos. La incorporación de un framework, base de datos, servicio externo o cambio significativo del estilo arquitectónico deberá estar respaldada por una decisión arquitectónica documentada mediante un ADR aprobado.
 
 ## 5. Contratos de Datos / Tipos
 
@@ -214,7 +223,12 @@ Las reglas principales asociadas a estos contratos son:
 
 * [ ] **CA-17:** La estructura del sistema mantiene una separación modular y por capas que permita incorporar funcionalidades futuras.
 
+
 ## Changelog
 
-### v1.0 - 2026-08-25
-Versión inicial de la especificación del proyecto.
+| Versión | Fecha | Cambio | Motivo |
+|---|---|---|---|
+| v1.0 | 2026-08-25 | Versión inicial de la especificación del proyecto. | Definir el alcance inicial, requerimientos, modelo de dominio y restricciones del MVP. |
+| v1.0 → v2.0 | 2026-09-22 | Se incorporó la sección "Restricciones arquitectónicas" con referencias a ADR-001, ADR-002 y ADR-003. | Formalizar las decisiones arquitectónicas adoptadas durante el desarrollo del proyecto. |
+| v1.0 → v2.0 | 2026-09-22 | Se estableció PostgreSQL como base de datos del sistema y se eliminó la definición de SQLite como base de datos del MVP. | Alinear la SPEC con ADR-001 y ADR-003 y con el modelo relacional del dominio. |
+| v1.0 → v2.0 | 2026-09-22 | Se revisaron los Non-Goals y se mantienen los límites de alcance definidos en v1. | Las decisiones arquitectónicas no incorporan nuevos requerimientos funcionales ni modifican los límites actuales del MVP. |
