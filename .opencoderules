@@ -60,7 +60,7 @@ Los archivos de configuración adicionales solo pueden modificarse cuando sean n
 ### Base de datos
 
 * Mantener el modelo relacional definido para el proyecto.
-* Utilizar SQLite para el MVP salvo que exista una decisión posterior documentada.
+* Utilizar PostgreSQL como base de datos del proyecto, conforme a ADR-001 y ADR-003.
 * Mantener la persistencia aislada mediante la capa de infraestructura.
 * No acoplar las entidades del dominio directamente al mecanismo de persistencia.
 
@@ -101,3 +101,7 @@ Ante cualquier conflicto entre una implementación propuesta y las decisiones do
 5. Requerimiento específico de la tarea.
 
 No asumir cambios tecnológicos o arquitectónicos que no estén documentados o autorizados.
+
+## 7. Coherencia arquitectónica
+
+* PROHIBIDO introducir frameworks, bases de datos o servicios externos que no estén declarados en un ADR aprobado. Ante duda, proponer ADR nuevo.
