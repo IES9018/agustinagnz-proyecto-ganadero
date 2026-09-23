@@ -105,6 +105,27 @@ Las decisiones arquitectónicas del sistema se encuentran formalizadas en los si
 
 Estas decisiones restringen la incorporación de nuevas tecnologías y componentes arquitectónicos. La incorporación de un framework, base de datos, servicio externo o cambio significativo del estilo arquitectónico deberá estar respaldada por una decisión arquitectónica documentada mediante un ADR aprobado.
 
+### Requisitos de interfaz y accesibilidad
+
+La interfaz del MVP deberá mantener una estructura simple y consistente con los criterios UX definidos para GanadApp.
+
+Las dos pantallas críticas definidas para el TP3 son:
+
+- Gestión de Animales.
+- Vacunación.
+
+En ambas pantallas será obligatorio:
+
+- permitir navegación mediante teclado;
+- mantener un orden de foco lógico;
+- utilizar etiquetas comprensibles para los campos;
+- comunicar errores mediante texto;
+- mantener contraste suficiente para cumplir el nivel AA definido para el alcance del TP3;
+- no utilizar el color como único medio para comunicar estados;
+- mostrar confirmación después de operaciones exitosas.
+
+Estos requisitos se aplican específicamente a las dos pantallas críticas del TP3 y no implican que el MVP deba implementar en esta etapa la totalidad de los criterios de accesibilidad existentes.
+
 ## 5. Contratos de Datos / Tipos
 
 Los contratos principales se basan en las entidades definidas actualmente en el modelo de dominio de GanadApp.
@@ -187,48 +208,171 @@ Las reglas principales asociadas a estos contratos son:
 * El stock no puede resultar negativo.
 * Los registros históricos deben conservar su trazabilidad.
 
-## 6. Criterios de Aceptación
 
-* [ ] **CA-01:** Un usuario puede autenticarse utilizando sus credenciales y acceder al sistema según su rol.
+## 6. Criterios de Aceptación en Gherkin
 
-* [ ] **CA-02:** Un productor ganadero puede consultar información consolidada para la gestión del establecimiento.
+Los criterios de aceptación relacionados con la interacción de usuario se expresan mediante escenarios Given/When/Then.
 
-* [ ] **CA-03:** El personal de campo puede realizar las operaciones de carga de información correspondientes a sus responsabilidades.
+### RF-01 / CA-01 — Autenticación
 
-* [ ] **CA-04:** El sistema permite registrar un animal con su identificación, especie, raza, fecha de nacimiento y estado sanitario.
+```gherkin
+Scenario: Usuario con credenciales válidas
+  Given que el usuario posee credenciales válidas
+  When ingresa sus credenciales y envía el formulario
+  Then el sistema debe autenticarlo
+  And debe mostrar la interfaz correspondiente a su rol
+```
 
-* [ ] **CA-05:** El sistema rechaza el registro de un animal cuyo identificador ya exista.
+### RF-03 / CA-04 — Registro de animal
 
-* [ ] **CA-06:** El sistema permite consultar la información registrada de un animal.
+```gherkin
+Scenario: Registrar un animal con información válida
+  Given que el usuario se encuentra en Gestión de Animales
+  And dispone de un identificador único
+  When completa identificación, especie, raza, fecha de nacimiento y estado sanitario
+  And confirma el registro
+  Then el sistema debe guardar el animal
+  And debe informar que la operación fue realizada correctamente
+  And debe mostrar la información actualizada
+```
 
-* [ ] **CA-07:** El sistema permite registrar un evento sanitario asociado a un animal existente.
+### RF-04 / CA-06 — Consulta de animales
 
-* [ ] **CA-08:** El sistema rechaza un evento sanitario cuando el animal asociado no existe o los datos requeridos son inválidos.
+```gherkin
+Scenario: Consultar animales registrados
+  Given que existen animales registrados
+  When el usuario accede a Gestión de Animales
+  Then el sistema debe mostrar los animales disponibles
+  And debe mostrar su identificador, raza, estado sanitario y establecimiento
+```
 
-* [ ] **CA-09:** El sistema permite consultar el historial de eventos de un animal.
+### RF-05 / CA-05 — Identificador único
 
-* [ ] **CA-10:** El sistema permite consultar la trazabilidad completa de un animal.
+```gherkin
+Scenario: Evitar identificador duplicado
+  Given que ya existe un animal con un identificador determinado
+  When el usuario intenta registrar otro animal utilizando el mismo identificador
+  Then el sistema debe rechazar el registro
+  And debe informar que el identificador ya existe
+```
 
-* [ ] **CA-11:** El sistema permite registrar y actualizar el stock de insumos.
+### RF-06 — Datos básicos del animal
 
-* [ ] **CA-12:** El sistema rechaza cualquier operación que produzca una cantidad de stock inferior a cero.
+```gherkin
+Scenario: Completar datos básicos del animal
+  Given que el usuario está registrando un animal
+  When completa especie, raza, fecha de nacimiento y estado sanitario
+  Then la interfaz debe permitir enviar los datos para su validación
+```
 
-* [ ] **CA-13:** El sistema genera una alerta cuando el stock alcanza una condición definida como baja o crítica.
+### RF-07 — Registro de evento
 
-* [ ] **CA-14:** El sistema genera alertas correspondientes a eventos sanitarios próximos o pendientes.
+```gherkin
+Scenario: Registrar un evento asociado a un animal
+  Given que existe el animal seleccionado
+  When el usuario completa los datos requeridos del evento
+  And confirma la operación
+  Then el sistema debe registrar el evento asociado al animal
+```
 
-* [ ] **CA-15:** Los registros históricos mantienen su trazabilidad y no pueden eliminarse físicamente.
+### RF-08 / CA-07 — Registro de vacunación
 
-* [ ] **CA-16:** La aplicación funciona como sistema web mediante una API REST y una interfaz web.
+```gherkin
+Scenario: Registrar una vacunación válida
+  Given que existe el animal seleccionado
+  And el usuario se encuentra en Vacunación
+  When completa animal, vacuna y fecha
+  And confirma el registro
+  Then el sistema debe registrar la vacunación
+  And debe confirmar la operación
+  And debe mostrar el historial actualizado
+```
 
-* [ ] **CA-17:** La estructura del sistema mantiene una separación modular y por capas que permita incorporar funcionalidades futuras.
+### RF-08 / CA-08 — Validación de vacunación
 
+```gherkin
+Scenario: Rechazar una vacunación inválida
+  Given que el usuario intenta registrar una vacunación
+  When el animal no existe o faltan datos requeridos
+  Then el sistema debe rechazar la operación
+  And debe informar qué dato debe corregirse
+```
+
+### RF-09 / CA-09 — Historial de eventos
+
+```gherkin
+Scenario: Consultar historial sanitario
+  Given que un animal posee eventos sanitarios registrados
+  When el usuario consulta su historial
+  Then el sistema debe mostrar los eventos disponibles
+```
+
+### RF-10 / CA-10 — Trazabilidad
+
+```gherkin
+Scenario: Consultar la trazabilidad de un animal
+  Given que el animal posee información histórica registrada
+  When el usuario consulta su trazabilidad
+  Then el sistema debe mostrar la información histórica correspondiente
+```
+
+### RF-11 / CA-11 — Stock
+
+```gherkin
+Scenario: Actualizar stock de insumos
+  Given que el usuario posee permisos para gestionar insumos
+  When registra una operación válida de stock
+  Then el sistema debe actualizar la cantidad correspondiente
+```
+
+### RF-13 / CA-12 — Stock no negativo
+
+```gherkin
+Scenario: Evitar stock negativo
+  Given que una operación produciría una cantidad de stock inferior a cero
+  When el usuario intenta confirmar la operación
+  Then el sistema debe rechazarla
+  And debe informar que la cantidad no puede resultar negativa
+```
+
+### RF-14 / CA-13 — Alerta de stock
+
+```gherkin
+Scenario: Detectar stock bajo o crítico
+  Given que un insumo alcanza una condición definida como baja o crítica
+  When el sistema actualiza o consulta el stock
+  Then debe generar la alerta correspondiente
+```
+
+### RF-15 / CA-14 — Alertas sanitarias
+
+```gherkin
+Scenario: Detectar evento sanitario próximo o pendiente
+  Given que existe un evento sanitario próximo o pendiente
+  When el sistema consulta las condiciones de alerta
+  Then debe mostrar la alerta correspondiente
+```
+
+### RF-16 / CA-15 — Trazabilidad histórica
+
+```gherkin
+Scenario: Conservar registros históricos
+  Given que existe un registro histórico
+  When el usuario realiza una operación sobre información actual
+  Then el sistema debe conservar la trazabilidad del registro histórico
+  And no debe eliminar físicamente la información histórica
+```
+
+---
 
 ## Changelog
 
-| Versión | Fecha | Cambio | Motivo |
-|---|---|---|---|
-| v1.0 | 2026-08-25 | Versión inicial de la especificación del proyecto. | Definir el alcance inicial, requerimientos, modelo de dominio y restricciones del MVP. |
-| v1.0 → v2.0 | 2026-09-22 | Se incorporó la sección "Restricciones arquitectónicas" con referencias a ADR-001, ADR-002 y ADR-003. | Formalizar las decisiones arquitectónicas adoptadas durante el desarrollo del proyecto. |
-| v1.0 → v2.0 | 2026-09-22 | Se estableció PostgreSQL como base de datos del sistema y se eliminó la definición de SQLite como base de datos del MVP. | Alinear la SPEC con ADR-001 y ADR-003 y con el modelo relacional del dominio. |
-| v1.0 → v2.0 | 2026-09-22 | Se revisaron los Non-Goals y se mantienen los límites de alcance definidos en v1. | Las decisiones arquitectónicas no incorporan nuevos requerimientos funcionales ni modifican los límites actuales del MVP. |
+| Versión     | Fecha      | Cambio                                                                                                                                 | Motivo                                                                                                                    |
+| ----------- | ---------- | -------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| v1.0        | 2026-08-25 | Versión inicial de la especificación del proyecto.                                                                                     | Definir el alcance inicial, requerimientos, modelo de dominio y restricciones del MVP.                                    |
+| v1.0 → v2.0 | 2026-09-22 | Se incorporó la sección "Restricciones arquitectónicas" con referencias a ADR-001, ADR-002 y ADR-003.                                  | Formalizar las decisiones arquitectónicas adoptadas durante el desarrollo del proyecto.                                   |
+| v1.0 → v2.0 | 2026-09-22 | Se estableció PostgreSQL como base de datos del sistema y se eliminó la definición de SQLite como base de datos del MVP.               | Alinear la SPEC con ADR-001 y ADR-003 y con el modelo relacional del dominio.                                             |
+| v1.0 → v2.0 | 2026-09-22 | Se revisaron los Non-Goals y se mantienen los límites de alcance definidos en v1.                                                      | Las decisiones arquitectónicas no incorporan nuevos requerimientos funcionales ni modifican los límites actuales del MVP. |
+| v2.0 → v3.0 | 2026-09-23 | Se incorporaron criterios de aceptación en formato Gherkin para los requerimientos relacionados con la interacción del usuario.        | Formalizar el comportamiento esperado de la interfaz mediante escenarios Given/When/Then.                                 |
+| v2.0 → v3.0 | 2026-09-23 | Se incorporaron requisitos mínimos de accesibilidad para las dos pantallas críticas: navegación mediante teclado y contraste nivel AA. | Incorporar criterios HCI y accesibilidad definidos en TP3.                                                                |
+| v2.0 → v3.0 | 2026-09-23 | Se formalizó la selección del stack de interfaz mediante ADR-004.                                                                      | Documentar la decisión tecnológica de la capa de presentación.                                                            |
