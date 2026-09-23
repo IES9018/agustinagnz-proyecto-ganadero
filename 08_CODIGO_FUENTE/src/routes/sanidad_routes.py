@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from services.sanidad_service import SanidadService
+from src.services.sanidad_service import SanidadService
 
 router = APIRouter()
 

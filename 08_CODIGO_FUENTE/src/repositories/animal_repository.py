@@ -1,105 +1,85 @@
-import sqlite3
+from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm import Session
 
-DB_PATH = "ganado.db"
+from src.models.animal import Animal
 
 
 class AnimalRepository:
 
-    def __init__(self):
-        self._crear_tabla()
-
-    def _crear_tabla(self):
-        conn = sqlite3.connect(DB_PATH)
-        cursor = conn.cursor()
-
-        cursor.execute("""
-            CREATE TABLE IF NOT EXISTS animales (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                codigo TEXT,
-                especie TEXT,
-                raza TEXT,
-                edad INTEGER,
-                estado TEXT
-            )
-        """)
-
-        conn.commit()
-        conn.close()
+    def __init__(self, db: Session):
+        self.db = db
 
     def crear(self, data):
-        conn = sqlite3.connect(DB_PATH)
-        cursor = conn.cursor()
+        animal = Animal(
+            identificador=data["identificador"],
+            especie=data["especie"],
+            raza=data["raza"],
+            fecha_nacimiento=data.get("fecha_nacimiento"),
+            estado_sanitario=data["estado_sanitario"],
+            id_establecimiento=data.get("id_establecimiento")
+        )
 
-        cursor.execute("""
-            INSERT INTO animales (codigo, especie, raza, edad, estado)
-            VALUES (?, ?, ?, ?, ?)
-        """, (
-            data["codigo"],
-            data["especie"],
-            data["raza"],
-            data["edad"],
-            data["estado"]
-        ))
+        self.db.add(animal)
 
-        conn.commit()
-        conn.close()
+        try:
+            self.db.commit()
+        except IntegrityError:
+            self.db.rollback()
+            raise ValueError("El identificador del animal ya existe.")
 
-        return {"mensaje": "animal creado"}
+        self.db.refresh(animal)
+
+        return self._to_dict(animal)
 
     def listar(self):
-        conn = sqlite3.connect(DB_PATH)
-        cursor = conn.cursor()
+        statement = select(Animal).order_by(Animal.id_animal)
 
-        cursor.execute("SELECT * FROM animales")
-        rows = cursor.fetchall()
-
-        conn.close()
+        animales = self.db.scalars(statement).all()
 
         return [
-            {
-                "id": r[0],
-                "codigo": r[1],
-                "especie": r[2],
-                "raza": r[3],
-                "edad": r[4],
-                "estado": r[5]
-            }
-            for r in rows
+            self._to_dict(animal)
+            for animal in animales
         ]
 
-    def eliminar(self, animal_id):
-        conn = sqlite3.connect(DB_PATH)
-        cursor = conn.cursor()
-
-        cursor.execute("DELETE FROM animales WHERE id = ?", (animal_id,))
-
-        conn.commit()
-        conn.close()
-
-        return {"mensaje": "animal eliminado"}
+    def obtener(self, animal_id):
+        return self.db.get(Animal, animal_id)
 
     def actualizar(self, animal_id, data):
-        conn = sqlite3.connect(DB_PATH)
-        cursor = conn.cursor()
+        animal = self.db.get(Animal, animal_id)
 
-        cursor.execute("""
-            UPDATE animales
-            SET codigo = ?,
-                especie = ?,
-                raza = ?,
-                edad = ?,
-                estado = ?
-            WHERE id = ?
-        """, (
-            data["codigo"],
-            data["especie"],
-            data["raza"],
-            data["edad"],
-            data["estado"],
-            animal_id
-        ))
+        if animal is None:
+            return None
 
-        conn.commit()
-        conn.close()
+        animal.identificador = data["identificador"]
+        animal.especie = data["especie"]
+        animal.raza = data["raza"]
+        animal.fecha_nacimiento = data.get("fecha_nacimiento")
+        animal.estado_sanitario = data["estado_sanitario"]
+        animal.id_establecimiento = data.get("id_establecimiento")
 
-        return {"mensaje": "animal actualizado"}
+        try:
+            self.db.commit()
+        except IntegrityError:
+            self.db.rollback()
+            raise ValueError("El identificador del animal ya existe.")
+
+        self.db.refresh(animal)
+
+        return self._to_dict(animal)
+
+    @staticmethod
+    def _to_dict(animal):
+        return {
+            "id_animal": animal.id_animal,
+            "identificador": animal.identificador,
+            "especie": animal.especie,
+            "raza": animal.raza,
+            "fecha_nacimiento": (
+                animal.fecha_nacimiento.isoformat()
+                if animal.fecha_nacimiento
+                else None
+            ),
+            "estado_sanitario": animal.estado_sanitario,
+            "id_establecimiento": animal.id_establecimiento
+        }

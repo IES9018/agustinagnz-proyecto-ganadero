@@ -1,26 +1,36 @@
-import sqlite3
+import os
 
-DB_NAME = "ganadapp.db"
+from sqlalchemy import create_engine
+from sqlalchemy.orm import DeclarativeBase, sessionmaker
 
-def get_connection():
-    conn = sqlite3.connect(DB_NAME)
-    conn.row_factory = sqlite3.Row
-    return conn
 
-def init_db():
-    conn = get_connection()
-    cursor = conn.cursor()
+DATABASE_URL = os.getenv(
+    "DATABASE_URL",
+    "postgresql+psycopg://postgres:postgres@localhost:5432/ganadapp"
+)
 
-    cursor.execute("""
-    CREATE TABLE IF NOT EXISTS animales (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        codigo TEXT NOT NULL,
-        especie TEXT NOT NULL,
-        raza TEXT NOT NULL,
-        edad INTEGER NOT NULL,
-        estado TEXT NOT NULL
-    )
-    """)
 
-    conn.commit()
-    conn.close()
+class Base(DeclarativeBase):
+    pass
+
+
+engine = create_engine(
+    DATABASE_URL,
+    pool_pre_ping=True
+)
+
+
+SessionLocal = sessionmaker(
+    bind=engine,
+    autoflush=False,
+    autocommit=False
+)
+
+
+def get_db():
+    db = SessionLocal()
+
+    try:
+        yield db
+    finally:
+        db.close()
