@@ -8,6 +8,8 @@ from src.core.database import Base, engine
 from src.models.animal import Animal
 from src.models.establecimiento import Establecimiento
 
+from src.models.evento_sanitario import EventoSanitario
+
 BASE_DIR = Path(__file__).resolve().parent
 
 Base.metadata.create_all(bind=engine)

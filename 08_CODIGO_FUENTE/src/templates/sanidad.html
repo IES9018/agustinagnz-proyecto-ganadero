@@ -2,40 +2,136 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Módulo Sanidad</title>
-    <link rel="stylesheet" href="../static/styles.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión Sanitaria - Ganadapp</title>
+    <link rel="stylesheet" href="/static/styles.css">
 </head>
 <body>
+    <header class="topbar">
+        <div class="brand">
+            <img src="/static/img/logo.png" alt="Ganadapp" class="logo-main">
+            <span class="brand-name">Ganadapp</span>
+        </div>
+        <nav class="menu">
+            <button onclick="location.href='/'"><img src="/static/img/icon-inicio.png" alt="Inicio"><span>Inicio</span></button>
+            <button><img src="/static/img/icon-panel.png" alt="Panel"><span>Panel Principal</span></button>
+            <button><img src="/static/img/icon-productores.png" alt="Productores"><span>Productores</span></button>
+            <button onclick="location.href='/animales'"><img src="/static/img/icon-animales.png" alt="Animales"><span>Gestión de Animales</span></button>
+            <button class="active" onclick="location.href='/sanidad'"><img src="/static/img/icon-vacunacion.png" alt="Vacunación"><span>Vacunación</span></button>
+            <button><img src="/static/img/icon-stock.png" alt="Stock"><span>Stock de Insumos</span></button>
+            <button><img src="/static/img/icon-trazabilidad.png" alt="Trazabilidad"><span>Trazabilidad</span></button>
+            <button><img src="/static/img/icon-reportes.png" alt="Reportes"><span>Reportes</span></button>
+        </nav>
+    </header>
 
-<header class="topbar">
-    <div class="brand">
-        <img src="../static/img/logo.png" class="logo-main">
-        <span class="brand-name">Ganadapp</span>
-    </div>
-</header>
+    <main class="animal-page">
+        <section class="page-header">
+            <div>
+                <span class="section-label">Gestión ganadera</span>
+                <h1>Gestión Sanitaria</h1>
+                <p>Registre y consulte las vacunaciones, tratamientos y demás eventos sanitarios de sus animales.</p>
+            </div>
+            <div class="page-header-icon">
+                <img src="/static/img/icon-vacunacion.png" alt="Gestión sanitaria">
+            </div>
+        </section>
 
-<main class="container">
+        <section class="animal-form-card">
+            <div class="card-title">
+                <div class="title-icon">
+                    <img src="/static/img/icon-vacunacion.png" alt="">
+                </div>
+                <div>
+                    <h2>Registrar evento sanitario</h2>
+                    <p>Complete los datos del evento sanitario.</p>
+                </div>
+            </div>
 
-    <h2>Sanidad General</h2>
+            <form id="sanidad-form">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="animal-id">Animal</label>
+                        <select id="animal-id" required>
+                            <option value="">Seleccione un animal</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="tipo-evento">Tipo de evento</label>
+                        <select id="tipo-evento" required>
+                            <option value="">Seleccione un tipo</option>
+                            <option value="Vacunación">Vacunación</option>
+                            <option value="Tratamiento">Tratamiento</option>
+                            <option value="Desparasitación">Desparasitación</option>
+                            <option value="Control veterinario">Control veterinario</option>
+                            <option value="Enfermedad">Enfermedad</option>
+                            <option value="Movimiento">Movimiento</option>
+                            <option value="Otro">Otro</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="fecha-evento">Fecha</label>
+                        <input id="fecha-evento" type="date" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="descripcion-evento">Descripción</label>
+                        <input id="descripcion-evento" type="text" maxlength="500" placeholder="Detalle del evento" required>
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn-primary">Guardar evento</button>
+                    <button type="button" class="btn-secondary" id="limpiar-formulario">Limpiar</button>
+                </div>
+                <p id="sanidad-mensaje" role="status" aria-live="polite"></p>
+            </form>
+        </section>
 
-    <p>Seleccione un animal desde el módulo de animales para ver su historial.</p>
+        <section class="animals-list-card">
+            <div class="list-header">
+                <div>
+                    <span class="section-label">Registro</span>
+                    <h2>Historial sanitario</h2>
+                    <p>Consulte los eventos sanitarios registrados para cada animal.</p>
+                </div>
+                <button class="btn-refresh" id="actualizar-historial" type="button">Actualizar</button>
+            </div>
 
-    <div id="sanidadGlobal">
-        <p>No hay animal seleccionado.</p>
-    </div>
+            <div class="form-group">
+                <label for="animal-historial">Animal</label>
+                <select id="animal-historial">
+                    <option value="">Seleccione un animal</option>
+                </select>
+            </div>
 
-</main>
+            <div class="animal-count">
+                <span id="cantidad-eventos">Seleccione un animal para consultar su historial</span>
+            </div>
 
-<script>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Tipo de evento</th>
+                            <th>Descripción</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="lista-sanidad"></tbody>
+                </table>
+            </div>
 
-async function cargarSanidadGlobal() {
-    document.getElementById("sanidadGlobal").innerHTML =
-        "<p>Este módulo funciona como vista de referencia. Accede desde un animal específico.</p>";
-}
+            <div id="mensaje-vacio" class="empty-message" style="display: none;">
+                <img src="/static/img/icon-vacunacion.png" alt="">
+                <h3>No hay eventos sanitarios registrados</h3>
+                <p>Seleccione un animal o utilice el formulario superior para registrar un evento.</p>
+            </div>
+        </section>
+    </main>
 
-document.addEventListener("DOMContentLoaded", cargarSanidadGlobal);
-
-</script>
-
+    <footer>
+        © 2026 Ganadapp - Soluciones de Gestión Ganadera - Todos los derechos reservados
+    </footer>
+    <script src="/static/js/sanidad-ui.js"></script>
 </body>
 </html>

@@ -1,80 +1,73 @@
-import sqlite3
+from datetime import datetime, timezone
 
-DB_PATH = "ganado.db"
+from sqlalchemy import select
+from sqlalchemy.orm import Session
+
+from src.models.evento_sanitario import EventoSanitario
 
 
 class SanidadRepository:
+    def __init__(self, db: Session):
+        self.db = db
 
-    def __init__(self):
-        self._crear_tabla()
+    def crear_evento(self, animal_id: int, data: dict):
+        evento = EventoSanitario(
+            id_animal=animal_id,
+            tipo_evento=data["tipo_evento"],
+            descripcion=data["descripcion"],
+            fecha=data["fecha"],
+            estado="vigente"
+        )
 
-    def _crear_tabla(self):
-        conn = sqlite3.connect(DB_PATH)
-        cursor = conn.cursor()
+        self.db.add(evento)
+        self.db.commit()
+        self.db.refresh(evento)
 
-        cursor.execute("""
-            CREATE TABLE IF NOT EXISTS eventos_sanitarios (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                animal_id INTEGER,
-                tipo_evento TEXT,
-                descripcion TEXT,
-                fecha TEXT
+        return self._to_dict(evento)
+
+    def listar_por_animal(self, animal_id: int):
+        statement = (
+            select(EventoSanitario)
+            .where(EventoSanitario.id_animal == animal_id)
+            .order_by(
+                EventoSanitario.fecha.desc(),
+                EventoSanitario.id_evento.desc()
             )
-        """)
+        )
 
-        conn.commit()
-        conn.close()
+        eventos = self.db.scalars(statement).all()
 
-    def crear_evento(self, animal_id, data):
-        conn = sqlite3.connect(DB_PATH)
-        cursor = conn.cursor()
+        return [self._to_dict(evento) for evento in eventos]
 
-        cursor.execute("""
-            INSERT INTO eventos_sanitarios (animal_id, tipo_evento, descripcion, fecha)
-            VALUES (?, ?, ?, ?)
-        """, (
-            animal_id,
-            data["tipo_evento"],
-            data["descripcion"],
-            data["fecha"]
-        ))
+    def anular_evento(self, evento_id: int, motivo: str):
+        evento = self.db.get(EventoSanitario, evento_id)
 
-        conn.commit()
-        conn.close()
+        if evento is None:
+            return None
 
-        return {"mensaje": "evento creado"}
+        if evento.estado != "anulado":
+            evento.estado = "anulado"
+            evento.motivo_anulacion = motivo
+            evento.fecha_anulacion = datetime.now(timezone.utc)
 
-    def listar_por_animal(self, animal_id):
-        conn = sqlite3.connect(DB_PATH)
-        cursor = conn.cursor()
+            self.db.commit()
+            self.db.refresh(evento)
 
-        cursor.execute("""
-            SELECT id, animal_id, tipo_evento, descripcion, fecha
-            FROM eventos_sanitarios
-            WHERE animal_id = ?
-        """, (animal_id,))
+        return self._to_dict(evento)
 
-        rows = cursor.fetchall()
-        conn.close()
-
-        return [
-            {
-                "id": r[0],
-                "animal_id": r[1],
-                "tipo_evento": r[2],
-                "descripcion": r[3],
-                "fecha": r[4]
-            }
-            for r in rows
-        ]
-
-    def eliminar_evento(self, evento_id):
-        conn = sqlite3.connect(DB_PATH)
-        cursor = conn.cursor()
-
-        cursor.execute("DELETE FROM eventos_sanitarios WHERE id = ?", (evento_id,))
-
-        conn.commit()
-        conn.close()
-
-        return {"mensaje": "evento eliminado"}
+    @staticmethod
+    def _to_dict(evento: EventoSanitario):
+        return {
+            "id_evento": evento.id_evento,
+            "id_animal": evento.id_animal,
+            "tipo_evento": evento.tipo_evento,
+            "descripcion": evento.descripcion,
+            "fecha": evento.fecha.isoformat(),
+            "estado": evento.estado,
+            "motivo_anulacion": evento.motivo_anulacion,
+            "fecha_anulacion": (
+                evento.fecha_anulacion.isoformat()
+                if evento.fecha_anulacion
+                else None
+            )
+        }
