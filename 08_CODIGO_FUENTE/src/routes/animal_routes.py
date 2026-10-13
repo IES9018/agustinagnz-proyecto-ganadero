@@ -1,25 +1,45 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.orm import Session
 
-from services.animal_service import AnimalService
-
+from src.core.database import get_db
+from src.services.animal_service import AnimalService
 
 router = APIRouter()
 
-service = AnimalService()
-
 
 @router.post("/api/animales")
-def crear_animal(animal: dict):
-    return service.crear_animal(animal)
+def crear_animal(
+    animal: dict,
+    db: Session = Depends(get_db)
+):
+    service = AnimalService(db)
+
+    try:
+        return service.crear_animal(animal)
+
+    except ValueError as error:
+        raise HTTPException(
+            status_code=400,
+            detail=str(error)
+        )
 
 
 @router.get("/api/animales")
-def listar_animales():
+def listar_animales(
+    db: Session = Depends(get_db)
+):
+    service = AnimalService(db)
+
     return service.listar_animales()
 
 
 @router.get("/api/animales/{animal_id}")
-def obtener_animal(animal_id: int):
+def obtener_animal(
+    animal_id: int,
+    db: Session = Depends(get_db)
+):
+    service = AnimalService(db)
+
     animal = service.obtener_animal(animal_id)
 
     if animal is None:
@@ -32,21 +52,24 @@ def obtener_animal(animal_id: int):
 
 
 @router.put("/api/animales/{animal_id}")
-def actualizar_animal(animal_id: int, animal: dict):
-    resultado = service.actualizar_animal(animal_id, animal)
+def actualizar_animal(
+    animal_id: int,
+    animal: dict,
+    db: Session = Depends(get_db)
+):
+    service = AnimalService(db)
 
-    if resultado is None:
-        raise HTTPException(
-            status_code=404,
-            detail="Animal no encontrado"
+    try:
+        resultado = service.actualizar_animal(
+            animal_id,
+            animal
         )
 
-    return resultado
-
-
-@router.delete("/api/animales/{animal_id}")
-def eliminar_animal(animal_id: int):
-    resultado = service.eliminar_animal(animal_id)
+    except ValueError as error:
+        raise HTTPException(
+            status_code=400,
+            detail=str(error)
+        )
 
     if resultado is None:
         raise HTTPException(

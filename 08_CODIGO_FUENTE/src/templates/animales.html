@@ -152,12 +152,12 @@
 
                     <div class="form-group">
 
-                        <label for="codigo">
-                            Código
+                        <label for="identificador">
+                            Identificador
                         </label>
 
                         <input
-                            id="codigo"
+                            id="identificador"
                             type="text"
                             placeholder="Ej. BOV001"
                             required
@@ -197,6 +197,35 @@
 
                     </div>
 
+                    <div class="form-group">
+
+                        <label for="fecha_nacimiento">
+                            Fecha de nacimiento
+                        </label>
+
+                        <input
+                            id="fecha_nacimiento"
+                            type="date"
+                            required
+                        >
+
+                    </div>
+
+                    <div class="form-group">
+
+                        <label for="id_establecimiento">
+                            Establecimiento
+                        </label>
+
+                        <input
+                            id="id_establecimiento"
+                            type="number"
+                            min="1"
+                            placeholder="Ej. 1"
+                            required
+                        >
+
+                    </div>
 
                     <div class="form-group">
 
@@ -206,10 +235,9 @@
 
                         <input
                             id="edad"
-                            type="number"
-                            min="0"
-                            placeholder="Ej. 3"
-                            required
+                            type="text"
+                            placeholder="Se calcula automáticamente" 
+                            readonly
                         >
 
                     </div>
@@ -217,11 +245,11 @@
 
                     <div class="form-group">
 
-                        <label for="estado">
-                            Estado
+                        <label for="estado_sanitario">
+                            Estado Sanitario
                         </label>
 
-                        <select id="estado" required>
+                        <select id="estado_sanitario" required>
 
                             <option value="">
                                 Seleccione un estado
@@ -330,11 +358,12 @@
                         <tr>
 
                             <th>ID</th>
-                            <th>Código</th>
+                            <th>Identificador</th>
                             <th>Especie</th>
                             <th>Raza</th>
                             <th>Edad</th>
-                            <th>Estado</th>
+                            <th>Estado sanitario</th>
+                            <th>Establecimiento</th>
                             <th>Acciones</th>
 
                         </tr>
@@ -404,8 +433,8 @@
 
             return {
 
-                codigo:
-                    document.getElementById("codigo").value.trim(),
+                identificador:
+                    document.getElementById("identificador").value.trim(),
 
                 especie:
                     document.getElementById("especie").value.trim(),
@@ -413,17 +442,57 @@
                 raza:
                     document.getElementById("raza").value.trim(),
 
-                edad:
-                    Number(
-                        document.getElementById("edad").value
-                    ),
+                fecha_nacimiento:
+                    document.getElementById("fecha_nacimiento").value,
 
-                estado:
-                    document.getElementById("estado").value
+                estado_sanitario:
+                    document.getElementById("estado_sanitario").value,
+
+                id_establecimiento:
+                    Number(
+                        document.getElementById("id_establecimiento").value
+                    )
 
             };
 
         }
+
+        function calcularEdad(fechaNacimiento) {
+            if (!fechaNacimiento) {
+                return "";
+            }
+
+            const nacimiento = new Date(fechaNacimiento + "T00:00:00");
+            const hoy = new Date();
+
+            let edad = hoy.getFullYear() - nacimiento.getFullYear();
+
+            const mes = hoy.getMonth() - nacimiento.getMonth();
+
+            if (
+                mes < 0 ||
+                (mes === 0 && hoy.getDate() < nacimiento.getDate())
+            ) {
+                edad--;
+            }
+
+            return edad >= 0 ? edad : "";
+        }
+
+        function actualizarEdad() {
+            const fechaNacimiento =
+                document.getElementById("fecha_nacimiento").value;
+
+            const campoEdad =
+                document.getElementById("edad");
+
+            const edad =
+                calcularEdad(fechaNacimiento);
+
+            campoEdad.value =
+                edad === "" ? "" : `${edad} años`;
+        }
+
 
 
         async function guardarAnimal() {
@@ -431,11 +500,13 @@
             const payload = obtenerDatos();
 
             if (
-                !payload.codigo ||
+                !payload.identificador ||
                 !payload.especie ||
                 !payload.raza ||
-                !payload.estado ||
-                payload.edad < 0
+                !payload.fecha_nacimiento ||
+                !payload.estado_sanitario ||
+                !payload.id_establecimiento ||
+                payload.id_establecimiento < 1
             ) {
 
                 alert("Complete correctamente todos los campos.");
@@ -444,76 +515,71 @@
 
             }
 
+        try {
 
-            try {
+            let response;
 
-                let response;
+            if (editandoId === null) {
 
+                response = await fetch(API, {
 
-                if (editandoId === null) {
+                    method: "POST",
 
-                    response = await fetch(API, {
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
 
-                        method: "POST",
+                    body: JSON.stringify(payload)
+
+                });
+
+            } else {
+
+                response = await fetch(
+                    `${API}/${editandoId}`,
+                    {    
+                        method: "PUT",
 
                         headers: {
                             "Content-Type": "application/json"
                         },
 
                         body: JSON.stringify(payload)
-
-                    });
-
-                } else {
-
-                    response = await fetch(
-                        `${API}/${editandoId}`,
-                        {
-
-                            method: "PUT",
-
-                            headers: {
-                                "Content-Type": "application/json"
-                            },
-
-                            body: JSON.stringify(payload)
-
-                        }
-                    );
-
-                }
-
-
-                if (!response.ok) {
-
-                    const errorText = await response.text();
-
-                    console.error(errorText);
-
-                    alert(
-                        "No fue posible guardar el animal."
-                    );
-
-                    return;
-
-                }
-
-
-                cancelarEdicion();
-
-                await listar();
-
-            } catch (error) {
-
-                console.error(error);
-
-                alert(
-                    "No se pudo conectar con el servidor."
+                    }
                 );
 
             }
 
+            if (!response.ok) {
+
+                const errorData = await response.json();
+
+                console.error(errorData);
+
+                alert(
+                    errorData.detail ||
+                    "No fue posible guardar el animal."
+                );
+
+                return;
+
+            }
+
+            cancelarEdicion();
+
+            await listar();
+
+        } catch (error) {
+
+            console.error(error);
+
+            alert(
+                "No se pudo conectar con el servidor."
+            );
+
         }
+
+    }
 
 
         async function listar() {
@@ -574,11 +640,11 @@
                         <tr>
 
                             <td>
-                                ${animal.id}
+                                ${animal.id_animal}
                             </td>
 
                             <td class="animal-code">
-                                ${escapeHtml(animal.codigo)}
+                                ${escapeHtml(animal.identificador)}
                             </td>
 
                             <td>
@@ -590,13 +656,13 @@
                             </td>
 
                             <td>
-                                ${animal.edad} años
+                                ${calcularEdad(animal.fecha_nacimiento)} años 
                             </td>
 
                             <td>
 
                                 <span class="status ${estadoClase}">
-                                    ${escapeHtml(animal.estado)}
+                                    ${escapeHtml(animal.estado_sanitario)}
                                 </span>
 
                             </td>
@@ -607,24 +673,19 @@
 
                                     <button
                                         class="action-edit"
-                                        onclick="editarAnimal(${animal.id})"
+                                        onclick="editarAnimal(${animal.id_animal})"
                                     >
                                         Editar
                                     </button>
 
                                     <button
                                         class="action-health"
-                                        onclick="location.href='/sanidad?id=${animal.id}'"
+                                        onclick="location.href='/sanidad?id=${animal.id_animal}'"
                                     >
                                         Sanidad
                                     </button>
 
-                                    <button
-                                        class="action-delete"
-                                        onclick="eliminarAnimal(${animal.id})"
-                                    >
-                                        Eliminar
-                                    </button>
+                                    
 
                                 </div>
 
@@ -662,33 +723,24 @@
 
 
         async function editarAnimal(id) {
-
             try {
-
                 const response =
                     await fetch(`${API}/${id}`);
 
-
                 if (!response.ok) {
-
                     alert(
                         "No fue posible obtener los datos del animal."
                     );
-
                     return;
-
                 }
-
 
                 const animal =
                     await response.json();
 
+                editandoId = animal.id_animal;
 
-                editandoId = id;
-
-
-                document.getElementById("codigo").value =
-                    animal.codigo;
+                document.getElementById("identificador").value =
+                    animal.identificador;
 
                 document.getElementById("especie").value =
                     animal.especie;
@@ -696,101 +748,43 @@
                 document.getElementById("raza").value =
                     animal.raza;
 
-                document.getElementById("edad").value =
-                    animal.edad;
+                document.getElementById("fecha_nacimiento").value =
+                    animal.fecha_nacimiento;
 
-                document.getElementById("estado").value =
-                    animal.estado;
+                document.getElementById("estado_sanitario").value =
+                    animal.estado_sanitario;
 
+                document.getElementById("id_establecimiento").value =
+                    animal.id_establecimiento;
+
+                actualizarEdad();
 
                 document.getElementById("form-title")
                     .textContent =
                     "Editar Animal";
 
-
                 document.getElementById("save-button")
                     .textContent =
                     "Guardar Cambios";
-
 
                 document.getElementById("cancel-button")
                     .style.display =
                     "inline-flex";
 
-
                 window.scrollTo({
-
                     top: 0,
-
                     behavior: "smooth"
-
                 });
 
+        } catch (error) {
+            console.error(error);
 
-            } catch (error) {
+            alert(
+                "No fue posible cargar el animal."
+            );
+    }
+}
 
-                console.error(error);
-
-                alert(
-                    "No fue posible cargar el animal."
-                );
-
-            }
-
-        }
-
-
-        async function eliminarAnimal(id) {
-
-            const confirmar =
-                confirm(
-                    "¿Está seguro de eliminar este animal?"
-                );
-
-
-            if (!confirmar) {
-
-                return;
-
-            }
-
-
-            try {
-
-                const response =
-                    await fetch(
-                        `${API}/${id}`,
-                        {
-                            method: "DELETE"
-                        }
-                    );
-
-
-                if (!response.ok) {
-
-                    alert(
-                        "No fue posible eliminar el animal."
-                    );
-
-                    return;
-
-                }
-
-
-                await listar();
-
-
-            } catch (error) {
-
-                console.error(error);
-
-                alert(
-                    "No se pudo conectar con el servidor."
-                );
-
-            }
-
-        }
 
 
         function cancelarEdicion() {
@@ -901,6 +895,13 @@
             "DOMContentLoaded",
             listar
         );
+
+        document
+            .getElementById("fecha_nacimiento")
+            .addEventListener(
+                "change",
+                actualizarEdad
+            );
 
     </script>
 
