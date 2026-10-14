@@ -1,3 +1,4 @@
+
 import math
 
 from src.models.establecimiento import Establecimiento
@@ -5,6 +6,12 @@ from src.repositories.stock_repository import StockRepository
 
 
 class StockService:
+    CATEGORIAS_VALIDAS = (
+        "Alimentos",
+        "Medicamentos",
+        "Insumos generales",
+    )
+
     def __init__(self, db):
         self.db = db
         self.repo = StockRepository(db)
@@ -90,6 +97,18 @@ class StockService:
                 )
 
             datos[campo] = str(valor).strip()
+
+        categoria = str(
+            data.get("categoria", "Insumos generales")
+        ).strip()
+
+        if categoria not in cls.CATEGORIAS_VALIDAS:
+            raise ValueError(
+                "La categoría debe ser Alimentos, Medicamentos "
+                "o Insumos generales."
+            )
+
+        datos["categoria"] = categoria
 
         try:
             establecimiento_id = int(data["id_establecimiento"])

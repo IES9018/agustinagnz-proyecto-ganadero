@@ -118,6 +118,7 @@ async function cargarStock() {
         for (const item of items) {
             const fila = document.createElement("tr");
             agregarCelda(fila, item.tipo_insumo);
+            agregarCelda(fila, item.categoria);
             agregarCelda(fila, String(item.cantidad));
             agregarCelda(fila, item.unidad);
             agregarCelda(fila, item.ubicacion);
@@ -180,6 +181,7 @@ form.addEventListener("submit", async (evento) => {
     evento.preventDefault();
 
     const datos = Object.fromEntries(new FormData(form).entries());
+    datos.categoria = document.getElementById("stock-categoria").value;
     datos.cantidad = Number(datos.cantidad);
     datos.id_establecimiento = Number(datos.id_establecimiento);
 

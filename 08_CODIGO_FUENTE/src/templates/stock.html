@@ -78,6 +78,16 @@
                         <label for="stock-tipo-insumo">Insumo</label>
                         <input id="stock-tipo-insumo" name="tipo_insumo" maxlength="150" placeholder="Ej.: alimento balanceado" required>
                     </div>
+
+                    <div class="form-group">
+                        <label for="stock-categoria">Categoría</label>
+                        <select name="categoria" id="stock-categoria" required>
+                            <option value="Alimentos">Alimentos</option>
+                            <option value="Medicamentos">Medicamentos</option>
+                            <option value="Insumos generales" selected>Insumos generales</option>
+                        </select>
+                    </div>
+
                     <div class="form-group">
                         <label for="stock-cantidad">Cantidad inicial</label>
                         <input id="stock-cantidad" name="cantidad" type="number" min="0" step="any" value="0" required>
@@ -120,6 +130,7 @@
                     <thead>
                         <tr>
                             <th>Insumo</th>
+                            <th>Categoría</th>
                             <th>Existencia</th>
                             <th>Unidad</th>
                             <th>Ubicación</th>

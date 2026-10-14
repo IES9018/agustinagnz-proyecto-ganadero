@@ -25,6 +25,13 @@ class StockInsumo(Base):
         nullable=False
     )
 
+    categoria: Mapped[str] = mapped_column(
+    String(40),
+    nullable=False,
+    default="Insumos generales",
+    server_default="Insumos generales"
+    )
+
     cantidad: Mapped[float] = mapped_column(
         Float,
         nullable=False,

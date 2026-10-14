@@ -1,3 +1,4 @@
+
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -11,7 +12,11 @@ class StockRepository:
     def listar(self):
         statement = (
             select(StockInsumo)
-            .order_by(StockInsumo.tipo_insumo, StockInsumo.id_stock)
+            .order_by(
+                StockInsumo.categoria,
+                StockInsumo.tipo_insumo,
+                StockInsumo.id_stock,
+            )
         )
         return [
             self._to_dict(item)
@@ -64,8 +69,9 @@ class StockRepository:
         return {
             "id_stock": item.id_stock,
             "tipo_insumo": item.tipo_insumo,
+            "categoria": item.categoria,
             "cantidad": float(item.cantidad),
             "unidad": item.unidad,
             "ubicacion": item.ubicacion,
-            "id_establecimiento": item.id_establecimiento
+            "id_establecimiento": item.id_establecimiento,
         }
