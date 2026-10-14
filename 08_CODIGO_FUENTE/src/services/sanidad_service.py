@@ -35,10 +35,30 @@ class SanidadService:
                 "La fecha del evento no puede ser futura."
             )
 
+        fecha_proxima = None
+        valor_fecha_proxima = data.get("fecha_proxima")
+
+        if valor_fecha_proxima:
+            try:
+                fecha_proxima = date.fromisoformat(
+                    str(valor_fecha_proxima)
+                )
+            except ValueError:
+                raise ValueError(
+                    "La fecha próxima no tiene un formato válido."
+                )
+
+            if fecha_proxima < fecha_evento:
+                raise ValueError(
+                    "La fecha próxima no puede ser anterior "
+                    "a la fecha del evento."
+                )
+
         datos = {
             "tipo_evento": str(data["tipo_evento"]).strip(),
             "descripcion": str(data["descripcion"]).strip(),
-            "fecha": fecha_evento
+            "fecha": fecha_evento,
+            "fecha_proxima": fecha_proxima,
         }
 
         return self.repo.crear_evento(animal_id, datos)
@@ -65,3 +85,6 @@ class SanidadService:
             raise LookupError("Evento sanitario no encontrado.")
 
         return evento
+
+    def listar_alertas(self):
+        return self.repo.listar_alertas()

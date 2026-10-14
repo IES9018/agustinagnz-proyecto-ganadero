@@ -50,3 +50,9 @@ def delete_sanidad(
         raise HTTPException(status_code=404, detail=str(error))
     except ValueError as error:
         raise HTTPException(status_code=400, detail=str(error))
+
+@router.get("/api/sanidad/alertas")
+def get_alertas_sanidad(
+    db: Session = Depends(get_db)
+):
+    return SanidadService(db).listar_alertas()

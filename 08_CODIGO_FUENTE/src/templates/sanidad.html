@@ -72,6 +72,12 @@
                         <label for="fecha-evento">Fecha</label>
                         <input id="fecha-evento" type="date" required>
                     </div>
+
+                    <div class="form-group">
+                        <label for="fecha-proxima">Próxima fecha programada</label>
+                        <input id="fecha-proxima" type="date">
+                    </div>
+
                     <div class="form-group">
                         <label for="descripcion-evento">Descripción</label>
                         <input id="descripcion-evento" type="text" maxlength="500" placeholder="Detalle del evento" required>
@@ -83,6 +89,14 @@
                 </div>
                 <p id="sanidad-mensaje" role="status" aria-live="polite"></p>
             </form>
+        </section>
+
+        <section class="animals-list-card">
+            <h2>Alertas sanitarias</h2>
+            <p id="mensaje-alertas-sanidad">
+                Cargando alertas...
+            </p>
+            <div id="lista-alertas-sanidad"></div>
         </section>
 
         <section class="animals-list-card">

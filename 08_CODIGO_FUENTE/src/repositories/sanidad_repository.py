@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import date, datetime, timedelta, timezone
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -16,6 +16,7 @@ class SanidadRepository:
             tipo_evento=data["tipo_evento"],
             descripcion=data["descripcion"],
             fecha=data["fecha"],
+            fecha_proxima=data.get("fecha_proxima"),
             estado="vigente"
         )
 
@@ -39,6 +40,39 @@ class SanidadRepository:
 
         return [self._to_dict(evento) for evento in eventos]
 
+    def listar_alertas(self):
+        hoy = date.today()
+        limite = hoy + timedelta(days=30)
+
+        statement = (
+            select(EventoSanitario)
+            .where(
+                EventoSanitario.estado == "vigente",
+                EventoSanitario.fecha_proxima.is_not(None),
+                EventoSanitario.fecha_proxima <= limite,
+            )
+            .order_by(
+                EventoSanitario.fecha_proxima.asc(),
+                EventoSanitario.id_evento.asc(),
+            )
+        )
+
+        eventos = self.db.scalars(statement).all()
+        alertas = []
+
+        for evento in eventos:
+            datos = self._to_dict(evento)
+
+            datos["tipo_alerta"] = (
+                "Pendiente vencido"
+                if evento.fecha_proxima < hoy
+                else "Próximo"
+            )
+
+            alertas.append(datos)
+
+        return alertas
+    
     def anular_evento(self, evento_id: int, motivo: str):
         evento = self.db.get(EventoSanitario, evento_id)
 
@@ -63,6 +97,11 @@ class SanidadRepository:
             "tipo_evento": evento.tipo_evento,
             "descripcion": evento.descripcion,
             "fecha": evento.fecha.isoformat(),
+            "fecha_proxima": (
+                evento.fecha_proxima.isoformat()
+                if evento.fecha_proxima
+                else None
+            ),
             "estado": evento.estado,
             "motivo_anulacion": evento.motivo_anulacion,
             "fecha_anulacion": (

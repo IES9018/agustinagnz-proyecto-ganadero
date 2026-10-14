@@ -8,6 +8,9 @@ const tablaSanidad = document.getElementById("lista-sanidad");
 const mensajeSanidad = document.getElementById("sanidad-mensaje");
 const cantidadEventos = document.getElementById("cantidad-eventos");
 const mensajeVacio = document.getElementById("mensaje-vacio");
+const fechaProxima = document.getElementById("fecha-proxima");
+const listaAlertas = document.getElementById("lista-alertas-sanidad");
+const mensajeAlertas = document.getElementById("mensaje-alertas-sanidad");
 
 function escapeHtml(value) {
     return String(value ?? "")
@@ -44,6 +47,49 @@ async function solicitar(url, opciones = {}) {
 function obtenerLista(datos) {
     if (Array.isArray(datos)) return datos;
     return datos.animales || datos.eventos || datos.historial || datos.items || [];
+}
+
+async function cargarAlertasSanidad() {
+    if (!listaAlertas || !mensajeAlertas) return;
+
+    listaAlertas.innerHTML = "";
+    mensajeAlertas.textContent = "Cargando alertas...";
+
+    try {
+        const alertas = obtenerLista(
+            await solicitar("/api/sanidad/alertas")
+        );
+
+        if (!alertas.length) {
+            mensajeAlertas.textContent =
+                "No hay eventos sanitarios próximos ni vencidos.";
+            return;
+        }
+
+        mensajeAlertas.textContent =
+            `${alertas.length} alerta(s) sanitaria(s)`;
+
+        listaAlertas.innerHTML = alertas.map(alerta => {
+            const vencida = alerta.tipo_alerta === "Pendiente vencido";
+
+            return `
+                <article class="sanidad-alerta ${vencida ? "status-danger" : "status-ok"}">
+                    <strong>
+                        ${escapeHtml(alerta.tipo_alerta || "Próximo")}
+                    </strong>
+                    <p>Animal: ${escapeHtml(alerta.id_animal)}</p>
+                    <p>Evento: ${escapeHtml(alerta.tipo_evento || "—")}</p>
+                    <p>Descripción: ${escapeHtml(alerta.descripcion || "—")}</p>
+                    <p>Fecha programada:
+                        ${escapeHtml(alerta.fecha_proxima || "—")}
+                    </p>
+                </article>
+            `;
+        }).join("");
+    } catch (error) {
+        mensajeAlertas.textContent =
+            `No fue posible cargar las alertas: ${error.message}`;
+    }
 }
 
 async function cargarAnimales() {
@@ -138,10 +184,10 @@ formulario.addEventListener("submit", async event => {
     const idAnimal = selectAnimal.value;
 
     const payload = {
-        tipo_evento: document.getElementById("tipo-evento").value,
-        descripcion: document.getElementById("descripcion-evento").value.trim(),
-        fecha: document.getElementById("fecha-evento").value,
-        estado: "Registrado"
+    tipo_evento: document.getElementById("tipo-evento").value,
+    descripcion: document.getElementById("descripcion-evento").value.trim(),
+    fecha: document.getElementById("fecha-evento").value,
+    fecha_proxima: fechaProxima.value || null
     };
 
     if (!idAnimal || !payload.tipo_evento || !payload.descripcion || !payload.fecha) {
@@ -165,6 +211,7 @@ formulario.addEventListener("submit", async event => {
 
         selectHistorial.value = idAnimal;
         await cargarHistorial();
+        await cargarAlertasSanidad();
     } catch (error) {
         mostrarMensaje(`No fue posible registrar el evento: ${error.message}`, true);
     }
@@ -185,6 +232,7 @@ tablaSanidad.addEventListener("click", async event => {
 
         mostrarMensaje("Evento anulado. El registro se conserva en el historial.");
         await cargarHistorial();
+        await cargarAlertasSanidad();
     } catch (error) {
         mostrarMensaje(`No fue posible anular el evento: ${error.message}`, true);
     }
@@ -206,3 +254,4 @@ document.getElementById("fecha-evento").value =
     new Date().toISOString().slice(0, 10);
 
 cargarAnimales();
+cargarAlertasSanidad();

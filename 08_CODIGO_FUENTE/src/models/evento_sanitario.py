@@ -37,6 +37,12 @@ class EventoSanitario(Base):
         nullable=False
     )
 
+    fecha_proxima: Mapped[date | None] = mapped_column(
+        Date,
+        nullable=True,
+        index=True
+    )
+
     estado: Mapped[str] = mapped_column(
         String(20),
         nullable=False,
