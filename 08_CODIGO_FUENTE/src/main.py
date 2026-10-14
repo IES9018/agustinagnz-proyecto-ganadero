@@ -9,6 +9,7 @@ from src.models.animal import Animal
 from src.models.establecimiento import Establecimiento
 
 from src.models.evento_sanitario import EventoSanitario
+from src.models.historial_animal import HistorialAnimal
 
 BASE_DIR = Path(__file__).resolve().parent
 
@@ -30,9 +31,15 @@ def animales_page():
 def sanidad_page():
     return FileResponse(BASE_DIR / "templates" / "sanidad.html")
 
+@app.get("/trazabilidad")
+def trazabilidad_page():
+    return FileResponse(BASE_DIR / "templates" / "trazabilidad.html")
+
 from src.routes.animal_routes import router as animal_router
 from src.routes.sanidad_routes import router as sanidad_router
+from src.routes.trazabilidad_routes import router as trazabilidad_router
 
 
 app.include_router(animal_router)
 app.include_router(sanidad_router)
+app.include_router(trazabilidad_router)
