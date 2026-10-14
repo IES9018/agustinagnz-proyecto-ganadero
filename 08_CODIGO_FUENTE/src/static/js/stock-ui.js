@@ -7,6 +7,29 @@ const mensaje = document.querySelector("#stock-message");
 
 let establecimientos = [];
 
+
+function obtenerEstadoStock(insumo) {
+    if (Number(insumo.cantidad) <= Number(insumo.stock_critico)) {
+        return {
+            texto: "Crítico",
+            clase: "stock-estado-critico"
+        };
+    }
+
+    if (Number(insumo.cantidad) <= Number(insumo.stock_minimo)) {
+        return {
+            texto: "Stock bajo",
+            clase: "stock-estado-bajo"
+        };
+    }
+
+    return {
+        texto: "Normal",
+        clase: "stock-estado-normal"
+    };
+}
+
+
 function mostrarMensaje(texto, error = false) {
     mensaje.textContent = texto;
     mensaje.classList.toggle("is-error", error);
@@ -59,6 +82,40 @@ function agregarCelda(fila, texto) {
     return celda;
 }
 
+function obtenerEstadoStock(item) {
+    if (item.cantidad <= item.stock_critico) {
+        return {
+            texto: "Crítico",
+            clase: "stock-estado-critico"
+        };
+    }
+
+    if (item.cantidad <= item.stock_minimo) {
+        return {
+            texto: "Stock bajo",
+            clase: "stock-estado-bajo"
+        };
+    }
+
+    return {
+        texto: "Normal",
+        clase: "stock-estado-normal"
+    };
+}
+
+function agregarEstadoStock(fila, item) {
+    const estado = obtenerEstadoStock(item);
+    const celda = document.createElement("td");
+    const indicador = document.createElement("span");
+
+    indicador.className = estado.clase;
+    indicador.textContent = estado.texto;
+
+    celda.append(indicador);
+    fila.append(celda);
+}
+
+
 function crearControlMovimiento(item) {
     const celda = document.createElement("td");
     const cantidad = document.createElement("input");
@@ -93,11 +150,12 @@ function crearControlMovimiento(item) {
     return celda;
 }
 
+
 async function cargarStock() {
     lista.replaceChildren();
+
     const filaCarga = document.createElement("tr");
-    agregarCelda(filaCarga, "Cargando inventario...");
-    filaCarga.firstElementChild.colSpan = 6;
+    agregarCelda(filaCarga, "Cargando inventario...").colSpan = 8;
     lista.append(filaCarga);
 
     try {
@@ -106,26 +164,30 @@ async function cargarStock() {
 
         if (!items.length) {
             const fila = document.createElement("tr");
-            const celda = agregarCelda(
+            agregarCelda(
                 fila,
                 "Todavía no hay insumos registrados."
-            );
-            celda.colSpan = 6;
+            ).colSpan = 8;
             lista.append(fila);
             return;
         }
 
         for (const item of items) {
             const fila = document.createElement("tr");
+
             agregarCelda(fila, item.tipo_insumo);
             agregarCelda(fila, item.categoria);
             agregarCelda(fila, String(item.cantidad));
+            agregarEstadoStock(fila, item);
             agregarCelda(fila, item.unidad);
             agregarCelda(fila, item.ubicacion);
 
             const establecimiento = establecimientos.find(
-                (e) => e.id_establecimiento === item.id_establecimiento
+                (e) =>
+                    Number(e.id_establecimiento) ===
+                    Number(item.id_establecimiento)
             );
+
             agregarCelda(
                 fila,
                 establecimiento
@@ -138,12 +200,13 @@ async function cargarStock() {
         }
     } catch (error) {
         lista.replaceChildren();
+
         const fila = document.createElement("tr");
-        const celda = agregarCelda(fila, error.message);
-        celda.colSpan = 6;
+        agregarCelda(fila, error.message).colSpan = 8;
         lista.append(fila);
     }
 }
+
 
 async function registrarMovimiento(stockId, tipoOperacion, valor) {
     const cantidad = Number(valor);
@@ -182,6 +245,8 @@ form.addEventListener("submit", async (evento) => {
 
     const datos = Object.fromEntries(new FormData(form).entries());
     datos.categoria = document.getElementById("stock-categoria").value;
+    datos.stock_minimo = Number(document.getElementById("stock-minimo").value);
+    datos.stock_critico = Number(document.getElementById("stock-critico").value);
     datos.cantidad = Number(datos.cantidad);
     datos.id_establecimiento = Number(datos.id_establecimiento);
 

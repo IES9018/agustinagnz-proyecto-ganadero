@@ -110,6 +110,27 @@ class StockService:
 
         datos["categoria"] = categoria
 
+
+        stock_minimo = cls._validar_cantidad(
+            data.get("stock_minimo", 10)
+        )
+        stock_critico = cls._validar_cantidad(
+            data.get("stock_critico", 5)
+        )
+
+        if stock_minimo < 0 or stock_critico < 0:
+            raise ValueError(
+                "Los umbrales de stock no pueden ser negativos."
+            )
+
+        if stock_critico > stock_minimo:
+            raise ValueError(
+                "El umbral crítico no puede superar el stock mínimo."
+            )
+
+        datos["stock_minimo"] = stock_minimo
+        datos["stock_critico"] = stock_critico
+
         try:
             establecimiento_id = int(data["id_establecimiento"])
         except (KeyError, TypeError, ValueError):

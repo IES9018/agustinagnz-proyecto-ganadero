@@ -137,3 +137,29 @@
         padding: 20px;
     }
 }
+
+.stock-estado-critico,
+.stock-estado-bajo,
+.stock-estado-normal {
+    display: inline-block;
+    padding: 4px 9px;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.stock-estado-critico {
+    color: #991b1b;
+    background-color: #fee2e2;
+}
+
+.stock-estado-bajo {
+    color: #92400e;
+    background-color: #fef3c7;
+}
+
+.stock-estado-normal {
+    color: #166534;
+    background-color: #dcfce7;
+}

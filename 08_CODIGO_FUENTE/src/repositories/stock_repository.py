@@ -71,6 +71,8 @@ class StockRepository:
             "tipo_insumo": item.tipo_insumo,
             "categoria": item.categoria,
             "cantidad": float(item.cantidad),
+            "stock_minimo": float(item.stock_minimo),
+            "stock_critico": float(item.stock_critico),
             "unidad": item.unidad,
             "ubicacion": item.ubicacion,
             "id_establecimiento": item.id_establecimiento,
