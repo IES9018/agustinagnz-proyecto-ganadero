@@ -57,7 +57,7 @@
                 <span>Vacunación</span>
             </button>
 
-            <button>
+            <button onclick="location.href='/stock'">
                 <img src="/static/img/icon-stock.png" alt="Stock">
                 <span>Stock de Insumos</span>
             </button>
@@ -599,6 +599,20 @@
 
                 const data = await response.json();
 
+                const respuestaEstablecimientos = await fetch("/api/establecimientos");
+
+                const establecimientos = respuestaEstablecimientos.ok
+                    ? await respuestaEstablecimientos.json()
+                    : [];
+
+                const establecimientosPorId = new Map(
+                    establecimientos.map(e => [
+                        Number(e.id_establecimiento),
+                        e.nombre
+                    ])
+                );
+
+
                 const lista =
                     document.getElementById("lista");
 
@@ -665,6 +679,14 @@
                                     ${escapeHtml(animal.estado_sanitario)}
                                 </span>
 
+                            </td>
+
+                            
+                            <td>
+                                ${escapeHtml(
+                                    establecimientosPorId.get(Number(animal.id_establecimiento))
+                                    || "Sin establecimiento asociado"
+                                )}
                             </td>
 
                             <td>

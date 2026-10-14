@@ -10,6 +10,7 @@ from src.models.establecimiento import Establecimiento
 
 from src.models.evento_sanitario import EventoSanitario
 from src.models.historial_animal import HistorialAnimal
+from src.models.stock_insumo import StockInsumo
 
 BASE_DIR = Path(__file__).resolve().parent
 
@@ -35,11 +36,18 @@ def sanidad_page():
 def trazabilidad_page():
     return FileResponse(BASE_DIR / "templates" / "trazabilidad.html")
 
+
+@app.get("/stock")
+def stock_page():
+    return FileResponse(BASE_DIR / "templates" / "stock.html")
+
 from src.routes.animal_routes import router as animal_router
 from src.routes.sanidad_routes import router as sanidad_router
 from src.routes.trazabilidad_routes import router as trazabilidad_router
+from src.routes.stock_routes import router as stock_router
 
 
 app.include_router(animal_router)
 app.include_router(sanidad_router)
 app.include_router(trazabilidad_router)
+app.include_router(stock_router)

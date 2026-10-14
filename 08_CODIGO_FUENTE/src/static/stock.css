@@ -1,0 +1,139 @@
+/* Stock reutiliza los componentes visuales de styles.css. */
+
+.stock-page {
+    width: min(1200px, 94%);
+    margin: 32px auto 48px;
+}
+
+.stock-page .stock-field-wide {
+    grid-column: 1 / -1;
+}
+
+.stock-list-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+    margin-bottom: 18px;
+}
+
+.stock-list-heading h2 {
+    margin: 0 0 8px;
+    color: #6f4329;
+    font-size: 21px;
+}
+
+.stock-list-heading p {
+    margin: 0;
+    color: #85766c;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.stock-message {
+    min-height: 1.5em;
+    margin: 12px 0;
+    font-size: 13px;
+}
+
+.stock-message.is-error {
+    color: #a32626;
+}
+
+.stock-message.is-success {
+    color: #246a42;
+}
+
+.stock-page .stock-table {
+    width: 100%;
+    min-width: 900px;
+    border-collapse: collapse;
+    text-align: left;
+}
+
+.stock-page .stock-table thead {
+    background: #7a4a2d;
+}
+
+.stock-page .stock-table thead th {
+    padding: 14px 13px;
+    color: #fff;
+    font-size: 12px;
+    font-weight: bold;
+    white-space: nowrap;
+}
+
+.stock-page .stock-table tbody tr {
+    background: #fff;
+    border-bottom: 1px solid #eee4dc;
+}
+
+.stock-page .stock-table tbody tr:hover {
+    background: #fbf7f3;
+}
+
+.stock-page .stock-table tbody td {
+    padding: 14px 13px;
+    color: #55453b;
+    font-size: 13px;
+    vertical-align: middle;
+}
+
+.stock-movement-controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    min-width: 220px;
+}
+
+.stock-movement-controls input {
+    width: 90px;
+    min-height: 34px;
+    padding: 5px 8px;
+    border: 1px solid #d9c7b8;
+    border-radius: 8px;
+    font: inherit;
+}
+
+.stock-movement-controls button {
+    min-height: 34px;
+    padding: 5px 10px;
+    border: none;
+    border-radius: 8px;
+    background: #8b5735;
+    color: #fff;
+    cursor: pointer;
+    font: inherit;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.stock-movement-controls button:hover {
+    background: #734428;
+}
+
+@media (max-width: 760px) {
+    .stock-page {
+        width: 92%;
+        margin-top: 20px;
+    }
+
+    .stock-page .form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .stock-page .stock-field-wide {
+        grid-column: auto;
+    }
+
+    .stock-list-heading {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .stock-page .animal-form-card,
+    .stock-page .animals-list-card {
+        padding: 20px;
+    }
+}
