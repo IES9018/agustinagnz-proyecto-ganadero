@@ -18,7 +18,7 @@
 
 <nav class="menu">
 
-<button><img src="../static/img/icon-inicio.png"> Inicio</button>
+<button onclick="location.href='/login'"><img src="../static/img/icon-inicio.png"> Inicio</button>
 
 <button><img src="../static/img/icon-panel.png"> Panel Principal</button>
 
@@ -38,6 +38,11 @@
 <button onclick="location.href='/trazabilidad'"><img src="../static/img/icon-trazabilidad.png" alt="Trazabilidad"> Trazabilidad</button>
 
 <button><img src="../static/img/icon-reportes.png"> Reportes</button>
+
+
+<form action="/auth/logout" method="post" class="logout-form">
+    <button type="submit" class="btn-logout">Cerrar sesión</button>
+</form>
 
 </nav>
 
@@ -65,7 +70,7 @@ Ver Animales >
 <div class="icon-box"><img src="../static/img/icon-inicio.png"></div>
 <h3>Inicio de Sesión</h3>
 <p>Acceda de forma segura a su panel de control para gestionar su inventario y productos.</p>
-<button>Abrir</button>
+<button onclick="location.href='/login'">Abrir</button>
 </div>
 
 <div class="card">

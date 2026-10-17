@@ -40,3 +40,8 @@ typing-inspection==0.4.2
 typing_extensions==4.15.0
 tzdata==2025.2
 uvicorn==0.49.0
+pwdlib[argon2]
+itsdangerous
+python-multipart
+pwdlib[argon2]
+python-dotenv

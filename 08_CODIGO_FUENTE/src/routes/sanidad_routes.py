@@ -4,7 +4,13 @@ from sqlalchemy.orm import Session
 from src.core.database import get_db
 from src.services.sanidad_service import SanidadService
 
-router = APIRouter()
+from src.core.security import requiere_roles
+
+router = APIRouter(
+    dependencies=[
+        Depends(requiere_roles("personal_campo"))
+    ]
+)
 
 
 @router.get("/api/animales/{animal_id}/sanidad")

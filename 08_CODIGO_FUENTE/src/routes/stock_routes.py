@@ -8,7 +8,13 @@ from src.models.establecimiento import Establecimiento
 from src.core.database import get_db
 from src.services.stock_service import StockService
 
-router = APIRouter()
+from src.core.security import requiere_roles
+
+router = APIRouter(
+    dependencies=[
+        Depends(requiere_roles("productor", "personal_campo"))
+    ]
+)
 
 
 @router.get("/api/establecimientos")

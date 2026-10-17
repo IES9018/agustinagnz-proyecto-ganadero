@@ -4,7 +4,13 @@ from sqlalchemy.orm import Session
 from src.core.database import get_db
 from src.services.trazabilidad_service import TrazabilidadService
 
-router = APIRouter()
+from src.core.security import requiere_roles
+
+router = APIRouter(
+    dependencies=[
+        Depends(requiere_roles("productor"))
+    ]
+)
 
 
 @router.get("/api/animales/{animal_id}/trazabilidad")
