@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inicio de Sesión - Ganadapp</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <header class="topbar">
+        <div class="brand">
+            <img src="/static/img/logo.png" alt="Ganadapp" class="logo-main">
+            <span class="brand-name">Ganadapp</span>
+        </div>
+        <nav class="menu">
+            <button onclick="location.href='/'">
+                <img src="/static/img/icon-inicio.png" alt="Inicio">
+                <span>Inicio</span>
+            </button>
+            <button class="active">
+                <img src="/static/img/icon-panel.png" alt="Acceso">
+                <span>Inicio de Sesión</span>
+            </button>
+        </nav>
+    </header>
+
+    <main class="animal-page">
+        <section class="page-header">
+            <div>
+                <span class="section-label">Acceso al sistema</span>
+                <h1>Inicio de Sesión</h1>
+                <p>Ingrese sus credenciales o registre una cuenta para acceder a Ganadapp.</p>
+            </div>
+            <div class="page-header-icon">
+                <img src="/static/img/icon-panel.png" alt="Acceso al sistema">
+            </div>
+        </section>
+
+        <section class="animal-form-card">
+            <div class="card-title">
+                <div class="title-icon">
+                    <img src="/static/img/icon-panel.png" alt="">
+                </div>
+                <div>
+                    <h2>Iniciar sesión</h2>
+                    <p>Ingrese los datos de su cuenta.</p>
+                </div>
+            </div>
+
+            <form action="/auth/login" method="post">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="email-login">Correo electrónico</label>
+                        <input
+                            id="email-login"
+                            name="email"
+                            type="email"
+                            maxlength="255"
+                            autocomplete="username"
+                            required
+                        >
+                    </div>
+                    <div class="form-group">
+                        <label for="password-login">Contraseña</label>
+                        <input
+                            id="password-login"
+                            name="password"
+                            type="password"
+                            autocomplete="current-password"
+                            required
+                        >
+                    </div>
+                </div>
+
+                <p id="login-error" role="alert" style="display:none;">
+                    Correo, contraseña incorrectos o cuenta inactiva.
+                </p>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn-primary">Ingresar</button>
+                </div>
+            </form>
+        </section>
+
+        <section class="animal-form-card">
+            <div class="card-title">
+                <div class="title-icon">
+                    <img src="/static/img/icon-productores.png" alt="">
+                </div>
+                <div>
+                    <h2>Crear una cuenta</h2>
+                    <p>Complete sus datos para registrarse en el sistema.</p>
+                </div>
+            </div>
+
+            <form action="/auth/registro" method="post">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="nombre-registro">Nombre completo</label>
+                        <input
+                            id="nombre-registro"
+                            name="nombre"
+                            type="text"
+                            maxlength="150"
+                            autocomplete="name"
+                            required
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email-registro">Correo electrónico</label>
+                        <input
+                            id="email-registro"
+                            name="email"
+                            type="email"
+                            maxlength="255"
+                            autocomplete="email"
+                            required
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label for="rol-registro">Perfil</label>
+                        <select id="rol-registro" name="rol" required>
+                            <option value="">Seleccione un perfil</option>
+                            <option value="productor">Productor ganadero</option>
+                            <option value="personal_campo">Personal de campo</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="password-registro">Contraseña</label>
+                        <input
+                            id="password-registro"
+                            name="password"
+                            type="password"
+                            minlength="12"
+                            autocomplete="new-password"
+                            required
+                        >
+                        <small>Debe contener al menos 12 caracteres.</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="password-confirmacion">Confirmar contraseña</label>
+                        <input
+                            id="password-confirmacion"
+                            name="password_confirmacion"
+                            type="password"
+                            minlength="12"
+                            autocomplete="new-password"
+                            required
+                        >
+                    </div>
+                </div>
+
+                <p id="registro-error" role="alert" style="display:none;"></p>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn-primary">Crear cuenta</button>
+                </div>
+            </form>
+        </section>
+    </main>
+
+    <footer>
+        © 2026 Ganadapp - Soluciones de Gestión Ganadera -
+        Todos los derechos reservados
+    </footer>
+
+    <script>
+        const parametros = new URLSearchParams(window.location.search);
+
+        if (parametros.get("error") === "1") {
+            const mensaje = document.getElementById("login-error");
+            mensaje.style.display = "block";
+        }
+
+        if (parametros.get("registro") === "duplicado") {
+            mostrarErrorRegistro("Ya existe una cuenta con ese correo electrónico.");
+        } else if (parametros.get("registro") === "invalido") {
+            mostrarErrorRegistro("Verifique los datos. La contraseña debe tener al menos 12 caracteres.");
+        } else if (parametros.get("registro") === "error") {
+            mostrarErrorRegistro("No fue posible completar el registro. Intente nuevamente.");
+        }
+
+        function mostrarErrorRegistro(mensaje) {
+            const elemento = document.getElementById("registro-error");
+            elemento.textContent = mensaje;
+            elemento.style.display = "block";
+        }
+
+        const formularioRegistro = document.querySelector(
+            'form[action="/auth/registro"]'
+        );
+
+        formularioRegistro.addEventListener("submit", function (evento) {
+            const password = document.getElementById("password-registro").value;
+            const confirmacion = document.getElementById("password-confirmacion").value;
+
+            if (password.length < 12) {
+                evento.preventDefault();
+                mostrarErrorRegistro("La contraseña debe tener al menos 12 caracteres.");
+                return;
+            }
+
+            if (password !== confirmacion) {
+                evento.preventDefault();
+                mostrarErrorRegistro("Las contraseñas no coinciden.");
+            }
+        });
+    </script>
+</body>
+</html>

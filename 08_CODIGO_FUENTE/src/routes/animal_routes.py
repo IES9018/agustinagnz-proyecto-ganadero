@@ -4,7 +4,15 @@ from sqlalchemy.orm import Session
 from src.core.database import get_db
 from src.services.animal_service import AnimalService
 
-router = APIRouter()
+from src.core.security import requiere_roles
+from fastapi import Depends
+
+
+router = APIRouter(
+    dependencies=[
+        Depends(requiere_roles("productor", "personal_campo"))
+    ]
+)
 
 
 @router.post("/api/animales")

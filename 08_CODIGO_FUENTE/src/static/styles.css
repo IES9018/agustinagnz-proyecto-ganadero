@@ -1024,3 +1024,114 @@ body.animals-page {
     }
 
 }
+.sanidad-alertas {
+    margin: 24px 0;
+}
+
+#lista-alertas-sanidad {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 12px;
+}
+
+.sanidad-alerta {
+    padding: 14px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    background: #fff;
+}
+
+.sanidad-alerta p {
+    margin: 8px 0 0;
+}
+
+.sanidad-alerta.status-danger {
+    border-left: 4px solid #dc2626;
+}
+
+.sanidad-alerta.status-ok {
+    border-left: 4px solid #16a34a;
+}
+
+
+.btn-logout {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 9px 16px;
+    border: 1px solid #ffffff !important;
+    border-radius: 8px;
+    background: transparent !important;
+    color: #ffffff !important;
+    font: inherit;
+    font-size: 14px;
+    font-weight: 400;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+    transition: background-color 0.2s ease,
+                box-shadow 0.2s ease,
+                transform 0.2s ease;
+}
+
+.btn-logout:hover {
+    background: rgba(255, 255, 255, 0.12) !important;
+    border-color: #ffffff !important;
+    color: #ffffff !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    transform: translateY(-1px);
+}
+
+
+/* Distribución del encabezado y cierre de sesión */
+.topbar {
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    gap: 16px 24px;
+}
+
+.brand {
+    margin-right: 0;
+    flex-shrink: 0;
+}
+
+.menu {
+    flex: 1 1 700px;
+    min-width: 0;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.menu .logout-form {
+    display: inline-flex;
+    flex: 0 0 auto;
+    margin: 0 0 0 8px;
+}
+
+.menu .logout-form .btn-logout {
+    display: inline-flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    min-height: 40px;
+    padding: 9px 16px;
+    border: 1px solid #fff !important;
+    border-radius: 8px;
+    background: transparent !important;
+    color: #fff !important;
+    white-space: nowrap;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+}
+
+.menu .logout-form .btn-logout:hover {
+    background: rgba(255, 255, 255, 0.14) !important;
+}
+
+@media (max-width: 768px) {
+    .menu {
+        flex-basis: 100%;
+        justify-content: flex-start;
+    }
+}

@@ -1,4 +1,3 @@
-{% load static %}
 <!DOCTYPE html>
 <html lang="es">
 
@@ -9,7 +8,7 @@
 
     <title>{% block title %}GanadApp{% endblock %}</title>
 
-    <link rel="stylesheet" href="{% static 'styles.css' %}">
+    <link rel="stylesheet" href="{{ url_for('static', path='styles.css') }}">
 
     {% block extra_css %}{% endblock %}
 
@@ -22,7 +21,7 @@
     <div class="brand">
 
         <img
-            src="{% static 'img/logo.png' %}"
+            src="{{ url_for('static', path='img/logo.png') }}"
             alt="Logo GanadApp"
             class="logo-main">
 
@@ -35,42 +34,42 @@
     <nav class="menu">
 
         <button onclick="location.href='/'">
-            <img src="{% static 'img/icon-inicio.png' %}" alt="">
+            <img src="{{ url_for('static', path='img/icon-inicio.png') }}" alt="">
             Inicio
         </button>
 
         <button onclick="location.href='/'">
-            <img src="{% static 'img/icon-panel.png' %}" alt="">
+            <img src="{{ url_for('static', path='img/icon-panel.png') }}" alt="">
             Panel Principal
         </button>
 
         <button>
-            <img src="{% static 'img/icon-productores.png' %}" alt="">
+            <img src="{{ url_for('static', path='img/icon-productores.png') }}" alt="">
             Productores
         </button>
 
         <button onclick="location.href='/animales'">
-            <img src="{% static 'img/icon-animales.png' %}" alt="">
+            <img src="{{ url_for('static', path='img/icon-animales.png') }}" alt="">
             Gestión de Animales
         </button>
 
         <button onclick="location.href='/sanidad'">
-            <img src="{% static 'img/icon-vacunacion.png' %}" alt="">
+            <img src="{{ url_for('static', path='img/icon-vacunacion.png') }}" alt="">
             Vacunación
         </button>
 
         <button>
-            <img src="{% static 'img/icon-stock.png' %}" alt="">
+            <img src="{{ url_for('static', path='img/icon-stock.png') }}" alt="">
             Stock
         </button>
 
-        <button>
-            <img src="{% static 'img/icon-trazabilidad.png' %}" alt="">
+        <button onclick="location.href='/trazabilidad'">
+            <img src="{{ url_for('static', path='img/icon-trazabilidad.png') }}" alt="">
             Trazabilidad
         </button>
 
         <button>
-            <img src="{% static 'img/icon-reportes.png' %}" alt="">
+            <img src="{{ url_for('static', path='img/icon-reportes.png') }}" alt="">
             Reportes
         </button>
 

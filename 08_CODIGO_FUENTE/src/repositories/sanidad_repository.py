@@ -1,80 +1,112 @@
-import sqlite3
+from datetime import date, datetime, timedelta, timezone
 
-DB_PATH = "ganado.db"
+from sqlalchemy import select
+from sqlalchemy.orm import Session
+
+from src.models.evento_sanitario import EventoSanitario
 
 
 class SanidadRepository:
+    def __init__(self, db: Session):
+        self.db = db
 
-    def __init__(self):
-        self._crear_tabla()
+    def crear_evento(self, animal_id: int, data: dict):
+        evento = EventoSanitario(
+            id_animal=animal_id,
+            tipo_evento=data["tipo_evento"],
+            descripcion=data["descripcion"],
+            fecha=data["fecha"],
+            fecha_proxima=data.get("fecha_proxima"),
+            estado="vigente"
+        )
 
-    def _crear_tabla(self):
-        conn = sqlite3.connect(DB_PATH)
-        cursor = conn.cursor()
+        self.db.add(evento)
+        self.db.commit()
+        self.db.refresh(evento)
 
-        cursor.execute("""
-            CREATE TABLE IF NOT EXISTS eventos_sanitarios (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                animal_id INTEGER,
-                tipo_evento TEXT,
-                descripcion TEXT,
-                fecha TEXT
+        return self._to_dict(evento)
+
+    def listar_por_animal(self, animal_id: int):
+        statement = (
+            select(EventoSanitario)
+            .where(EventoSanitario.id_animal == animal_id)
+            .order_by(
+                EventoSanitario.fecha.desc(),
+                EventoSanitario.id_evento.desc()
             )
-        """)
+        )
 
-        conn.commit()
-        conn.close()
+        eventos = self.db.scalars(statement).all()
 
-    def crear_evento(self, animal_id, data):
-        conn = sqlite3.connect(DB_PATH)
-        cursor = conn.cursor()
+        return [self._to_dict(evento) for evento in eventos]
 
-        cursor.execute("""
-            INSERT INTO eventos_sanitarios (animal_id, tipo_evento, descripcion, fecha)
-            VALUES (?, ?, ?, ?)
-        """, (
-            animal_id,
-            data["tipo_evento"],
-            data["descripcion"],
-            data["fecha"]
-        ))
+    def listar_alertas(self):
+        hoy = date.today()
+        limite = hoy + timedelta(days=30)
 
-        conn.commit()
-        conn.close()
+        statement = (
+            select(EventoSanitario)
+            .where(
+                EventoSanitario.estado == "vigente",
+                EventoSanitario.fecha_proxima.is_not(None),
+                EventoSanitario.fecha_proxima <= limite,
+            )
+            .order_by(
+                EventoSanitario.fecha_proxima.asc(),
+                EventoSanitario.id_evento.asc(),
+            )
+        )
 
-        return {"mensaje": "evento creado"}
+        eventos = self.db.scalars(statement).all()
+        alertas = []
 
-    def listar_por_animal(self, animal_id):
-        conn = sqlite3.connect(DB_PATH)
-        cursor = conn.cursor()
+        for evento in eventos:
+            datos = self._to_dict(evento)
 
-        cursor.execute("""
-            SELECT id, animal_id, tipo_evento, descripcion, fecha
-            FROM eventos_sanitarios
-            WHERE animal_id = ?
-        """, (animal_id,))
+            datos["tipo_alerta"] = (
+                "Pendiente vencido"
+                if evento.fecha_proxima < hoy
+                else "Próximo"
+            )
 
-        rows = cursor.fetchall()
-        conn.close()
+            alertas.append(datos)
 
-        return [
-            {
-                "id": r[0],
-                "animal_id": r[1],
-                "tipo_evento": r[2],
-                "descripcion": r[3],
-                "fecha": r[4]
-            }
-            for r in rows
-        ]
+        return alertas
+    
+    def anular_evento(self, evento_id: int, motivo: str):
+        evento = self.db.get(EventoSanitario, evento_id)
 
-    def eliminar_evento(self, evento_id):
-        conn = sqlite3.connect(DB_PATH)
-        cursor = conn.cursor()
+        if evento is None:
+            return None
 
-        cursor.execute("DELETE FROM eventos_sanitarios WHERE id = ?", (evento_id,))
+        if evento.estado != "anulado":
+            evento.estado = "anulado"
+            evento.motivo_anulacion = motivo
+            evento.fecha_anulacion = datetime.now(timezone.utc)
 
-        conn.commit()
-        conn.close()
+            self.db.commit()
+            self.db.refresh(evento)
 
-        return {"mensaje": "evento eliminado"}
+        return self._to_dict(evento)
+
+    @staticmethod
+    def _to_dict(evento: EventoSanitario):
+        return {
+            "id_evento": evento.id_evento,
+            "id_animal": evento.id_animal,
+            "tipo_evento": evento.tipo_evento,
+            "descripcion": evento.descripcion,
+            "fecha": evento.fecha.isoformat(),
+            "fecha_proxima": (
+                evento.fecha_proxima.isoformat()
+                if evento.fecha_proxima
+                else None
+            ),
+            "estado": evento.estado,
+            "motivo_anulacion": evento.motivo_anulacion,
+            "fecha_anulacion": (
+                evento.fecha_anulacion.isoformat()
+                if evento.fecha_anulacion
+                else None
+            )
+        }
