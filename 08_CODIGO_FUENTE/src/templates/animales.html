@@ -308,6 +308,12 @@
 
             </form>
 
+            <p id="animal-message"
+               class="animal-message"
+               role="status"
+               aria-live="polite"
+               aria-atomic="true"></p>
+
         </section>
 
 
@@ -348,7 +354,7 @@
 
             <div class="animal-count">
 
-                <span id="animal-count">
+                <span id="animal-count" role="status" aria-live="polite" aria-atomic="true">
                     0 animales registrados
                 </span>
 
@@ -363,14 +369,14 @@
 
                         <tr>
 
-                            <th>ID</th>
-                            <th>Identificador</th>
-                            <th>Especie</th>
-                            <th>Raza</th>
-                            <th>Edad</th>
-                            <th>Estado sanitario</th>
-                            <th>Establecimiento</th>
-                            <th>Acciones</th>
+                            <th scope="col">ID</th>
+                            <th scope="col">Identificador</th>
+                            <th scope="col">Especie</th>
+                            <th scope="col">Raza</th>
+                            <th scope="col">Edad</th>
+                            <th scope="col">Estado sanitario</th>
+                            <th scope="col">Establecimiento</th>
+                            <th scope="col">Acciones</th>
 
                         </tr>
 
@@ -501,8 +507,19 @@
 
 
 
+        function mostrarMensajeAnimal(texto, error = false) {
+            const mensaje = document.getElementById("animal-message");
+            mensaje.textContent = texto;
+            mensaje.setAttribute("role", error ? "alert" : "status");
+            mensaje.setAttribute("aria-live", error ? "assertive" : "polite");
+            mensaje.className = error
+                ? "animal-message animal-message-error"
+                : "animal-message animal-message-success";
+        }
+
         async function guardarAnimal() {
 
+            const estabaEditando = editandoId !== null;
             const payload = obtenerDatos();
 
             if (
@@ -515,7 +532,7 @@
                 payload.id_establecimiento < 1
             ) {
 
-                alert("Complete correctamente todos los campos.");
+                mostrarMensajeAnimal("Complete correctamente todos los campos.", true);
 
                 return;
 
@@ -562,9 +579,9 @@
 
                 console.error(errorData);
 
-                alert(
-                    errorData.detail ||
-                    "No fue posible guardar el animal."
+                mostrarMensajeAnimal(
+                    errorData.detail || "No fue posible guardar el animal.",
+                    true
                 );
 
                 return;
@@ -573,14 +590,21 @@
 
             cancelarEdicion();
 
+            mostrarMensajeAnimal(
+                estabaEditando
+                    ? "Cambios del animal guardados correctamente."
+                    : "Animal registrado correctamente."
+            );
+
             await listar();
 
         } catch (error) {
 
             console.error(error);
 
-            alert(
-                "No se pudo conectar con el servidor."
+            mostrarMensajeAnimal(
+                "No se pudo conectar con el servidor.",
+                true
             );
 
         }
@@ -729,6 +753,10 @@
             } catch (error) {
 
                 console.error(error);
+                mostrarMensajeAnimal(
+                    "No fue posible cargar los animales.",
+                    true
+                );
 
                 document.getElementById("lista").innerHTML = `
 

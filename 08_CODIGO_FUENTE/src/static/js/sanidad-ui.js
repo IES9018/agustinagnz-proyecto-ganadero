@@ -24,6 +24,9 @@ function escapeHtml(value) {
 function mostrarMensaje(texto, error = false) {
     mensajeSanidad.textContent = texto;
     mensajeSanidad.className = error ? "error-row" : "";
+    mensajeSanidad.setAttribute("role", error ? "alert" : "status");
+    mensajeSanidad.setAttribute("aria-live", error ? "assertive" : "polite");
+    mensajeSanidad.setAttribute("aria-atomic", "true");
 }
 
 async function solicitar(url, opciones = {}) {

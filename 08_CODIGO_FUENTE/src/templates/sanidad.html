@@ -92,7 +92,7 @@
                     <button type="submit" class="btn-primary">Guardar evento</button>
                     <button type="button" class="btn-secondary" id="limpiar-formulario">Limpiar</button>
                 </div>
-                <p id="sanidad-mensaje" role="status" aria-live="polite"></p>
+                <p id="sanidad-mensaje" role="status" aria-live="polite" aria-atomic="true"></p>
             </form>
         </section>
 
@@ -129,11 +129,11 @@
                 <table>
                     <thead>
                         <tr>
-                            <th>Fecha</th>
-                            <th>Tipo de evento</th>
-                            <th>Descripción</th>
-                            <th>Estado</th>
-                            <th>Acciones</th>
+                            <th scope="col">Fecha</th>
+                            <th scope="col">Tipo de evento</th>
+                            <th scope="col">Descripción</th>
+                            <th scope="col">Estado</th>
+                            <th scope="col">Acciones</th>
                         </tr>
                     </thead>
                     <tbody id="lista-sanidad"></tbody>

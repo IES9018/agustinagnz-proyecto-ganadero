@@ -1135,3 +1135,44 @@ body.animals-page {
         justify-content: flex-start;
     }
 }
+
+
+/* Accesibilidad básica: foco de teclado y legibilidad */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[tabindex]:focus-visible {
+    outline: 3px solid #1f2937 !important;
+    outline-offset: 3px;
+    box-shadow: 0 0 0 5px #ffffff;
+}
+
+/* Contraste legible para placeholders sobre los campos claros de las pantallas críticas. */
+.animal-page input::placeholder,
+.form-group input::placeholder {
+    color: #62564f;
+    opacity: 1;
+}
+
+/* Contraste AA para textos secundarios de las tarjetas de las pantallas críticas. */
+.animal-page .card-title p,
+.animal-page .list-header p {
+    color: #62564f;
+}
+
+/* Mensajes de resultado de Gestión de Animales. */
+.animal-message {
+    min-height: 1.5em;
+    margin: 12px 0 0;
+    font-weight: 600;
+}
+
+.animal-message-success {
+    color: #245c36;
+}
+
+.animal-message-error {
+    color: #8a1c1c;
+}
