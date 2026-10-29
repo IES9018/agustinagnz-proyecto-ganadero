@@ -23,3 +23,6 @@ build/
 
 # sistema operativo
 .DS_Store
+
+# Cobertura de pruebas
+08_CODIGO_FUENTE/.coverage
