@@ -9,6 +9,14 @@ from src.core.database import SessionLocal
 from src.models.usuario import Usuario
 
 from src.services.auth_service import verificar_password, hash_password, ROLES_VALIDOS
+import hmac
+import os
+
+from dotenv import load_dotenv
+import hmac
+import os
+
+load_dotenv()
 
 router = APIRouter(prefix="/auth", tags=["Autenticación"])
 
@@ -21,10 +29,12 @@ def registrar_usuario(
     rol: str = Form(...),
     password: str = Form(...),
     password_confirmacion: str = Form(...),
+    codigo_autorizacion: str = Form(...),
 ):
     nombre = nombre.strip()
     email = email.strip().lower()
     rol = rol.strip().lower()
+    
 
     if (
         not nombre
@@ -58,6 +68,33 @@ def registrar_usuario(
             rol=rol,
             estado_activo=True,
         )
+
+            variables_codigo = {
+                "productor": "CODIGO_REGISTRO_PRODUCTOR",
+                "personal_campo": "CODIGO_REGISTRO_PERSONAL_CAMPO",
+            }
+
+            nombre_variable = variables_codigo.get(rol)
+            codigo_esperado = (
+                os.getenv(nombre_variable, "")
+            if nombre_variable
+            else ""
+            )
+
+            if not codigo_esperado:
+                return RedirectResponse(
+                    "/login?registro=no_configurado",
+                    status_code=303,
+                )
+
+            if not hmac.compare_digest(
+                codigo_autorizacion,
+                codigo_esperado,
+            ):
+                return RedirectResponse(
+                    "/login?registro=invalido",
+                    status_code=303,
+                )
 
         db.add(usuario)
 
