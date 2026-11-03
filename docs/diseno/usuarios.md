@@ -4,12 +4,11 @@
 
 Este documento define las personas y los recorridos de usuario principales de GanadApp para orientar el diseño de la interfaz desde criterios HCI.
 
-Las personas son perfiles ficticios construidos a partir de los roles definidos en la especificación del sistema:
+Las personas son perfiles ficticios que representan posibles usuarios de la aplicación. No corresponden a roles ni implican diferencias de permisos o funcionalidades dentro del sistema.
 
-* Productor ganadero.
-* Personal de campo.
+GanadApp permite que múltiples usuarios accedan a las mismas funcionalidades y trabajen sobre los establecimientos registrados.
 
-Los recorridos se concentran en dos operaciones críticas ya contempladas por GanadApp:
+Los recorridos se concentran en dos operaciones críticas:
 
 1. Gestión de animales.
 2. Registro de vacunaciones.
@@ -20,15 +19,17 @@ El objetivo es identificar qué necesita hacer el usuario, qué información deb
 
 # 2. Personas
 
-## 2.1 Persona 1 — Productor ganadero
+## 2.1 Persona 1 — Carlos
 
 | Aspecto               | Descripción                                                                                                                                           |
 | --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Nombre                | Carlos                                                                                                                                                |
-| Rol                   | Productor ganadero                                                                                                                                    |
-| Objetivo principal    | Consultar y mantener organizada la información de los animales y el estado sanitario de su establecimiento.                                           |
+| Perfil                  | Usuario de GanadApp vinculado a la actividad ganadera.                                                                                                               |
+| Objetivo principal    | 
+
+Mantener organizada la información de los animales y consultar su estado sanitario.                                    |
 | Frustración principal | Tener información dispersa y necesitar consultar diferentes registros para conocer el estado de los animales.                                         |
-| Contexto de uso       | Utiliza GanadApp desde una computadora o dispositivo estándar para consultar información del establecimiento y supervisar las operaciones realizadas. |
+| Contexto de uso       | Utiliza GanadApp desde una computadora o dispositivo estándar para registrar y consultar información de los establecimientos ganaderos. |
 
 ### Necesidades principales
 
@@ -51,15 +52,17 @@ La interfaz debe priorizar:
 
 ---
 
-## 2.2 Persona 2 — Personal de campo
+## 2.2 Persona 2 — Martín
 
 | Aspecto               | Descripción                                                                                                                                                     |
 | --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Nombre                | Martín                                                                                                                                                          |
-| Rol                   | Personal de campo                                                                                                                                               |
-| Objetivo principal    | Registrar información operativa de los animales y sus eventos sanitarios.                                                                                       |
+| Perfil                  | 
+
+Usuario de GanadApp que utiliza la aplicación durante las actividades cotidianas del establecimiento.                                                                                                                                              |
+| Objetivo principal    | Registrar y consultar información de los animales y sus eventos sanitarios.                                                                                      |
 | Frustración principal | Tener que recordar o registrar manualmente información de animales y vacunaciones sin una referencia centralizada.                                              |
-| Contexto de uso       | Utiliza GanadApp durante las tareas operativas del establecimiento, principalmente para cargar y consultar información correspondiente a sus responsabilidades. |
+| Contexto de uso       | Utiliza GanadApp durante las tareas habituales del establecimiento, desde un dispositivo estándar. |
 
 ### Necesidades principales
 
@@ -94,6 +97,7 @@ Este recorrido se relaciona principalmente con:
 * RF-04: actualizar y consultar información de animales.
 * RF-05: identificar cada animal mediante un identificador único.
 * RF-06: almacenar información básica del animal.
+* RF-19: seleccionar un establecimiento previamente registrado al dar de alta un animal.
 * CA-04: registrar un animal con sus datos principales.
 * CA-05: rechazar identificadores duplicados.
 * CA-06: consultar información registrada.
@@ -115,7 +119,7 @@ flowchart TD
     G --> I["Sistema muestra formulario de registro"]
     H --> I
 
-    I --> J["Usuario completa los datos del animal"]
+    I --> J["Usuario completa los datos del animal y selecciona un establecimiento"]
     J --> K["Usuario intenta guardar"]
 
     K --> L{"¿Datos válidos e identificador disponible?"}
@@ -140,7 +144,7 @@ flowchart TD
 | ----------------------- | ---------------------------------------------------------------- | -------------------------------------------------------------------------------- |
 | Estado vacío            | El usuario puede interpretar que el sistema no funciona.         | Mensaje explícito de ausencia de registros y acción `+ Registrar primer animal`. |
 | Error de consulta       | El usuario puede quedar sin saber cómo continuar.                | Mensaje de error claro y acción `Reintentar`.                                    |
-| Formulario              | El usuario puede no saber qué información debe ingresar.         | Etiquetas claras y campos identificados.                                         |
+| Formulario              | El usuario puede no saber qué información debe ingresar o qué establecimiento seleccionar.         | Etiquetas claras y campos identificados y selección de establecimientos existentes.                                        |
 | Identificador duplicado | El usuario puede no comprender por qué no puede guardar.         | Informar específicamente que el identificador ya existe y solicitar corrección.  |
 | Después de guardar      | El usuario puede no saber si la operación terminó correctamente. | Confirmación y actualización visible de la información.                          |
 
@@ -198,12 +202,14 @@ flowchart TD
 
 # 5. Relación entre personas y recorridos
 
+Ambas personas representan usuarios con las mismas funcionalidades y permisos dentro de GanadApp. Las diferencias descriptas corresponden a sus contextos y necesidades de uso, no a restricciones del sistema
+
 | Persona            |           Gestión de animales |              Registro de vacunación |
 | ------------------ | ----------------------------: | ----------------------------------: |
-| Productor ganadero |        Consulta y supervisión |   Consulta de información sanitaria |
-| Personal de campo  | Registro y consulta operativa | Registro y consulta de vacunaciones |
+| Carlos |        Registro y consulta de animales. |   Registro y consulta de vacunaciones |
+| Martín  | Registro y consulta de animales. | Registro y consulta de vacunaciones |
 
-Los dos recorridos son relevantes para ambos perfiles, aunque el tipo de interacción puede variar según las responsabilidades y permisos definidos por el sistema.
+Los dos recorridos están disponibles para todos los usuarios autenticados.
 
 ---
 
