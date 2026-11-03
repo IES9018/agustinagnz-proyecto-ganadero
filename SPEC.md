@@ -10,9 +10,9 @@ En esta etapa, el objetivo es desarrollar un MVP que cubra las operaciones princ
 
 ## 2. Requerimientos Funcionales
 
-* [ ] **RF-01:** El sistema deberá permitir la autenticación de usuarios mediante control de acceso por rol.
+* [ ] **RF-01:** El sistema deberá permitir la autenticación de usuarios mediante correo electrónico y contraseña.
 
-* [ ] **RF-02:** El sistema deberá diferenciar los permisos y responsabilidades correspondientes al productor ganadero y al personal de campo.
+* [ ] **RF-02:** El sistema deberá permitir el registro de múltiples usuarios, todos con las mismas funcionalidades y sin diferenciación de permisos por rol.
 
 * [ ] **RF-03:** El sistema deberá permitir registrar animales individualmente.
 
@@ -20,7 +20,7 @@ En esta etapa, el objetivo es desarrollar un MVP que cubra las operaciones princ
 
 * [ ] **RF-05:** El sistema deberá identificar cada animal mediante un identificador único.
 
-* [ ] **RF-06:** El sistema deberá almacenar información básica del animal, incluyendo especie, raza, fecha de nacimiento y estado sanitario.
+* [ ] **RF-06:** El sistema deberá almacenar información básica del animal, incluyendo especie, raza, sexo, fecha de nacimiento y estado sanitario.
 
 * [ ] **RF-07:** El sistema deberá permitir registrar eventos asociados a los animales.
 
@@ -41,6 +41,15 @@ En esta etapa, el objetivo es desarrollar un MVP que cubra las operaciones princ
 * [ ] **RF-15:** El sistema deberá generar alertas relacionadas con eventos sanitarios próximos o pendientes.
 
 * [ ] **RF-16:** El sistema deberá mantener la trazabilidad de los registros históricos y evitar eliminaciones físicas de información histórica.
+  
+* [ ] **RF-17**: El sistema deberá permitir registrar y consultar productores como entidades del dominio.
+  
+* [ ] **RF-18**: El sistema deberá permitir registrar y consultar establecimientos asociados a un productor.
+  
+* [ ] **RF-19**: El sistema deberá permitir seleccionar un establecimiento previamente registrado al dar de alta un animal.
+  
+
+  
 
 ## 3. Non-Goals (Límites del Alcance)
 
@@ -135,7 +144,6 @@ interface Usuario {
   id_usuario: number;
   nombre: string;
   email: string;
-  rol: string;
   contacto: string;
   estado_activo: boolean;
   ultimo_acceso: string;
@@ -164,6 +172,7 @@ interface Animal {
   identificador: string;
   especie: string;
   raza: string;
+  sexo: string;
   fecha_nacimiento: string;
   estado_sanitario: string;
   id_establecimiento: number;
@@ -220,7 +229,7 @@ Scenario: Usuario con credenciales válidas
   Given que el usuario posee credenciales válidas
   When ingresa sus credenciales y envía el formulario
   Then el sistema debe autenticarlo
-  And debe mostrar la interfaz correspondiente a su rol
+  And debe permitirle acceder a todas las funcionalidades del sistema
 ```
 
 ### RF-03 / CA-04 — Registro de animal
@@ -228,10 +237,11 @@ Scenario: Usuario con credenciales válidas
 ```gherkin
 Scenario: Registrar un animal con información válida
   Given que el usuario se encuentra en Gestión de Animales
-  And dispone de un identificador único
-  When completa identificación, especie, raza, fecha de nacimiento y estado sanitario
+  And existe al menos un establecimiento registrado
+  When completa identificación, especie, raza, sexo, fecha de nacimiento y estado sanitario
+  And selecciona un establecimiento existente
   And confirma el registro
-  Then el sistema debe guardar el animal
+  Then el sistema debe guardar el animal asociado al establecimiento seleccionado
   And debe informar que la operación fue realizada correctamente
   And debe mostrar la información actualizada
 ```
@@ -243,7 +253,7 @@ Scenario: Consultar animales registrados
   Given que existen animales registrados
   When el usuario accede a Gestión de Animales
   Then el sistema debe mostrar los animales disponibles
-  And debe mostrar su identificador, raza, estado sanitario y establecimiento
+  And debe mostrar su identificador, especie, raza, sexo, edad, estado sanitario y establecimiento
 ```
 
 ### RF-05 / CA-05 — Identificador único
@@ -261,7 +271,7 @@ Scenario: Evitar identificador duplicado
 ```gherkin
 Scenario: Completar datos básicos del animal
   Given que el usuario está registrando un animal
-  When completa especie, raza, fecha de nacimiento y estado sanitario
+  When completa identificador, especie, raza, sexo, fecha de nacimiento y estado sanitario
   Then la interfaz debe permitir enviar los datos para su validación
 ```
 
@@ -320,7 +330,7 @@ Scenario: Consultar la trazabilidad de un animal
 
 ```gherkin
 Scenario: Actualizar stock de insumos
-  Given que el usuario posee permisos para gestionar insumos
+  Given que el usuario se encuentra en la sección de gestión de insumos
   When registra una operación válida de stock
   Then el sistema debe actualizar la cantidad correspondiente
 ```
@@ -376,3 +386,7 @@ Scenario: Conservar registros históricos
 | v2.0 → v3.0 | 2026-09-23 | Se incorporaron criterios de aceptación en formato Gherkin para los requerimientos relacionados con la interacción del usuario.        | Formalizar el comportamiento esperado de la interfaz mediante escenarios Given/When/Then.                                 |
 | v2.0 → v3.0 | 2026-09-23 | Se incorporaron requisitos mínimos de accesibilidad para las dos pantallas críticas: navegación mediante teclado y contraste nivel AA. | Incorporar criterios HCI y accesibilidad definidos en TP3.                                                                |
 | v2.0 → v3.0 | 2026-09-23 | Se formalizó la selección del stack de interfaz mediante ADR-004.                                                                      | Documentar la decisión tecnológica de la capa de presentación.                                                            |
+
+| v3.0 → v4.0 | 2026-11-03 | Se unificó el modelo de usuarios, eliminando la diferenciación por roles y estableciendo las mismas funcionalidades para todas las cuentas.                                                                     | Alinear los requerimientos funcionales y el modelo de dominio con la definición actual de usuarios de GanadApp                                                            |
+| v3.0 → v4.0 | 2026-11-03 | Se incorporaron los requerimientos RF-17, RF-18 y RF-19 para registrar productores, establecimientos asociados y seleccionar establecimientos existentes al registrar animales.                                                                     | Formalizar la gestión de productores y establecimientos como parte del dominio del sistema.                                                           |
+| v3.0 → v4.0 | 2026-11-03 | Se incorporó el sexo entre los datos básicos del animal en el RF-06 y en su contrato de datos.                                                                     | Completar la información contemplada para el registro y consulta de animales.                                                         |
