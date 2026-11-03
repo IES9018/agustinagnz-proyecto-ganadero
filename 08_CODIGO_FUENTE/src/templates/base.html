@@ -34,14 +34,15 @@
     <nav class="menu">
 
         <button onclick="location.href='/'">
-            <img src="{{ url_for('static', path='img/icon-inicio.png') }}" alt="">
-            Inicio
+                <img src="/static/img/icon-panel.png" alt="Inicio">
+                <span>Inicio</span>
         </button>
 
         <button onclick="location.href='/'">
-            <img src="{{ url_for('static', path='img/icon-panel.png') }}" alt="">
-            Panel Principal
+            <img src="{{ url_for('static', path='img/icon-inicio.png') }}" alt="">
+            Inicio de Sesión
         </button>
+
 
         <button>
             <img src="{{ url_for('static', path='img/icon-productores.png') }}" alt="">
@@ -68,10 +69,6 @@
             Trazabilidad
         </button>
 
-        <button>
-            <img src="{{ url_for('static', path='img/icon-reportes.png') }}" alt="">
-            Reportes
-        </button>
 
     </nav>
 

@@ -14,14 +14,17 @@
             <span class="brand-name">Ganadapp</span>
         </div>
         <nav class="menu">
+
             <button onclick="location.href='/'">
-                <img src="/static/img/icon-inicio.png" alt="Inicio">
+                <img src="/static/img/icon-panel.png" alt="Inicio">
                 <span>Inicio</span>
             </button>
-            <button onclick="location.href='/'">
-                <img src="/static/img/icon-panel.png" alt="Panel principal">
-                <span>Panel Principal</span>
+
+            <button onclick="location.href='/login'">
+                <img src="/static/img/icon-inicio.png" alt="Inicio">
+                <span>Inicio de Sesión</span>
             </button>
+            
             <button>
                 <img src="/static/img/icon-productores.png" alt="Productores">
                 <span>Productores</span>
@@ -42,10 +45,7 @@
                 <img src="/static/img/icon-trazabilidad.png" alt="Trazabilidad">
                 <span>Trazabilidad</span>
             </button>
-            <button>
-                <img src="/static/img/icon-reportes.png" alt="Reportes">
-                <span>Reportes</span>
-            </button>
+            
 
             
             <div class="user-profile">
@@ -53,8 +53,10 @@
                 <span id="perfil-rol"></span>
             </div>
 
-            <form action="/auth/logout" method="post" class="logout-form">
-                <button type="submit" class="btn-logout">Cerrar sesión</button>
+        
+
+            <form action="/auth/logout" method="post" id="nav-logout" hidden>
+                <button type="submit">Cerrar sesión</button>
             </form>
 
 
@@ -211,6 +213,30 @@
             console.error("No se pudo cargar el perfil del usuario:", error);
         }
     });
+
+
+document.addEventListener("DOMContentLoaded", async () => {
+    const loginLink = document.getElementById("nav-login");
+    const logoutForm = document.getElementById("nav-logout");
+
+    if (!loginLink || !logoutForm) return;
+
+    try {
+        const response = await fetch("/auth/perfil", {
+            credentials: "same-origin",
+            cache: "no-store"
+        });
+
+        const autenticado = response.ok;
+
+        loginLink.hidden = autenticado;
+        logoutForm.hidden = !autenticado;
+
+    } catch (error) {
+        loginLink.hidden = false;
+        logoutForm.hidden = true;
+    }
+});
 </script>
 
 </body>
