@@ -1,42 +1,52 @@
-
 import os
-
-from fastapi import Depends, Request
-from fastapi.responses import RedirectResponse
-from starlette.middleware.sessions import SessionMiddleware
-
-from src.models.usuario import Usuario
-from src.routes.auth_routes import router as auth_router
-from src.core.security import usuario_actual, requiere_roles
-
-
+from contextlib import asynccontextmanager
 from pathlib import Path
-
-from fastapi import FastAPI
-from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
-
-from src.core.database import Base, engine
-from src.models.animal import Animal
-from src.models.establecimiento import Establecimiento
-
-from src.models.evento_sanitario import EventoSanitario
-from src.models.historial_animal import HistorialAnimal
-from src.models.stock_insumo import StockInsumo
 
 from dotenv import load_dotenv
 
 load_dotenv()
 
+from fastapi import Depends, FastAPI
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
+from starlette.middleware.sessions import SessionMiddleware
+
+from src.core.database import Base, engine
+from src.core.security import usuario_actual, requiere_roles
+from src.models.usuario import Usuario
+from src.models.animal import Animal
+from src.models.establecimiento import Establecimiento
+from src.models.evento_sanitario import EventoSanitario
+from src.models.historial_animal import HistorialAnimal
+from src.models.stock_insumo import StockInsumo
+
+from src.routes.auth_routes import router as auth_router
+from src.routes.animal_routes import router as animal_router
+from src.routes.sanidad_routes import router as sanidad_router
+from src.routes.trazabilidad_routes import router as trazabilidad_router
+from src.routes.stock_routes import router as stock_router
+
 BASE_DIR = Path(__file__).resolve().parent
 
-Base.metadata.create_all(bind=engine)
+SECRET_KEY = os.getenv("SECRET_KEY")
 
-app = FastAPI()
+if not SECRET_KEY:
+    raise RuntimeError(
+        "La variable SECRET_KEY no está configurada en el entorno."
+    )
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    Base.metadata.create_all(bind=engine)
+    yield
+
+
+app = FastAPI(lifespan=lifespan)
 
 app.add_middleware(
     SessionMiddleware,
-    secret_key=os.environ["SECRET_KEY"],
+    secret_key=SECRET_KEY,
     same_site="lax",
     https_only=os.getenv("HTTPS_ONLY", "false").lower() == "true",
     session_cookie="ganadapp_session",
