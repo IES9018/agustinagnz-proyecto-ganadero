@@ -24,6 +24,10 @@ from src.models.evento_sanitario import EventoSanitario
 from src.models.historial_animal import HistorialAnimal
 from src.models.stock_insumo import StockInsumo
 
+from dotenv import load_dotenv
+
+load_dotenv()
+
 BASE_DIR = Path(__file__).resolve().parent
 
 Base.metadata.create_all(bind=engine)
