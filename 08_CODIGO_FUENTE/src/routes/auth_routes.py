@@ -1,25 +1,24 @@
 
 from datetime import datetime, timezone
+import hmac
+import os
 
+from dotenv import load_dotenv
 from fastapi import APIRouter, Form, Request
 from fastapi.responses import RedirectResponse
 from sqlalchemy import select
 
 from src.core.database import SessionLocal
 from src.models.usuario import Usuario
-
-from src.services.auth_service import verificar_password, hash_password, ROLES_VALIDOS
-import hmac
-import os
-
-from dotenv import load_dotenv
-import hmac
-import os
+from src.services.auth_service import (
+    verificar_password,
+    hash_password,
+    ROLES_VALIDOS,
+)
 
 load_dotenv()
 
 router = APIRouter(prefix="/auth", tags=["Autenticación"])
-
 
 
 @router.post("/registro")
@@ -34,7 +33,6 @@ def registrar_usuario(
     nombre = nombre.strip()
     email = email.strip().lower()
     rol = rol.strip().lower()
-    
 
     if (
         not nombre
@@ -44,6 +42,33 @@ def registrar_usuario(
         or rol not in ROLES_VALIDOS
         or len(password) < 12
         or password != password_confirmacion
+    ):
+        return RedirectResponse(
+            "/login?registro=invalido",
+            status_code=303,
+        )
+
+    variables_codigo = {
+        "productor": "CODIGO_REGISTRO_PRODUCTOR",
+        "personal_campo": "CODIGO_REGISTRO_PERSONAL_CAMPO",
+    }
+
+    nombre_variable = variables_codigo.get(rol)
+    codigo_esperado = (
+        os.getenv(nombre_variable, "")
+        if nombre_variable
+        else ""
+    )
+
+    if not codigo_esperado:
+        return RedirectResponse(
+            "/login?registro=no_configurado",
+            status_code=303,
+        )
+
+    if not hmac.compare_digest(
+        codigo_autorizacion,
+        codigo_esperado,
     ):
         return RedirectResponse(
             "/login?registro=invalido",
@@ -69,33 +94,6 @@ def registrar_usuario(
             estado_activo=True,
         )
 
-            variables_codigo = {
-                "productor": "CODIGO_REGISTRO_PRODUCTOR",
-                "personal_campo": "CODIGO_REGISTRO_PERSONAL_CAMPO",
-            }
-
-            nombre_variable = variables_codigo.get(rol)
-            codigo_esperado = (
-                os.getenv(nombre_variable, "")
-            if nombre_variable
-            else ""
-            )
-
-            if not codigo_esperado:
-                return RedirectResponse(
-                    "/login?registro=no_configurado",
-                    status_code=303,
-                )
-
-            if not hmac.compare_digest(
-                codigo_autorizacion,
-                codigo_esperado,
-            ):
-                return RedirectResponse(
-                    "/login?registro=invalido",
-                    status_code=303,
-                )
-
         db.add(usuario)
 
         try:
@@ -108,6 +106,7 @@ def registrar_usuario(
             )
 
     return RedirectResponse("/login", status_code=303)
+
 
 @router.post("/login")
 def login(
