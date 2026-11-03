@@ -4,12 +4,10 @@ from sqlalchemy.orm import Session
 from src.core.database import get_db
 from src.services.sanidad_service import SanidadService
 
-from src.core.security import requiere_roles
+from src.core.security import usuario_actual
 
 router = APIRouter(
-    dependencies=[
-        Depends(requiere_roles("personal_campo"))
-    ]
+    dependencies=[Depends(usuario_actual)]
 )
 
 

@@ -6,13 +6,13 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-from fastapi import Depends, FastAPI
-from fastapi.responses import FileResponse
+from fastapi import Depends, FastAPI, Request
+from fastapi.responses import FileResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from starlette.middleware.sessions import SessionMiddleware
 
 from src.core.database import Base, engine
-from src.core.security import usuario_actual, requiere_roles
+from src.core.security import usuario_actual
 from src.models.usuario import Usuario
 from src.models.animal import Animal
 from src.models.establecimiento import Establecimiento
@@ -57,54 +57,36 @@ app.mount("/static", StaticFiles(directory=BASE_DIR / "static"), name="static")
 
 @app.get("/auth/perfil")
 def obtener_perfil(usuario: dict = Depends(usuario_actual)):
-    roles = {
-        "productor": "Productor ganadero",
-        "personal_campo": "Personal de campo",
-    }
-
     return {
-        "nombre": usuario["nombre"],
-        "rol": roles.get(usuario["rol"], usuario["rol"]),
+        "nombre": usuario["nombre"]
     }
 
 @app.get("/")
-def home(usuario: dict = Depends(usuario_actual)):
-    return FileResponse(BASE_DIR / "templates" / "index.html")
-
-
+def home():
+    return FileResponse(
+        BASE_DIR / "templates" / "index.html",
+        headers={"Cache-Control": "no-store, no-cache, must-revalidate"}
+    )
 
 @app.get("/animales")
-def animales_page():
-    return FileResponse(
-        BASE_DIR / "templates" / "animales.html",
-        headers={"Cache-Control": "no-store, no-cache, must-revalidate"}
-    )
+def animales_page(request: Request):
+    return pagina_protegida(request, "animales.html")
+
 
 @app.get("/sanidad")
-def sanidad_page():
-    return FileResponse(
-        BASE_DIR / "templates" / "sanidad.html",
-        headers={"Cache-Control": "no-store, no-cache, must-revalidate"}
-    )
-
-
-
-@app.get("/trazabilidad")
-def trazabilidad_page(
-    usuario: dict = Depends(
-        requiere_roles("productor")
-    )
-):
-    return FileResponse(BASE_DIR / "templates" / "trazabilidad.html")
+def sanidad_page(request: Request):
+    return pagina_protegida(request, "sanidad.html")
 
 
 @app.get("/stock")
-def stock_page(
-    usuario: dict = Depends(
-        requiere_roles("productor", "personal_campo")
-    )
-):
-    return FileResponse(BASE_DIR / "templates" / "stock.html")
+def stock_page(request: Request):
+    return pagina_protegida(request, "stock.html")
+
+
+@app.get("/trazabilidad")
+def trazabilidad_page(request: Request):
+    return pagina_protegida(request, "trazabilidad.html")
+
 
 from src.routes.animal_routes import router as animal_router
 from src.routes.sanidad_routes import router as sanidad_router
@@ -119,5 +101,23 @@ app.include_router(stock_router)
 app.include_router(auth_router)
 
 @app.get("/login")
-def login_page():
-    return FileResponse(BASE_DIR / "templates" / "login.html")
+def login_page(request: Request):
+    if request.session.get("usuario_id"):
+        return RedirectResponse("/", status_code=303)
+
+    return FileResponse(
+        BASE_DIR / "templates" / "login.html",
+        headers={"Cache-Control": "no-store, no-cache, must-revalidate"}
+    )
+
+def pagina_protegida(request: Request, nombre_archivo: str):
+    if not request.session.get("usuario_id"):
+        return RedirectResponse(
+            f"/login?next=/{nombre_archivo}",
+            status_code=303
+        )
+
+    return FileResponse(
+        BASE_DIR / "templates" / nombre_archivo,
+        headers={"Cache-Control": "no-store, no-cache, must-revalidate"}
+    )
