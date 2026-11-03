@@ -22,6 +22,11 @@
             <button onclick="location.href='/trazabilidad'"><img src="/static/img/icon-trazabilidad.png" alt="Trazabilidad"><span>Trazabilidad</span></button>
             <button><img src="/static/img/icon-reportes.png" alt="Reportes"><span>Reportes</span></button>
             
+            <div class="user-profile">
+                <span id="perfil-nombre"></span>
+                <span id="perfil-rol"></span>
+            </div>
+
             <form action="/auth/logout" method="post" class="logout-form">
                 <button type="submit" class="btn-logout">Cerrar sesión</button>
             </form>
@@ -152,5 +157,27 @@
         © 2026 Ganadapp - Soluciones de Gestión Ganadera - Todos los derechos reservados
     </footer>
     <script src="/static/js/sanidad-ui.js"></script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", async () => {
+        try {
+            const respuesta = await fetch("/auth/perfil", {
+                credentials: "same-origin"
+            });
+
+            if (!respuesta.ok) {
+                return;
+            }
+
+            const perfil = await respuesta.json();
+
+            document.getElementById("perfil-nombre").textContent = perfil.nombre;
+            document.getElementById("perfil-rol").textContent = perfil.rol;
+        } catch (error) {
+            console.error("No se pudo cargar el perfil del usuario:", error);
+        }
+    });
+</script>
+
 </body>
 </html>

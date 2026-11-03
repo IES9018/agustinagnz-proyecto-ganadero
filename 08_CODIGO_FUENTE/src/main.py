@@ -45,6 +45,17 @@ app.add_middleware(
 
 app.mount("/static", StaticFiles(directory=BASE_DIR / "static"), name="static")
 
+@app.get("/auth/perfil")
+def obtener_perfil(usuario: dict = Depends(usuario_actual)):
+    roles = {
+        "productor": "Productor ganadero",
+        "personal_campo": "Personal de campo",
+    }
+
+    return {
+        "nombre": usuario["nombre"],
+        "rol": roles.get(usuario["rol"], usuario["rol"]),
+    }
 
 @app.get("/")
 def home(usuario: dict = Depends(usuario_actual)):

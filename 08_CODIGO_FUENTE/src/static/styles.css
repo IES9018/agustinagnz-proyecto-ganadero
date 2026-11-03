@@ -1176,3 +1176,30 @@ textarea:focus-visible,
 .animal-message-error {
     color: #8a1c1c;
 }
+
+.user-profile {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 4px;
+    min-width: 145px;
+    padding: 7px 12px;
+    margin-left: 8px;
+    border-left: 1px solid rgba(255, 255, 255, 0.25);
+}
+
+.user-profile span:first-child {
+    color: inherit;
+    font-size: 0.9rem;
+    font-weight: 600;
+    line-height: 1.2;
+}
+
+.user-profile span:last-child {
+    color: inherit;
+    font-size: 0.72rem;
+    font-weight: 400;
+    line-height: 1.2;
+    opacity: 0.75;
+}
