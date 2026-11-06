@@ -8,12 +8,10 @@ from src.models.establecimiento import Establecimiento
 from src.core.database import get_db
 from src.services.stock_service import StockService
 
-from src.core.security import requiere_roles
+from src.core.security import usuario_actual
 
 router = APIRouter(
-    dependencies=[
-        Depends(requiere_roles("productor", "personal_campo"))
-    ]
+    dependencies=[Depends(usuario_actual)]
 )
 
 

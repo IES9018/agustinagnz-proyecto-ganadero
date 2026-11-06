@@ -108,7 +108,7 @@ El usuario recibe una explicación y una acción concreta de recuperación.
 
 ## 6. Wireframe — registro
 
-```text
+```
 +----------------------------------------------------------------+
 | GANADAPP | GESTIÓN DE ANIMALES                         | usuario |
 +----------------------------------------------------------------+
@@ -118,9 +118,10 @@ El usuario recibe una explicación y una acción concreta de recuperación.
 | Identificador *       [________________________]               |
 | Especie *             [________________________]               |
 | Raza *                [________________________]               |
+| Sexo *                [ Seleccionar             v]             |
 | Fecha de nacimiento * [________________________]               |
 | Estado sanitario *    [________________________]               |
-| Establecimiento *     [________________________]               |
+| Establecimiento *     [ Seleccionar             v]             |
 |                                                                |
 | [ Cancelar ]                         [ Guardar animal ]         |
 |                                                                |
@@ -146,9 +147,10 @@ El formulario requiere los datos definidos por el modelo de dominio:
 * identificador;
 * especie;
 * raza;
+* sexo;
 * fecha de nacimiento;
 * estado sanitario;
-* establecimiento.
+* establecimiento previamente registrado.
 
 ---
 
@@ -204,3 +206,4 @@ Se incorporan las siguientes decisiones al wireframe:
 | Un identificador duplicado puede impedir el registro sin orientar al usuario. | Se define validación específica y mensaje de corrección.                            |
 | Los campos obligatorios no estaban explicitados.                              | Se incorpora `*` en los campos requeridos.                                          |
 | El usuario puede no saber si el registro terminó correctamente.               | Se exige confirmación y actualización visible del listado.                          |
+| El formulario no contemplaba el sexo ni la selección de establecimientos existentes. | Se incorporan ambos campos, utilizando controles de selección. |

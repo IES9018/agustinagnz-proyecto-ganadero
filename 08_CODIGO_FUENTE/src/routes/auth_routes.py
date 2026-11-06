@@ -7,31 +7,29 @@ from sqlalchemy import select
 
 from src.core.database import SessionLocal
 from src.models.usuario import Usuario
-
-from src.services.auth_service import verificar_password, hash_password, ROLES_VALIDOS
+from src.services.auth_service import (
+    verificar_password,
+    hash_password,
+)
 
 router = APIRouter(prefix="/auth", tags=["Autenticación"])
-
 
 
 @router.post("/registro")
 def registrar_usuario(
     nombre: str = Form(...),
     email: str = Form(...),
-    rol: str = Form(...),
     password: str = Form(...),
     password_confirmacion: str = Form(...),
 ):
     nombre = nombre.strip()
     email = email.strip().lower()
-    rol = rol.strip().lower()
 
     if (
         not nombre
         or len(nombre) > 150
         or not email
         or len(email) > 255
-        or rol not in ROLES_VALIDOS
         or len(password) < 12
         or password != password_confirmacion
     ):
@@ -55,7 +53,6 @@ def registrar_usuario(
             nombre=nombre,
             email=email,
             password_hash=hash_password(password),
-            rol=rol,
             estado_activo=True,
         )
 
@@ -70,7 +67,8 @@ def registrar_usuario(
                 status_code=303,
             )
 
-    return RedirectResponse("/login", status_code=303)
+    return RedirectResponse("/login?registro=exitoso", status_code=303)
+
 
 @router.post("/login")
 def login(
@@ -91,7 +89,8 @@ def login(
             or not verificar_password(password, usuario.password_hash)
         ):
             return RedirectResponse(
-                "/login?error=1", status_code=303
+                "/login?error=1",
+                status_code=303,
             )
 
         usuario.ultimo_acceso = datetime.now(timezone.utc)
@@ -99,7 +98,6 @@ def login(
 
         request.session.clear()
         request.session["usuario_id"] = usuario.id_usuario
-        request.session["rol"] = usuario.rol
         request.session["nombre"] = usuario.nombre
 
     return RedirectResponse("/", status_code=303)

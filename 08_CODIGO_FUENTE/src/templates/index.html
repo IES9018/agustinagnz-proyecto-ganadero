@@ -18,9 +18,13 @@
 
 <nav class="menu">
 
-<button onclick="location.href='/login'"><img src="../static/img/icon-inicio.png"> Inicio</button>
+<button onclick="location.href='/'">
+    <img src="/static/img/icon-panel.png" alt="Inicio">
+    <span>Inicio</span>
+</button>
 
-<button><img src="../static/img/icon-panel.png"> Panel Principal</button>
+<button onclick="location.href='/login'"><img src="../static/img/icon-inicio.png"> Inicio de Sesión</button>
+
 
 <button><img src="../static/img/icon-productores.png"> Panel de Productores</button>
 
@@ -37,11 +41,17 @@
 
 <button onclick="location.href='/trazabilidad'"><img src="../static/img/icon-trazabilidad.png" alt="Trazabilidad"> Trazabilidad</button>
 
-<button><img src="../static/img/icon-reportes.png"> Reportes</button>
 
 
-<form action="/auth/logout" method="post" class="logout-form">
-    <button type="submit" class="btn-logout">Cerrar sesión</button>
+<div class="user-profile">
+    <span id="perfil-nombre"></span>
+    <span id="perfil-rol"></span>
+</div>
+
+
+
+<form action="/auth/logout" method="post" id="nav-logout" hidden>
+    <button type="submit">Cerrar sesión</button>
 </form>
 
 </nav>
@@ -56,10 +66,6 @@
 
 <p>Centralice el control de su hacienda, productores, salud y trazabilidad.</p>
 
-<button class="btn-hero" onclick="location.href='./animales'">
-Ver Animales >
-</button>
-
 </div>
 
 </section>
@@ -73,12 +79,6 @@ Ver Animales >
 <button onclick="location.href='/login'">Abrir</button>
 </div>
 
-<div class="card">
-<div class="icon-box"><img src="../static/img/icon-panel.png"></div>
-<h3>Panel Principal</h3>
-<p>Visualice resúmenes estadísticos, alertas pendientes y actividades recientes de la hacienda.</p>
-<button>Abrir</button>
-</div>
 
 <div class="card">
 <div class="icon-box"><img src="../static/img/icon-productores.png"></div>
@@ -115,16 +115,56 @@ Ver Animales >
 <button>Abrir</button>
 </div>
 
-<div class="card">
-<div class="icon-box"><img src="../static/img/icon-reportes.png"></div>
-<h3>Reportes</h3>
-<p>Genere informes detallados sobre productividad, ventas y estado general del ganado.</p>
-<button>Abrir</button>
-</div>
 
 </main>
 
 <footer>© 2026 Ganadapp - Soluciones de Gestión Ganadera - Todos los derechos reservados</footer>
+
+
+<script>
+    document.addEventListener("DOMContentLoaded", async () => {
+        try {
+            const respuesta = await fetch("/auth/perfil", {
+                credentials: "same-origin"
+            });
+
+            if (!respuesta.ok) {
+                return;
+            }
+
+            const perfil = await respuesta.json();
+
+            document.getElementById("perfil-nombre").textContent = perfil.nombre;
+            document.getElementById("perfil-rol").textContent = perfil.rol;
+        } catch (error) {
+            console.error("No se pudo cargar el perfil del usuario:", error);
+        }
+    });
+
+
+document.addEventListener("DOMContentLoaded", async () => {
+    const loginLink = document.getElementById("nav-login");
+    const logoutForm = document.getElementById("nav-logout");
+
+    if (!loginLink || !logoutForm) return;
+
+    try {
+        const response = await fetch("/auth/perfil", {
+            credentials: "same-origin",
+            cache: "no-store"
+        });
+
+        const autenticado = response.ok;
+
+        loginLink.hidden = autenticado;
+        logoutForm.hidden = !autenticado;
+
+    } catch (error) {
+        loginLink.hidden = false;
+        logoutForm.hidden = true;
+    }
+});
+</script>
 
 </body>
 </html>

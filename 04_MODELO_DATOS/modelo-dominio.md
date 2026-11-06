@@ -6,19 +6,27 @@ El dominio representa la gestión ganadera orientada a la trazabilidad de animal
 
 Se modela bajo un enfoque de DDD simplificado, priorizando claridad sobre complejidad técnica.
 
+El sistema distingue entre los usuarios que acceden a la aplicación y los productores que forman parte de la actividad ganadera registrada.
+
+Todos los usuarios tienen las mismas funcionalidades y pueden trabajar sobre los establecimientos registrados. No existen roles ni permisos diferenciados por tipo de usuario.
 
 ## Entidades principales
 
 ### Usuario
+
+Representa a una persona que posee una cuenta para acceder a GanadApp.
+
 - id_usuario: int
 - nombre: string
 - email: string
-- rol: string
 - contacto: string
 - estado_activo: boolean
 - ultimo_acceso: datetime
 
 ### Productor
+
+Representa al titular de la actividad ganadera cuyos datos se registran en el sistema. Es una entidad del dominio independiente de las cuentas de usuario.
+
 - id_productor: int
 - nombre: string
 - documento: string
@@ -27,6 +35,9 @@ Se modela bajo un enfoque de DDD simplificado, priorizando claridad sobre comple
 - estado: string
 
 ### Establecimiento
+
+Representa un establecimiento ganadero asociado a un productor. Los establecimientos se registran previamente y pueden seleccionarse al dar de alta animales.
+
 - id_establecimiento: int
 - nombre: string
 - ubicacion: string
@@ -35,15 +46,22 @@ Se modela bajo un enfoque de DDD simplificado, priorizando claridad sobre comple
 - id_productor: int
 
 ### Animal
+
+Representa un animal registrado en un establecimiento ganadero.
+
 - id_animal: int
 - identificador: string
 - especie: string
 - raza: string
+- sexo: string
 - fecha_nacimiento: date
 - estado_sanitario: string
 - id_establecimiento: int
 
 ### EventoSanitario
+
+Representa un evento sanitario asociado a un animal y registrado por un usuario.
+
 - id_evento: int
 - tipo: string
 - fecha: datetime
@@ -53,6 +71,9 @@ Se modela bajo un enfoque de DDD simplificado, priorizando claridad sobre comple
 - id_usuario: int
 
 ### StockInsumo
+
+Representa el stock de un insumo dentro de un establecimiento.
+
 - id_stock: int
 - tipo_insumo: string
 - cantidad: float
@@ -87,8 +108,10 @@ En el modelo de dominio se distinguen objetos con identidad propia (Entidades) d
 - Un productor tiene muchos establecimientos
 - Un establecimiento tiene muchos animales
 - Un animal tiene muchos eventos sanitarios
-- Un usuario registra eventos sanitarios
-- Un establecimiento administra stock
+- Un usuario puede registrar muchos eventos sanitarios
+- Un establecimiento administra stock de insumos
+  
+Los usuarios y los productores son entidades independientes. No existe una relación de pertenencia entre las cuentas de usuario y los establecimientos para determinar permisos o acceso. Todos los usuarios cuentan con las mismas funcionalidades y pueden trabajar sobre los establecimientos registrados.
 
 ---
 
@@ -115,7 +138,7 @@ El `Animal` es la raíz del agregado porque posee identidad propia y controla lo
 - Animal
 - StockInsumo
 
-El `Establecimiento` representa el límite de consistencia para los animales y el stock administrado en él. Las operaciones que afecten estos elementos deben respetar las reglas del establecimiento.
+El `Establecimiento` representa el ámbito al que pertenecen los animales y el stock administrado en él. Las operaciones que afecten estos elementos deben respetar las reglas del establecimiento.
 
 ### Agregado Productor
 
@@ -171,6 +194,14 @@ ESTABLECIMIENTO {
   int id_establecimiento
   string nombre
   string ubicacion
+  int id_productor
+}
+
+USUARIO {
+  int id_usuario
+  string nombre
+  string email
+  boolean estado_activo
 }
 
 ANIMAL {
@@ -178,16 +209,23 @@ ANIMAL {
   string identificador
   string especie
   string raza
+  string sexo
+  date fecha_nacimiento
+  string estado_sanitario
+  int id_establecimiento
 }
 
 EVENTO_SANITARIO {
   int id_evento
   string tipo
   datetime fecha
+  int id_animal
+  int id_usuario
 }
 
 STOCK_INSUMO {
   int id_stock
   string tipo_insumo
   float cantidad
+  int id_establecimiento
 }

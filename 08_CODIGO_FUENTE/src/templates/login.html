@@ -14,15 +14,13 @@
         </div>
         <nav class="menu">
             <button onclick="location.href='/'">
-                <img src="/static/img/icon-inicio.png" alt="Inicio">
+                <img src="/static/img/icon-panel.png" alt="Inicio">
                 <span>Inicio</span>
             </button>
-            <button class="active">
-                <img src="/static/img/icon-panel.png" alt="Acceso">
-                <span>Inicio de Sesión</span>
-            </button>
+
         </nav>
     </header>
+
 
     <main class="animal-page">
         <section class="page-header">
@@ -32,7 +30,7 @@
                 <p>Ingrese sus credenciales o registre una cuenta para acceder a Ganadapp.</p>
             </div>
             <div class="page-header-icon">
-                <img src="/static/img/icon-panel.png" alt="Acceso al sistema">
+                <img src="/static/img/icon-inicio.png" alt="Acceso al sistema">
             </div>
         </section>
 
@@ -129,6 +127,17 @@
                     </div>
 
                     <div class="form-group">
+                        <label for="codigo-autorizacion">Código de autorización</label>
+                        <input
+                            id="codigo-autorizacion"
+                            name="codigo_autorizacion"
+                            type="password"
+                            autocomplete="off"
+                            required
+                        >
+                    </div>
+
+                    <div class="form-group">
                         <label for="password-registro">Contraseña</label>
                         <input
                             id="password-registro"
@@ -169,46 +178,48 @@
     </footer>
 
     <script>
-        const parametros = new URLSearchParams(window.location.search);
+    const parametros = new URLSearchParams(window.location.search);
 
-        if (parametros.get("error") === "1") {
-            const mensaje = document.getElementById("login-error");
-            mensaje.style.display = "block";
+    if (parametros.get("error") === "1") {
+        const mensaje = document.getElementById("login-error");
+        mensaje.style.display = "block";
+    }
+
+    if (parametros.get("registro") === "duplicado") {
+        mostrarErrorRegistro("Ya existe una cuenta con ese correo electrónico.");
+    } else if (parametros.get("registro") === "invalido") {
+        mostrarErrorRegistro("Verifique los datos y el código de autorización.");
+    } else if (parametros.get("registro") === "error") {
+        mostrarErrorRegistro("No fue posible completar el registro. Intente nuevamente.");
+    } else if (parametros.get("registro") === "no_configurado") {
+        mostrarErrorRegistro("El registro para este perfil no está habilitado. Contacte al administrador.");
+    }
+
+    function mostrarErrorRegistro(mensaje) {
+        const elemento = document.getElementById("registro-error");
+        elemento.textContent = mensaje;
+        elemento.style.display = "block";
+    }
+
+    const formularioRegistro = document.querySelector(
+        'form[action="/auth/registro"]'
+    );
+
+    formularioRegistro.addEventListener("submit", function (evento) {
+        const password = document.getElementById("password-registro").value;
+        const confirmacion = document.getElementById("password-confirmacion").value;
+
+        if (password.length < 12) {
+            evento.preventDefault();
+            mostrarErrorRegistro("La contraseña debe tener al menos 12 caracteres.");
+            return;
         }
 
-        if (parametros.get("registro") === "duplicado") {
-            mostrarErrorRegistro("Ya existe una cuenta con ese correo electrónico.");
-        } else if (parametros.get("registro") === "invalido") {
-            mostrarErrorRegistro("Verifique los datos. La contraseña debe tener al menos 12 caracteres.");
-        } else if (parametros.get("registro") === "error") {
-            mostrarErrorRegistro("No fue posible completar el registro. Intente nuevamente.");
+        if (password !== confirmacion) {
+            evento.preventDefault();
+            mostrarErrorRegistro("Las contraseñas no coinciden.");
         }
-
-        function mostrarErrorRegistro(mensaje) {
-            const elemento = document.getElementById("registro-error");
-            elemento.textContent = mensaje;
-            elemento.style.display = "block";
-        }
-
-        const formularioRegistro = document.querySelector(
-            'form[action="/auth/registro"]'
-        );
-
-        formularioRegistro.addEventListener("submit", function (evento) {
-            const password = document.getElementById("password-registro").value;
-            const confirmacion = document.getElementById("password-confirmacion").value;
-
-            if (password.length < 12) {
-                evento.preventDefault();
-                mostrarErrorRegistro("La contraseña debe tener al menos 12 caracteres.");
-                return;
-            }
-
-            if (password !== confirmacion) {
-                evento.preventDefault();
-                mostrarErrorRegistro("Las contraseñas no coinciden.");
-            }
-        });
+    });
     </script>
 </body>
 </html>

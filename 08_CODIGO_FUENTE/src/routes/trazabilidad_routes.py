@@ -4,12 +4,10 @@ from sqlalchemy.orm import Session
 from src.core.database import get_db
 from src.services.trazabilidad_service import TrazabilidadService
 
-from src.core.security import requiere_roles
+from src.core.security import usuario_actual
 
 router = APIRouter(
-    dependencies=[
-        Depends(requiere_roles("productor"))
-    ]
+    dependencies=[Depends(usuario_actual)]
 )
 
 
