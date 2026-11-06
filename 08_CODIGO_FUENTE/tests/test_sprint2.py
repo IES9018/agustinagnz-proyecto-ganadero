@@ -1,3 +1,8 @@
+from src.models.animal import Animal
+from src.models.historial_animal import HistorialAnimal
+from src.repositories.animal_repository import AnimalRepository
+from src.repositories.trazabilidad_repository import TrazabilidadRepository
+
 import unittest
 from datetime import date, datetime, timedelta, timezone
 from types import SimpleNamespace
@@ -401,6 +406,238 @@ class TestStockServiceValidacionesAdicionales(unittest.TestCase):
 
         with self.assertRaises(ValueError):
             StockService._validar_datos(datos, incluir_cantidad=True)
+
+class TestHistorialAnimal(unittest.TestCase):
+
+    def setUp(self):
+        self.db = Mock()
+        self.repo = AnimalRepository(self.db)
+
+    def datos_validos(self):
+        return {
+            "identificador": "AN-001",
+            "especie": "Bovino",
+            "raza": "Hereford",
+            "fecha_nacimiento": date(2024, 5, 10),
+            "estado_sanitario": "Saludable",
+            "id_establecimiento": 1,
+        }
+
+    def test_39_alta_de_animal_registra_historial(self):
+        def asignar_id():
+            animal = self.db.add.call_args_list[0].args[0]
+            animal.id_animal = 10
+
+        self.db.flush.side_effect = asignar_id
+        self.db.scalar.return_value = None
+
+        self.repo.crear(self.datos_validos())
+
+        self.assertEqual(self.db.add.call_count, 2)
+
+        registro = self.db.add.call_args_list[1].args[0]
+
+        self.assertIsInstance(registro, HistorialAnimal)
+        self.assertEqual(registro.id_animal, 10)
+        self.assertEqual(registro.tipo_evento, "alta")
+        self.assertIn("AN-001", registro.descripcion)
+        self.assertIsNotNone(registro.fecha_evento)
+        self.db.commit.assert_called_once()
+
+    def test_40_modificacion_de_animal_registra_cambios(self):
+        animal = SimpleNamespace(
+            id_animal=10,
+            identificador="AN-001",
+            especie="Bovino",
+            raza="Hereford",
+            fecha_nacimiento=date(2024, 5, 10),
+            estado_sanitario="Saludable",
+            id_establecimiento=1,
+        )
+
+        self.db.get.return_value = animal
+
+        datos = self.datos_validos()
+        datos["estado_sanitario"] = "En observación"
+
+        self.repo.actualizar(10, datos)
+
+        registros = [
+            llamada.args[0]
+            for llamada in self.db.add.call_args_list
+            if isinstance(llamada.args[0], HistorialAnimal)
+        ]
+
+        self.assertEqual(len(registros), 1)
+        self.assertEqual(registros[0].id_animal, 10)
+        self.assertEqual(registros[0].tipo_evento, "modificacion")
+        self.assertIn("estado_sanitario", registros[0].descripcion)
+        self.assertIn("En observación", registros[0].descripcion)
+        self.db.commit.assert_called_once()
+
+    def test_41_actualizacion_sin_cambios_no_genera_historial(self):
+        animal = SimpleNamespace(
+            id_animal=10,
+            identificador="AN-001",
+            especie="Bovino",
+            raza="Hereford",
+            fecha_nacimiento=date(2024, 5, 10),
+            estado_sanitario="Saludable",
+            id_establecimiento=1,
+        )
+
+        self.db.get.return_value = animal
+
+        self.repo.actualizar(10, self.datos_validos())
+
+        self.db.add.assert_not_called()
+        self.db.commit.assert_called_once()
+
+
+class TestTrazabilidadRepository(unittest.TestCase):
+
+    def setUp(self):
+        self.db = Mock()
+        self.repo = TrazabilidadRepository(self.db)
+
+    def test_42_animal_inexistente_no_tiene_trazabilidad(self):
+        self.db.get.return_value = None
+
+        resultado = self.repo.listar_por_animal(999)
+
+        self.assertIsNone(resultado)
+        self.db.scalars.assert_not_called()
+
+    def test_43_integra_historial_animal_y_sanitario(self):
+        animal = SimpleNamespace(
+            id_animal=10,
+            identificador="AN-001",
+        )
+
+        registro = SimpleNamespace(
+            id_historial=1,
+            fecha_evento=datetime(
+                2026, 10, 1, 12, 0, tzinfo=timezone.utc
+            ),
+            tipo_evento="alta",
+            descripcion="Alta del animal AN-001.",
+        )
+
+        evento = SimpleNamespace(
+            id_evento=2,
+            fecha=date(2026, 10, 2),
+            tipo_evento="Vacunación",
+            descripcion="Aplicación de vacuna",
+            estado="vigente",
+            motivo_anulacion=None,
+            fecha_anulacion=None,
+        )
+
+        self.db.get.return_value = animal
+        self.db.scalars.side_effect = [
+            SimpleNamespace(all=Mock(return_value=[registro])),
+            SimpleNamespace(all=Mock(return_value=[evento])),
+        ]
+
+        resultado = self.repo.listar_por_animal(10)
+
+        self.assertEqual(resultado["id_animal"], 10)
+        self.assertEqual(resultado["identificador"], "AN-001")
+        self.assertEqual(resultado["total_eventos"], 2)
+        self.assertEqual(len(resultado["eventos"]), 2)
+
+        self.assertEqual(resultado["eventos"][0]["origen"], "sanidad")
+        self.assertEqual(resultado["eventos"][1]["origen"], "animal")
+
+    def test_44_ordena_cronologicamente_fechas_con_zona_horaria(self):
+        animal = SimpleNamespace(
+            id_animal=10,
+            identificador="AN-001",
+        )
+
+        registro_antiguo = SimpleNamespace(
+            id_historial=1,
+            fecha_evento=datetime(
+                2026, 10, 1, 12, 0, tzinfo=timezone.utc
+            ),
+            tipo_evento="alta",
+            descripcion="Alta",
+        )
+
+        registro_reciente = SimpleNamespace(
+            id_historial=2,
+            fecha_evento=datetime(
+                2026, 10, 2, 12, 0, tzinfo=timezone.utc
+            ),
+            tipo_evento="modificacion",
+            descripcion="Modificación",
+        )
+
+        self.db.get.return_value = animal
+        self.db.scalars.side_effect = [
+            SimpleNamespace(
+                all=Mock(return_value=[
+                    registro_antiguo,
+                    registro_reciente,
+                ])
+            ),
+            SimpleNamespace(all=Mock(return_value=[])),
+        ]
+
+        resultado = self.repo.listar_por_animal(10)
+
+        fechas = [
+            evento["fecha"]
+            for evento in resultado["eventos"]
+        ]
+
+        self.assertEqual(
+            fechas,
+            [
+                "2026-10-02T12:00:00+00:00",
+                "2026-10-01T12:00:00+00:00",
+            ],
+        )
+
+    def test_45_conserva_anulacion_en_trazabilidad(self):
+        animal = SimpleNamespace(
+            id_animal=10,
+            identificador="AN-001",
+        )
+
+        evento = SimpleNamespace(
+            id_evento=5,
+            fecha=date(2026, 10, 2),
+            tipo_evento="Vacunación",
+            descripcion="Aplicación de vacuna",
+            estado="anulado",
+            motivo_anulacion="Registro duplicado",
+            fecha_anulacion=datetime(
+                2026, 10, 3, 10, 0, tzinfo=timezone.utc
+            ),
+        )
+
+        self.db.get.return_value = animal
+        self.db.scalars.side_effect = [
+            SimpleNamespace(all=Mock(return_value=[])),
+            SimpleNamespace(all=Mock(return_value=[evento])),
+        ]
+
+        resultado = self.repo.listar_por_animal(10)
+        evento_resultado = resultado["eventos"][0]
+
+        self.assertEqual(evento_resultado["estado"], "anulado")
+        self.assertEqual(
+            evento_resultado["motivo_anulacion"],
+            "Registro duplicado",
+        )
+        self.assertIsNotNone(evento_resultado["fecha_anulacion"])
+        self.assertIn("ANULADO", evento_resultado["descripcion"])
+        self.assertIn(
+            "Registro duplicado",
+            evento_resultado["descripcion"],
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

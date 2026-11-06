@@ -1,3 +1,5 @@
+from datetime import datetime, timezone
+
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -35,7 +37,7 @@ class TrazabilidadRepository:
                 "fecha": registro.fecha_evento.isoformat(),
                 "tipo": registro.tipo_evento,
                 "origen": "animal",
-                "descripcion": registro.descripcion
+                "descripcion": registro.descripcion,
             })
 
         for evento in eventos_sanitarios:
@@ -59,17 +61,26 @@ class TrazabilidadRepository:
                     evento.fecha_anulacion.isoformat()
                     if evento.fecha_anulacion
                     else None
-                )
+                ),
             })
 
         resultado.sort(
-            key=lambda item: item["fecha"],
-            reverse=True
+            key=lambda item: self._convertir_fecha(item["fecha"]),
+            reverse=True,
         )
 
         return {
             "id_animal": animal.id_animal,
             "identificador": animal.identificador,
             "total_eventos": len(resultado),
-            "eventos": resultado
+            "eventos": resultado,
         }
+
+    @staticmethod
+    def _convertir_fecha(valor: str) -> datetime:
+        fecha = datetime.fromisoformat(valor)
+
+        if fecha.tzinfo is None:
+            fecha = fecha.replace(tzinfo=timezone.utc)
+
+        return fecha
