@@ -2,82 +2,121 @@
 
 ## 1. Objetivo
 
-Documentar los resultados de las pruebas unitarias ejecutadas localmente sobre funcionalidades de gestión de stock y conservación del historial sanitario de GanadApp.
+Documentar los resultados de las pruebas automatizadas ejecutadas localmente sobre las funcionalidades de GanadApp verificadas durante el Sprint 2.
 
 ## 2. Entorno de ejecución
 
 - Lenguaje: Python 3.12.
 - Framework de pruebas: `unittest`.
-- Medición de cobertura: `coverage.py`.
-- Ejecución: entorno virtual de `08_CODIGO_FUENTE`.
+- Medición de cobertura: `coverage.py` 7.17.2.
+- Base de datos de desarrollo: PostgreSQL.
+- Suite: `08_CODIGO_FUENTE/tests/test_sprint2.py`.
 
-## 3. Resultados
+## 3. Resultados generales
 
-- Pruebas ejecutadas: 16.
-- Pruebas aprobadas: 16.
+- Pruebas ejecutadas: 45.
+- Pruebas aprobadas: 45.
 - Pruebas fallidas: 0.
 - Errores de ejecución: 0.
 - Resultado: OK.
 
-### Cobertura medida
+## 4. Cobertura de código
 
-| Archivo | Cobertura |
-|---|---:|
-| `src/core/database.py` | 73 % |
-| `src/main.py` | 0 % |
-| `src/models/establecimiento.py` | 100 % |
-| `src/models/evento_sanitario.py` | 100 % |
-| `src/models/stock_insumo.py` | 100 % |
-| `src/repositories/sanidad_repository.py` | 57 % |
-| `src/repositories/stock_repository.py` | 28 % |
-| `src/services/stock_service.py` | 83 % |
-| **Total informado por Coverage** | **57 %** |
+La medición se realizó con:
 
-El porcentaje total corresponde a los archivos incluidos en el reporte de Coverage (272 instrucciones ejecutables). No debe interpretarse como cobertura completa de toda la aplicación.
+```bash
+python -m coverage run --source=src -m unittest discover -s tests
+python -m coverage report -m
+```
 
-## 4. Casos verificados
+| Archivo                                       | Cobertura |
+| --------------------------------------------- | --------- |
+| `src/core/database.py`                        | 73 %      |
+| `src/main.py`                                 | 0 %       |
+| `src/models/animal.py`                        | 100 %     |
+| `src/models/establecimiento.py`               | 100 %     |
+| `src/models/evento_sanitario.py`              | 100 %     |
+| `src/models/historial_animal.py`              | 100 %     |
+| `src/models/stock_insumo.py`                  | 100 %     |
+| `src/repositories/animal_repository.py`       | 72 %      |
+| `src/repositories/sanidad_repository.py`      | 57 %      |
+| `src/repositories/stock_repository.py`        | 28 %      |
+| `src/repositories/trazabilidad_repository.py` | 100 %     |
+| `src/services/animal_service.py`              | 75 %      |
+| `src/services/sanidad_service.py`             | 81 %      |
+| `src/services/stock_service.py`               | 83 %      |
+| Total                                         | 67 %      |
+
+La medición comprende 560 instrucciones ejecutables, de las cuales 373 fueron cubiertas. El porcentaje corresponde a los módulos incluidos bajo `src`; no representa una validación completa de toda la aplicación.
+
+## 5. Casos verificados
 
 ### Gestión de stock
 
-- Normalización de datos válidos.
-- Rechazo de campos de texto obligatorios vacíos.
-- Rechazo de categorías inválidas.
-- Rechazo de cantidades iniciales negativas y valores no finitos.
-- Validación de umbrales de stock.
-- Validación del establecimiento al crear un insumo.
-- Incremento de existencias mediante ingresos.
-- Permisión de una salida que deja el stock en cero.
-- Rechazo de operaciones que producirían stock negativo.
-- Rechazo de operaciones inválidas, cantidades iguales a cero y registros inexistentes.
+- Normalización y validación de datos.
+- Rechazo de campos obligatorios vacíos.
+- Validación de categorías y límites de campos.
+- Rechazo de cantidades negativas, no finitas, booleanas o iguales a cero cuando no corresponden.
+- Validación de umbrales y establecimientos.
+- Ingreso de insumos y actualización de existencias.
+- Salidas que dejan el stock en cero.
+- Prevención de operaciones que generan stock negativo.
+- Rechazo de operaciones inválidas y registros inexistentes.
 
-### Historial sanitario
+### Validaciones de animales
 
-- Anulación de un evento conservando el registro y el motivo.
-- Protección frente a una segunda anulación que intentaría sobrescribir los datos históricos.
-- Ausencia de modificaciones cuando el evento no existe.
+- Aceptación de datos válidos.
+- Rechazo de estructuras de datos incorrectas.
+- Validación de campos obligatorios y límites de longitud.
+- Validación del formato y coherencia de fechas.
+- Rechazo de fechas de nacimiento futuras.
+- Validación del identificador y existencia del establecimiento.
 
-## 5. Limitaciones
+### Validaciones sanitarias
 
-- Las pruebas de servicios utilizan dependencias simuladas (*mocks*) en los casos correspondientes; no constituyen pruebas de integración con PostgreSQL.
-- No se cubrieron de forma suficiente las rutas HTTP, el flujo completo de la aplicación ni todos los métodos de los repositorios.
+- Creación de eventos con datos válidos.
+- Validación de estructura, animal asociado y tipo de evento.
+- Validación de longitud de campos y fechas.
+- Rechazo de fechas futuras y fechas próximas anteriores al evento.
+- Validación del motivo de anulación.
+- Conservación del evento y del motivo de anulación.
+- Protección frente a una segunda anulación que intente sobrescribir el historial.
+
+### Historial y trazabilidad
+
+- Registro histórico del alta de animales.
+- Registro de modificaciones de animales.
+- Ausencia de eventos históricos cuando no existen cambios.
+- Consulta de trazabilidad de animales existentes e inexistentes.
+- Integración del historial del animal con el historial sanitario.
+- Orden cronológico de eventos, contemplando fechas con zona horaria.
+- Conservación de las anulaciones en la trazabilidad.
+
+## 6. Limitaciones
+
+- Las pruebas unitarias utilizan dependencias simuladas (mocks) en los casos correspondientes.
+- La suite no constituye una prueba integral de integración con PostgreSQL.
 - `src/main.py` registra un 0 % de cobertura.
-- El porcentaje total informado no demuestra que todos los módulos de la aplicación hayan sido ejercitados.
-- No se verificaron en esta suite todos los requisitos funcionales del Sprint 2.
+- Los repositorios de stock y sanidad conservan métodos sin cubrir.
+- No se cubrieron exhaustivamente todas las rutas HTTP ni todos los flujos de interfaz.
+- La cobertura del 67 % no demuestra que todos los requisitos funcionales estén validados.
+- No se realizaron pruebas de rendimiento ni una auditoría exhaustiva de seguridad.
 
-## 6. Non-Goals
+## 7. Non-Goals
 
-Esta suite no pretende demostrar la cobertura completa de GanadApp, validar la interfaz gráfica, realizar pruebas de rendimiento o seguridad, ni sustituir las pruebas de integración con la base de datos.
+Esta suite no pretende demostrar la cobertura completa de GanadApp, validar integralmente la interfaz gráfica, realizar pruebas de rendimiento o seguridad, ni sustituir las pruebas de integración con la base de datos.
 
-## 7. Comando de reproducción
+## 8. Reproducción
 
-Desde `08_CODIGO_FUENTE`, con el entorno virtual activado:
+Desde `08_CODIGO_FUENTE`, con Python 3.12:
 
-```bash
-python -m unittest discover -s tests -v
+```
+python -m pip install -r requirements-dev.txt
+python -m compileall -q src tests
 python -m coverage run --source=src -m unittest discover -s tests -v
 python -m coverage report -m
 ```
 
-## 8. Estado
+## 9. Estado
 
-La suite unitaria ejecutada localmente finalizó con 16 pruebas aprobadas. La cobertura medida fue del 57 % en los archivos incluidos en el reporte. La cobertura y las limitaciones descritas deben considerarse al evaluar la calidad del Sprint 2.
+La ejecución local finalizó con 45 pruebas aprobadas, sin fallos ni errores. La cobertura global informada por Coverage fue del 67 % sobre los módulos incluidos.

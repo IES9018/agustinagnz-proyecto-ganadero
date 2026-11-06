@@ -2,53 +2,113 @@
 
 ## 1. Objetivo
 
-Registrar las incidencias detectadas durante la implementación y verificación de GanadApp, las correcciones realizadas y las limitaciones identificadas en las pruebas.
+Registrar las incidencias detectadas durante la implementación y verificación de GanadApp, las correcciones realizadas, las pruebas ejecutadas y las limitaciones identificadas.
 
 ## 2. Incidencias y correcciones
 
-### 2.1. Dependencia ausente en el entorno de ejecución de pruebas
+### 2.1. Dependencia ausente en el entorno de ejecución
 
-**Incidencia:** la primera ejecución de la suite falló durante la importación de los módulos porque Python no encontraba `dotenv`.
+**Incidencia:** una primera ejecución de la suite falló durante la importación de módulos porque Python no encontraba `dotenv`.
 
-**Análisis:** el módulo `src/core/database.py` importa `load_dotenv` desde `python-dotenv`. La dependencia ya estaba declarada en `08_CODIGO_FUENTE/requirements.txt`; el problema observado correspondía al entorno virtual utilizado para ejecutar las pruebas.
+**Análisis:** el módulo `src/core/database.py` importa `load_dotenv` desde `python-dotenv`. La dependencia estaba declarada en los requisitos; el problema correspondía al entorno utilizado para ejecutar las pruebas.
 
-**Corrección:** se instaló `python-dotenv` en el entorno virtual activo.
+**Corrección:** se instaló la dependencia en el entorno activo y se verificó posteriormente la instalación del conjunto de dependencias.
 
-**Verificación:** la suite se ejecutó nuevamente y finalizó con 16 pruebas aprobadas, sin fallos ni errores.
+**Verificación:** `python -m pip check` finalizó con el mensaje `No broken requirements found`.
 
-**Evidencia:** salida de `python -m unittest discover -s tests -v`.
+### 2.2. Validaciones insuficientes
 
-### 2.2. Cobertura de pruebas insuficiente para considerar validada toda la aplicación
+**Hallazgo:** se identificó la necesidad de reforzar las validaciones de datos en las operaciones de animales, sanidad y stock.
 
-**Hallazgo:** la medición local informó un 57 % de cobertura global entre los archivos incluidos. `src/main.py` registró 0 %, `src/repositories/stock_repository.py` 28 % y `src/services/stock_service.py` 83 %.
+**Corrección:** se incorporaron validaciones de estructura, campos obligatorios, límites de longitud, identificadores, fechas, cantidades, categorías y coherencia de umbrales.
 
-**Corrección realizada:** se incorporó una suite de 16 pruebas unitarias para validar reglas de negocio de stock y la conservación de registros sanitarios al anular eventos.
+**Verificación:** se incorporaron pruebas unitarias específicas para los escenarios válidos e inválidos.
 
-**Limitación pendiente:** la suite no cubre suficientemente las rutas HTTP, la integración con PostgreSQL ni todos los métodos de los repositorios. El resultado no demuestra que toda la aplicación esté validada.
+### 2.3. Historial y trazabilidad
 
-**Evidencia:** salida de `python -m coverage report -m`.
+**Hallazgo:** era necesario verificar la conservación de los cambios históricos de animales y eventos sanitarios, así como la integración y ordenamiento cronológico de los registros.
 
-## 3. Alcance de las pruebas
+**Corrección:** se incorporaron verificaciones del historial de animales, la integración con eventos sanitarios, el ordenamiento temporal y la conservación de anulaciones.
 
-Las pruebas unitarias cubren validaciones de datos de stock, operaciones de ingreso y salida, prevención de cantidades negativas y comportamiento de anulación de eventos sanitarios. Los casos implementados utilizan dependencias simuladas cuando corresponde.
+**Verificación:** los casos correspondientes finalizaron correctamente en la suite unitaria.
 
-No se consideran cubiertas por esta suite la totalidad de los requisitos funcionales, las pruebas de integración con PostgreSQL, las pruebas de interfaz, el rendimiento ni una auditoría exhaustiva de seguridad.
+### 2.4. Dependencias del proyecto
 
-## 4. Errores de código asistido por IA
+**Hallazgo:** el archivo de requisitos contenía dependencias no utilizadas por la implementación, entradas duplicadas y paquetes sin versión fijada.
 
-Durante esta etapa se detectó un problema de entorno al ejecutar las pruebas: faltaba instalar una dependencia que ya estaba declarada en el archivo de requisitos. La incidencia se corrigió instalando el paquete en el entorno virtual.
+**Corrección:** se depuró `08_CODIGO_FUENTE/requirements.txt`, conservando las dependencias necesarias para la ejecución de la aplicación. Las herramientas de desarrollo se separaron en `08_CODIGO_FUENTE/requirements-dev.txt`.
 
-No se afirma que esta incidencia haya sido un defecto del código productivo. Cualquier otro error atribuido a código generado o asistido por IA deberá documentarse únicamente si se identifica y verifica con evidencia concreta.
+**Verificación:** la instalación de dependencias y `pip check` finalizaron correctamente. La suite de 45 pruebas también se ejecutó satisfactoriamente.
 
-## 5. Evidencias y trazabilidad
+## 3. Resultados de las pruebas
+
+La suite automatizada se ejecutó mediante:
+
+```bash
+python -m unittest discover -s tests -v
+```
+
+Resultados:
+
+- Pruebas ejecutadas: 45.
+- Pruebas aprobadas: 45.
+- Pruebas fallidas: 0.
+- Errores: 0.
+
+La medición de cobertura se realizó mediante:
+
+```
+python -m coverage run --source=src -m unittest discover -s tests
+python -m coverage report -m
+```
+
+Cobertura global informada: 67 %, sobre 560 instrucciones ejecutables.
+
+Los resultados detallados por módulo se encuentran en `docs/pruebas/reporte-sprint2.md`.
+
+## 4. Alcance de la auditoría
+
+La suite verifica reglas de negocio y validaciones de animales, sanidad y stock, conservación de historiales y trazabilidad.
+
+La cobertura obtenida permite identificar módulos con mayor y menor nivel de ejercicio. Los modelos y el repositorio de trazabilidad alcanzaron el 100 % en esta medición.
+
+## 5. Limitaciones identificadas
+
+- `src/main.py` registra un 0 % de cobertura.
+- `src/repositories/stock_repository.py` registra un 28 %.
+- `src/repositories/sanidad_repository.py` registra un 57 %.
+- Las pruebas unitarias utilizan dependencias simuladas en los casos correspondientes.
+- No se considera validada la integración completa con PostgreSQL.
+- No se cubrieron exhaustivamente todas las rutas HTTP ni los flujos de interfaz.
+- La cobertura del 67 % no representa cobertura completa de la aplicación.
+- No se realizaron pruebas de rendimiento ni una auditoría exhaustiva de seguridad.
+
+## 6. Integración continua
+
+El workflow `.github/workflows/ci.yml` contempla:
+
+- Configuración de Python 3.12.
+- Instalación de dependencias de desarrollo.
+- Compilación de los módulos Python.
+- Ejecución de pruebas unitarias con medición de cobertura.
+- Validación de mensajes de commit mediante Commitlint.
+
+La aprobación efectiva del workflow debe confirmarse en GitHub Actions después de publicar los cambios y ejecutar el flujo mediante `push` o `pull_request`.
+
+## 7. Evidencias y trazabilidad
 
 - Suite unitaria: `08_CODIGO_FUENTE/tests/test_sprint2.py`.
+- Dependencias de ejecución: `08_CODIGO_FUENTE/requirements.txt`.
+- Dependencias de desarrollo: `08_CODIGO_FUENTE/requirements-dev.txt`.
+- Workflow: `.github/workflows/ci.yml`.
 - Reporte de pruebas: `docs/pruebas/reporte-sprint2.md`.
-- Medición de cobertura: comando `python -m coverage report -m`.
-- Pull requests: incorporar los identificadores y enlaces correspondientes una vez verificados en GitHub.
+- Medición de cobertura: `python -m coverage report -m`.
+- Commits y Pull Requests: consultar el historial del repositorio y GitHub.
 
-## 6. Estado de la auditoría
+## 8. Estado de la auditoría
 
-La suite unitaria ejecutada localmente finalizó con 16 pruebas aprobadas. La cobertura medida fue del 57 % en los archivos incluidos en el reporte.
+La verificación local del Sprint 2 registra 45 pruebas aprobadas, sin fallos ni errores, compilación correcta y 67 % de cobertura sobre los módulos incluidos.
 
-La auditoría queda pendiente de completar con la revisión de los entregables restantes del Sprint 2 y la incorporación de referencias verificadas a los Pull Requests. No se considera cerrado el sprint hasta completar esa revisión.
+Las dependencias fueron depuradas y las herramientas de desarrollo quedaron separadas de las dependencias de ejecución. La documentación refleja los resultados medidos y las limitaciones detectadas.
+
+La validación local queda completada. La aprobación de integración continua y la revisión mediante Pull Request requieren la ejecución correspondiente en GitHub.
