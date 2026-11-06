@@ -1,7 +1,7 @@
 
 from datetime import datetime, timezone
 
-from fastapi import APIRouter, Form, Request
+from fastapi import APIRouter, Form, HTTPException, Response, status
 from fastapi.responses import RedirectResponse
 from sqlalchemy import select
 
@@ -11,6 +11,8 @@ from src.services.auth_service import (
     verificar_password,
     hash_password,
 )
+from src.core.security import crear_access_token
+
 
 router = APIRouter(prefix="/auth", tags=["Autenticación"])
 
@@ -72,7 +74,6 @@ def registrar_usuario(
 
 @router.post("/login")
 def login(
-    request: Request,
     email: str = Form(...),
     password: str = Form(...),
 ):
@@ -86,24 +87,31 @@ def login(
         if (
             usuario is None
             or not usuario.estado_activo
-            or not verificar_password(password, usuario.password_hash)
+            or not verificar_password(
+                password,
+                usuario.password_hash
+            )
         ):
-            return RedirectResponse(
-                "/login?error=1",
-                status_code=303,
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Credenciales incorrectas o cuenta inactiva.",
+                headers={"WWW-Authenticate": "Bearer"},
             )
 
         usuario.ultimo_acceso = datetime.now(timezone.utc)
         db.commit()
 
-        request.session.clear()
-        request.session["usuario_id"] = usuario.id_usuario
-        request.session["nombre"] = usuario.nombre
+        access_token = crear_access_token(
+            usuario_id=usuario.id_usuario,
+            nombre=usuario.nombre,
+        )
 
-    return RedirectResponse("/", status_code=303)
+    return {
+        "access_token": access_token,
+        "token_type": "bearer",
+    }
 
 
-@router.post("/logout")
-def logout(request: Request):
-    request.session.clear()
-    return RedirectResponse("/login", status_code=303)
+@router.post("/logout", status_code=status.HTTP_204_NO_CONTENT)
+def logout():
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
