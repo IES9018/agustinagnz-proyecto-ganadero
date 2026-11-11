@@ -105,3 +105,34 @@ No asumir cambios tecnológicos o arquitectónicos que no estén documentados o 
 ## 7. Coherencia arquitectónica
 
 * PROHIBIDO introducir frameworks, bases de datos o servicios externos que no estén declarados en un ADR aprobado. Ante duda, proponer ADR nuevo.
+
+
+## Seguridad y protección de datos
+
+- PROHIBIDO hardcodear secrets, tokens, claves privadas, contraseñas o credenciales. Utilizar variables de entorno y mantener los archivos sensibles fuera del control de versiones.
+
+- OBLIGATORIO validar y sanear toda entrada externa en el borde del sistema antes de utilizarla en la lógica de negocio o persistencia. La validación debe contemplar tipos, formatos, longitudes, rangos y valores permitidos.
+
+- OBLIGATORIO: todo endpoint nuevo debe estar documentado en `docs/arquitectura/api-contracts.yaml` ANTES de implementarse. La implementación debe respetar el método HTTP, parámetros, esquemas de entrada, respuestas y códigos de estado definidos en el contrato.
+
+- OBLIGATORIO exigir autenticación en todos los endpoints privados mediante los mecanismos definidos en `src/core/security.py`.
+
+- OBLIGATORIO verificar autorización sobre el recurso solicitado. La autenticación del usuario no implica autorización automática para consultar o modificar cualquier animal, evento sanitario o registro de stock.
+
+- PROHIBIDO confiar en identificadores enviados por el cliente sin comprobar la existencia y pertenencia del recurso al ámbito autorizado del usuario.
+
+- OBLIGATORIO utilizar consultas parametrizadas mediante SQLAlchemy. PROHIBIDO construir consultas SQL concatenando valores provenientes de entradas externas.
+
+- OBLIGATORIO mantener las contraseñas mediante algoritmos de hash seguros. PROHIBIDO almacenar o registrar contraseñas en texto plano.
+
+- OBLIGATORIO no exponer tokens, contraseñas, secretos ni información sensible en respuestas HTTP, mensajes de error o registros de aplicación.
+
+- OBLIGATORIO mantener la integridad de las operaciones de negocio mediante validaciones en los servicios y restricciones de persistencia cuando corresponda.
+
+- OBLIGATORIO conservar trazabilidad de las operaciones críticas, incluyendo identidad del usuario, fecha, operación y motivo cuando corresponda.
+
+- OBLIGATORIO incorporar pruebas negativas para entradas inválidas, usuarios no autenticados, recursos inexistentes y accesos no autorizados.
+
+- OBLIGATORIO revisar las dependencias y configuraciones de seguridad antes de incorporar nuevas bibliotecas o servicios externos.
+
+- PROHIBIDO considerar una operación segura únicamente porque el endpoint requiere autenticación. Deben verificarse también autorización, validación de entradas y protección de los datos.
