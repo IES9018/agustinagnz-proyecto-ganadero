@@ -187,14 +187,8 @@ document.addEventListener("DOMContentLoaded", async () => {
             const perfil = await respuesta.json();
 
             const nombre = document.getElementById("perfil-nombre");
-            const rol = document.getElementById("perfil-rol");
-
             if (nombre) {
                 nombre.textContent = perfil.nombre;
-            }
-
-            if (rol && perfil.rol) {
-                rol.textContent = perfil.rol;
             }
 
             if (window.location.pathname === "/login") {

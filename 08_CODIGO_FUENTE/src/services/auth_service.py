@@ -3,9 +3,6 @@ from pwdlib import PasswordHash
 
 password_hash = PasswordHash.recommended()
 
-ROLES_VALIDOS = {"productor", "personal_campo"}
-
-
 def hash_password(password: str) -> str:
     return password_hash.hash(password)
 

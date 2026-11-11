@@ -10,6 +10,8 @@ from sqlalchemy import select
 
 from src.core.database import SessionLocal
 from src.models.usuario import Usuario
+from sqlalchemy.orm import Session
+from src.core.database import get_db
 
 
 JWT_SECRET_KEY = (
@@ -92,6 +94,7 @@ def usuario_actual(
     credentials: HTTPAuthorizationCredentials | None = Depends(
         bearer_scheme
     ),
+    db: Session = Depends(get_db),
 ) -> dict:
     if credentials is None or credentials.scheme.lower() != "bearer":
         raise HTTPException(
@@ -111,21 +114,20 @@ def usuario_actual(
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    with SessionLocal() as db:
-        usuario = db.scalar(
-            select(Usuario).where(
-                Usuario.id_usuario == usuario_id
-            )
+    usuario = db.scalar(
+        select(Usuario).where(
+            Usuario.id_usuario == usuario_id
+        )
+    )
+
+    if usuario is None or not usuario.estado_activo:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Usuario inexistente o inactivo.",
+            headers={"WWW-Authenticate": "Bearer"},
         )
 
-        if usuario is None or not usuario.estado_activo:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Usuario inexistente o inactivo.",
-                headers={"WWW-Authenticate": "Bearer"},
-            )
-
-        return {
-            "id_usuario": usuario.id_usuario,
-            "nombre": usuario.nombre,
-        }
+    return {
+        "id_usuario": usuario.id_usuario,
+        "nombre": usuario.nombre,
+    }
