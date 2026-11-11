@@ -122,7 +122,7 @@ class AnimalService:
         datos["id_establecimiento"] = id_establecimiento
 
         if self.db.get(Establecimiento, id_establecimiento) is None:
-            raise ValueError(
+            raise LookupError(
                 "El establecimiento no existe."
             )
 
@@ -155,7 +155,7 @@ class AnimalService:
                 "Debe indicar un establecimiento válido."
             )
 
-        if establecimiento_id <= 0:
+        if not 1 <= establecimiento_id <= 2147483647:
             raise ValueError(
                 "Debe indicar un establecimiento válido."
             )

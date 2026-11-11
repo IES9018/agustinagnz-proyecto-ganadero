@@ -1,3 +1,4 @@
+
 from datetime import date
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
@@ -10,14 +11,14 @@ class AnimalInput(BaseModel):
     raza: str = Field(min_length=1, max_length=100)
     fecha_nacimiento: date
     estado_sanitario: str = Field(min_length=1, max_length=100)
-    id_establecimiento: int = Field(ge=1)
+    id_establecimiento: int = Field(ge=1, le=2147483647)
 
     @field_validator(
         "identificador",
         "especie",
         "sexo",
         "raza",
-        "estado_sanitario"
+        "estado_sanitario",
     )
     @classmethod
     def validar_texto(cls, value):
@@ -26,6 +27,15 @@ class AnimalInput(BaseModel):
         if not value:
             raise ValueError("El campo no puede estar vacío.")
 
+        return value
+
+    @field_validator("fecha_nacimiento", mode="before")
+    @classmethod
+    def validar_formato_fecha(cls, value):
+        if not isinstance(value, str):
+            raise ValueError(
+                "La fecha de nacimiento debe ser una cadena con formato YYYY-MM-DD."
+            )
         return value
 
 

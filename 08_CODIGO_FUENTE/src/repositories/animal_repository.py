@@ -72,7 +72,7 @@ class AnimalRepository:
         campos = (
             "identificador",
             "especie",
-            "raza",
+            "sexo",
             "raza",
             "fecha_nacimiento",
             "estado_sanitario",

@@ -74,7 +74,6 @@
 
             <div class="user-profile">
                 <span id="perfil-nombre"></span>
-                <span id="perfil-rol"></span>
             </div>
 
             <form action="/auth/logout" method="post" id="nav-logout" hidden>
@@ -1008,7 +1007,6 @@
             const perfil = await respuesta.json();
 
             document.getElementById("perfil-nombre").textContent = perfil.nombre;
-            document.getElementById("perfil-rol").textContent = perfil.rol;
         } catch (error) {
             console.error("No se pudo cargar el perfil del usuario:", error);
         }

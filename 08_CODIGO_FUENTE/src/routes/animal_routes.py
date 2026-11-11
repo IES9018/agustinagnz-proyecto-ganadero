@@ -1,11 +1,15 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Path
 from sqlalchemy.orm import Session
 
 from src.core.database import get_db
+from src.core.security import usuario_actual
 from src.schemas.animal import AnimalInput, AnimalResponse
 from src.services.animal_service import AnimalService
 
-router = APIRouter()
+
+router = APIRouter(
+    dependencies=[Depends(usuario_actual)]
+)
 
 
 @router.post(
@@ -20,8 +24,10 @@ def crear_animal(
 
     try:
         return service.crear_animal(animal.model_dump())
+    except LookupError as error:
+        raise HTTPException(status_code=404, detail=str(error))
     except ValueError as error:
-        raise HTTPException(status_code=400, detail=str(error))
+        raise HTTPException(status_code=409, detail=str(error))
 
 
 @router.get(
@@ -38,7 +44,7 @@ def listar_animales(db: Session = Depends(get_db)):
     response_model=AnimalResponse
 )
 def obtener_animal(
-    animal_id: int,
+    animal_id: int = Path(..., ge=1, le=2147483647),
     db: Session = Depends(get_db)
 ):
     service = AnimalService(db)
@@ -58,8 +64,8 @@ def obtener_animal(
     response_model=AnimalResponse
 )
 def actualizar_animal(
-    animal_id: int,
     animal: AnimalInput,
+    animal_id: int = Path(..., ge=1, le=2147483647),
     db: Session = Depends(get_db)
 ):
     service = AnimalService(db)
@@ -69,8 +75,10 @@ def actualizar_animal(
             animal_id,
             animal.model_dump()
         )
+    except LookupError as error:
+        raise HTTPException(status_code=404, detail=str(error))
     except ValueError as error:
-        raise HTTPException(status_code=400, detail=str(error))
+        raise HTTPException(status_code=409, detail=str(error))
 
     if resultado is None:
         raise HTTPException(
