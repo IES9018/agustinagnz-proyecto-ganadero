@@ -1,13 +1,13 @@
 
 from contextlib import asynccontextmanager
 from pathlib import Path
+from fastapi.responses import FileResponse, RedirectResponse, Response
 
 from dotenv import load_dotenv
 
 load_dotenv()
 
 from fastapi import Depends, FastAPI
-from fastapi.responses import FileResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 
 from src.core.database import Base, engine
@@ -86,6 +86,49 @@ app.include_router(sanidad_router)
 app.include_router(trazabilidad_router)
 app.include_router(stock_router)
 app.include_router(auth_router)
+
+
+@app.options("/api/animales", include_in_schema=False)
+def options_animales():
+    return Response(
+        status_code=204,
+        headers={"Allow": "GET, HEAD, POST, OPTIONS"}
+    )
+
+
+@app.options("/api/animales/{animal_id}", include_in_schema=False)
+def options_animal():
+    return Response(
+        status_code=204,
+        headers={"Allow": "GET, HEAD, PUT, OPTIONS"}
+    )
+
+
+@app.options(
+    "/api/animales/{animal_id}/sanidad",
+    include_in_schema=False
+)
+def options_sanidad_animal():
+    return Response(
+        status_code=204,
+        headers={"Allow": "GET, HEAD, POST, OPTIONS"}
+    )
+
+
+@app.options("/api/sanidad/alertas", include_in_schema=False)
+def options_alertas_sanidad():
+    return Response(
+        status_code=204,
+        headers={"Allow": "GET, HEAD, OPTIONS"}
+    )
+
+
+@app.options("/api/stock", include_in_schema=False)
+def options_stock():
+    return Response(
+        status_code=204,
+        headers={"Allow": "GET, HEAD, POST, OPTIONS"}
+    )
 
 
 @app.get("/login")
