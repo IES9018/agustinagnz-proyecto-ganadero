@@ -72,6 +72,7 @@ class TrazabilidadRepository:
         return {
             "id_animal": animal.id_animal,
             "identificador": animal.identificador,
+            "sexo": animal.sexo,
             "total_eventos": len(resultado),
             "eventos": resultado,
         }

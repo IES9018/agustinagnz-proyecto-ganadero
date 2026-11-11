@@ -85,7 +85,7 @@ async function cargarAnimales() {
             const opcion = document.createElement("option");
             opcion.value = animal.id_animal;
             opcion.textContent =
-                `${animal.identificador} — ${animal.especie} (${animal.raza})`;
+                `${animal.identificador} — ${animal.especie} — ${animal.sexo} (${animal.raza})`;
             selectorAnimal.appendChild(opcion);
         });
 

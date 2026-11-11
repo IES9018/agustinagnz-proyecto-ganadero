@@ -17,6 +17,7 @@ class AnimalRepository:
         animal = Animal(
             identificador=data["identificador"],
             especie=data["especie"],
+             sexo=data["sexo"],
             raza=data["raza"],
             fecha_nacimiento=data.get("fecha_nacimiento"),
             estado_sanitario=data["estado_sanitario"],
@@ -71,6 +72,7 @@ class AnimalRepository:
         campos = (
             "identificador",
             "especie",
+            "sexo",
             "raza",
             "fecha_nacimiento",
             "estado_sanitario",
@@ -152,6 +154,7 @@ class AnimalRepository:
             "id_animal": animal.id_animal,
             "identificador": animal.identificador,
             "especie": animal.especie,
+            "sexo": animal.sexo,
             "raza": animal.raza,
             "fecha_nacimiento": (
                 animal.fecha_nacimiento.isoformat()

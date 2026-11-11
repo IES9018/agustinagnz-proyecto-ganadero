@@ -82,7 +82,7 @@ class StockService:
         )
 
         if establecimiento is None:
-            raise ValueError("El establecimiento indicado no existe.")
+            raise LookupError("El establecimiento indicado no existe.")
 
     @classmethod
     def _validar_datos(cls, data: dict, incluir_cantidad: bool) -> dict:
@@ -169,7 +169,7 @@ class StockService:
         if isinstance(valor, str) and str(establecimiento_id) != valor.strip():
             raise ValueError("Debe indicar un establecimiento válido.")
 
-        if establecimiento_id <= 0:
+        if not 1 <= establecimiento_id <= 2147483647:
             raise ValueError("Debe indicar un establecimiento válido.")
 
         return establecimiento_id

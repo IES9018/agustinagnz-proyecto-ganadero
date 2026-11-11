@@ -74,7 +74,6 @@
 
             <div class="user-profile">
                 <span id="perfil-nombre"></span>
-                <span id="perfil-rol"></span>
             </div>
 
             <form action="/auth/logout" method="post" id="nav-logout" hidden>
@@ -189,6 +188,23 @@
                         >
 
                     </div>
+
+                                        <div class="form-group">
+
+                        <label for="sexo">
+                            Sexo
+                        </label>
+
+                        <input
+                            id="sexo"
+                            type="text"
+                            maxlength="100"
+                            placeholder="Ingrese el sexo del animal"
+                            required
+                        >
+
+                    </div>
+
 
 
                     <div class="form-group">
@@ -375,6 +391,7 @@
                             <th scope="col">ID</th>
                             <th scope="col">Identificador</th>
                             <th scope="col">Especie</th>
+                            <th scope="col">Sexo</th>
                             <th scope="col">Raza</th>
                             <th scope="col">Edad</th>
                             <th scope="col">Estado sanitario</th>
@@ -437,7 +454,8 @@
          JAVASCRIPT
     ========================== -->
 
-    <script>
+    <script src="/static/js/auth.js"></script>
+<script>
 
         const API = "/api/animales";
 
@@ -453,6 +471,9 @@
 
                 especie:
                     document.getElementById("especie").value.trim(),
+
+                sexo:
+                    document.getElementById("sexo").value.trim(),
 
                 raza:
                     document.getElementById("raza").value.trim(),
@@ -528,6 +549,7 @@
             if (
                 !payload.identificador ||
                 !payload.especie ||
+                !payload.sexo ||
                 !payload.raza ||
                 !payload.fecha_nacimiento ||
                 !payload.estado_sanitario ||
@@ -699,6 +721,10 @@
                             </td>
 
                             <td>
+                                ${escapeHtml(animal.sexo)}
+                            </td>
+
+                            <td>
                                 ${escapeHtml(animal.raza)}
                             </td>
 
@@ -766,7 +792,7 @@
                     <tr>
 
                         <td
-                            colspan="7"
+                            colspan="8"
                             class="error-row"
                         >
                             No fue posible cargar los animales.
@@ -803,6 +829,9 @@
 
                 document.getElementById("especie").value =
                     animal.especie;
+
+                document.getElementById("sexo").value =
+                    animal.sexo;
 
                 document.getElementById("raza").value =
                     animal.raza;
@@ -978,7 +1007,6 @@
             const perfil = await respuesta.json();
 
             document.getElementById("perfil-nombre").textContent = perfil.nombre;
-            document.getElementById("perfil-rol").textContent = perfil.rol;
         } catch (error) {
             console.error("No se pudo cargar el perfil del usuario:", error);
         }

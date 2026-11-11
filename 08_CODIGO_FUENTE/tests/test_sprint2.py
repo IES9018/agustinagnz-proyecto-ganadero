@@ -214,6 +214,7 @@ class TestAnimalServiceValidaciones(unittest.TestCase):
         return {
             "identificador": "AN-001",
             "especie": "Bovino",
+            "sexo": "Hembra",
             "raza": "Hereford",
             "fecha_nacimiento": "2024-05-10",
             "estado_sanitario": "Saludable",
@@ -271,7 +272,7 @@ class TestAnimalServiceValidaciones(unittest.TestCase):
     def test_24_rechaza_establecimiento_inexistente(self):
         self.db.get.return_value = None
 
-        with self.assertRaisesRegex(ValueError, "no existe"):
+        with self.assertRaisesRegex(LookupError, "no existe"):
             self.service._validar(self.datos_validos())
 
 class TestSanidadServiceValidaciones(unittest.TestCase):
@@ -418,6 +419,7 @@ class TestHistorialAnimal(unittest.TestCase):
             "identificador": "AN-001",
             "especie": "Bovino",
             "raza": "Hereford",
+            "sexo": "Hembra",
             "fecha_nacimiento": date(2024, 5, 10),
             "estado_sanitario": "Saludable",
             "id_establecimiento": 1,
@@ -449,6 +451,7 @@ class TestHistorialAnimal(unittest.TestCase):
             id_animal=10,
             identificador="AN-001",
             especie="Bovino",
+            sexo="Hembra",
             raza="Hereford",
             fecha_nacimiento=date(2024, 5, 10),
             estado_sanitario="Saludable",
@@ -480,6 +483,7 @@ class TestHistorialAnimal(unittest.TestCase):
             id_animal=10,
             identificador="AN-001",
             especie="Bovino",
+            sexo="Hembra",
             raza="Hereford",
             fecha_nacimiento=date(2024, 5, 10),
             estado_sanitario="Saludable",
@@ -512,6 +516,7 @@ class TestTrazabilidadRepository(unittest.TestCase):
         animal = SimpleNamespace(
             id_animal=10,
             identificador="AN-001",
+            sexo="Macho",
         )
 
         registro = SimpleNamespace(
@@ -553,6 +558,7 @@ class TestTrazabilidadRepository(unittest.TestCase):
         animal = SimpleNamespace(
             id_animal=10,
             identificador="AN-001",
+            sexo="Macho",
         )
 
         registro_antiguo = SimpleNamespace(
@@ -603,6 +609,7 @@ class TestTrazabilidadRepository(unittest.TestCase):
         animal = SimpleNamespace(
             id_animal=10,
             identificador="AN-001",
+            sexo="Macho",
         )
 
         evento = SimpleNamespace(

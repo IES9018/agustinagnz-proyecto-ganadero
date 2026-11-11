@@ -1,16 +1,16 @@
-
 from datetime import datetime, timezone
 
-from fastapi import APIRouter, Form, Request
+from fastapi import APIRouter, Depends, Form, HTTPException, Response, status
 from fastapi.responses import RedirectResponse
 from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm import Session
 
-from src.core.database import SessionLocal
+from src.core.database import get_db
+from src.core.security import crear_access_token
 from src.models.usuario import Usuario
-from src.services.auth_service import (
-    verificar_password,
-    hash_password,
-)
+from src.services.auth_service import hash_password, verificar_password
+
 
 router = APIRouter(prefix="/auth", tags=["Autenticación"])
 
@@ -21,6 +21,7 @@ def registrar_usuario(
     email: str = Form(...),
     password: str = Form(...),
     password_confirmacion: str = Form(...),
+    db: Session = Depends(get_db),
 ):
     nombre = nombre.strip()
     email = email.strip().lower()
@@ -38,72 +39,80 @@ def registrar_usuario(
             status_code=303,
         )
 
-    with SessionLocal() as db:
-        existente = db.scalar(
-            select(Usuario).where(Usuario.email == email)
+    existente = db.scalar(
+        select(Usuario).where(Usuario.email == email)
+    )
+
+    if existente is not None:
+        return RedirectResponse(
+            "/login?registro=duplicado",
+            status_code=303,
         )
 
-        if existente:
-            return RedirectResponse(
-                "/login?registro=duplicado",
-                status_code=303,
-            )
+    usuario = Usuario(
+        nombre=nombre,
+        email=email,
+        password_hash=hash_password(password),
+        estado_activo=True,
+    )
 
-        usuario = Usuario(
-            nombre=nombre,
-            email=email,
-            password_hash=hash_password(password),
-            estado_activo=True,
+    db.add(usuario)
+
+    try:
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        return RedirectResponse(
+            "/login?registro=duplicado",
+            status_code=303,
         )
 
-        db.add(usuario)
-
-        try:
-            db.commit()
-        except Exception:
-            db.rollback()
-            return RedirectResponse(
-                "/login?registro=error",
-                status_code=303,
-            )
-
-    return RedirectResponse("/login?registro=exitoso", status_code=303)
+    return RedirectResponse(
+        "/login?registro=exitoso",
+        status_code=303,
+    )
 
 
 @router.post("/login")
 def login(
-    request: Request,
     email: str = Form(...),
     password: str = Form(...),
+    db: Session = Depends(get_db),
 ):
     email = email.strip().lower()
 
-    with SessionLocal() as db:
-        usuario = db.scalar(
-            select(Usuario).where(Usuario.email == email)
+    usuario = db.scalar(
+        select(Usuario).where(Usuario.email == email)
+    )
+
+    if (
+        usuario is None
+        or not usuario.estado_activo
+        or not verificar_password(password, usuario.password_hash)
+    ):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Credenciales incorrectas o cuenta inactiva.",
+            headers={"WWW-Authenticate": "Bearer"},
         )
 
-        if (
-            usuario is None
-            or not usuario.estado_activo
-            or not verificar_password(password, usuario.password_hash)
-        ):
-            return RedirectResponse(
-                "/login?error=1",
-                status_code=303,
-            )
+    usuario.ultimo_acceso = datetime.now(timezone.utc)
+    db.commit()
 
-        usuario.ultimo_acceso = datetime.now(timezone.utc)
-        db.commit()
+    access_token = crear_access_token(
+        usuario_id=usuario.id_usuario,
+        nombre=usuario.nombre,
+    )
 
-        request.session.clear()
-        request.session["usuario_id"] = usuario.id_usuario
-        request.session["nombre"] = usuario.nombre
-
-    return RedirectResponse("/", status_code=303)
+    return {
+        "access_token": access_token,
+        "token_type": "bearer",
+    }
 
 
-@router.post("/logout")
-def logout(request: Request):
-    request.session.clear()
-    return RedirectResponse("/login", status_code=303)
+@router.post(
+    "/logout",
+    status_code=status.HTTP_204_NO_CONTENT,
+)
+def logout():
+    return Response(status_code=status.HTTP_204_NO_CONTENT)

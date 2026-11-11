@@ -1,10 +1,10 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Path
 from sqlalchemy.orm import Session
 
 from src.core.database import get_db
+from src.core.security import usuario_actual
 from src.services.sanidad_service import SanidadService
 
-from src.core.security import usuario_actual
 
 router = APIRouter(
     dependencies=[Depends(usuario_actual)]
@@ -13,7 +13,7 @@ router = APIRouter(
 
 @router.get("/api/animales/{animal_id}/sanidad")
 def get_sanidad(
-    animal_id: int,
+    animal_id: int = Path(..., ge=1, le=2147483647),
     db: Session = Depends(get_db)
 ):
     service = SanidadService(db)
@@ -26,8 +26,8 @@ def get_sanidad(
 
 @router.post("/api/animales/{animal_id}/sanidad")
 def create_sanidad(
-    animal_id: int,
     data: dict,
+    animal_id: int = Path(..., ge=1, le=2147483647),
     db: Session = Depends(get_db)
 ):
     service = SanidadService(db)
@@ -37,12 +37,12 @@ def create_sanidad(
     except LookupError as error:
         raise HTTPException(status_code=404, detail=str(error))
     except ValueError as error:
-        raise HTTPException(status_code=400, detail=str(error))
+        raise HTTPException(status_code=409, detail=str(error))
 
 
-@router.delete("/api/sanidad/{event_id}")
+@router.delete("/api/sanidad/{event_id:int}")
 def delete_sanidad(
-    event_id: int,
+    event_id: int = Path(..., ge=1, le=2147483647),
     motivo: str = "Anulación administrativa",
     db: Session = Depends(get_db)
 ):
@@ -53,7 +53,8 @@ def delete_sanidad(
     except LookupError as error:
         raise HTTPException(status_code=404, detail=str(error))
     except ValueError as error:
-        raise HTTPException(status_code=400, detail=str(error))
+        raise HTTPException(status_code=409, detail=str(error))
+
 
 @router.get("/api/sanidad/alertas")
 def get_alertas_sanidad(

@@ -10,43 +10,43 @@ En esta etapa, el objetivo es desarrollar un MVP que cubra las operaciones princ
 
 ## 2. Requerimientos Funcionales
 
-* [ ] **RF-01:** El sistema deberá permitir la autenticación de usuarios mediante correo electrónico y contraseña.
+* [x] **RF-01:** El sistema deberá permitir la autenticación de usuarios mediante correo electrónico y contraseña.
 
-* [ ] **RF-02:** El sistema deberá permitir el registro de múltiples usuarios, todos con las mismas funcionalidades y sin diferenciación de permisos por rol.
+* [x] **RF-02:** El sistema deberá permitir el registro de múltiples usuarios, todos con las mismas funcionalidades y sin diferenciación de permisos por rol.
 
-* [ ] **RF-03:** El sistema deberá permitir registrar animales individualmente.
+* [x] **RF-03:** El sistema deberá permitir registrar animales individualmente.
 
-* [ ] **RF-04:** El sistema deberá permitir actualizar y consultar la información de los animales registrados.
+* [x] **RF-04:** El sistema deberá permitir actualizar y consultar la información de los animales registrados.
 
-* [ ] **RF-05:** El sistema deberá identificar cada animal mediante un identificador único.
+* [x] **RF-05:** El sistema deberá identificar cada animal mediante un identificador único.
 
-* [ ] **RF-06:** El sistema deberá almacenar información básica del animal, incluyendo especie, raza, sexo, fecha de nacimiento y estado sanitario.
+* [x] **RF-06:** El sistema deberá almacenar información básica del animal, incluyendo especie, raza, sexo, fecha de nacimiento y estado sanitario.
 
-* [ ] **RF-07:** El sistema deberá permitir registrar eventos asociados a los animales.
+* [x] **RF-07:** El sistema deberá permitir registrar eventos asociados a los animales.
 
-* [ ] **RF-08:** El sistema deberá permitir registrar vacunaciones, tratamientos sanitarios y movimientos como eventos asociados al animal.
+* [x] **RF-08:** El sistema deberá permitir registrar vacunaciones, tratamientos sanitarios y movimientos como eventos asociados al animal.
 
-* [ ] **RF-09:** El sistema deberá permitir consultar el historial de eventos de un animal.
+* [x] **RF-09:** El sistema deberá permitir consultar el historial de eventos de un animal.
 
-* [ ] **RF-10:** El sistema deberá permitir consultar la trazabilidad completa de un animal.
+* [x] **RF-10:** El sistema deberá permitir consultar la trazabilidad completa de un animal.
 
-* [ ] **RF-11:** El sistema deberá permitir registrar y actualizar información de stock de insumos.
+* [x] **RF-11:** El sistema deberá permitir registrar y actualizar información de stock de insumos.
 
-* [ ] **RF-12:** El sistema deberá permitir gestionar insumos operativos, incluyendo alimentos, medicamentos e insumos generales.
+* [x] **RF-12:** El sistema deberá permitir gestionar insumos operativos, incluyendo alimentos, medicamentos e insumos generales.
 
-* [ ] **RF-13:** El sistema deberá controlar que la cantidad de stock no resulte negativa.
+* [x] **RF-13:** El sistema deberá controlar que la cantidad de stock no resulte negativa.
 
 * [ ] **RF-14:** El sistema deberá generar alertas básicas cuando el stock alcance condiciones definidas como críticas o bajas.
 
-* [ ] **RF-15:** El sistema deberá generar alertas relacionadas con eventos sanitarios próximos o pendientes.
+* [x] **RF-15:** El sistema deberá generar alertas relacionadas con eventos sanitarios próximos o pendientes.
 
-* [ ] **RF-16:** El sistema deberá mantener la trazabilidad de los registros históricos y evitar eliminaciones físicas de información histórica.
+* [x] **RF-16:** El sistema deberá mantener la trazabilidad de los registros históricos y evitar eliminaciones físicas de información histórica.
   
 * [ ] **RF-17**: El sistema deberá permitir registrar y consultar productores como entidades del dominio.
   
 * [ ] **RF-18**: El sistema deberá permitir registrar y consultar establecimientos asociados a un productor.
   
-* [ ] **RF-19**: El sistema deberá permitir seleccionar un establecimiento previamente registrado al dar de alta un animal.
+* [x] **RF-19**: El sistema deberá permitir seleccionar un establecimiento previamente registrado al dar de alta un animal.
   
 
   
@@ -111,8 +111,12 @@ Las decisiones arquitectónicas del sistema se encuentran formalizadas en los si
 - **ADR-001 — Selección de arquitectura monolítica con base de datos relacional (PostgreSQL):** establece la arquitectura monolítica modular y la utilización de PostgreSQL como sistema de persistencia.
 - **ADR-002 — Selección del estilo arquitectónico:** establece la utilización de una arquitectura monolítica modular como estilo arquitectónico general, considerando el tamaño del equipo, el alcance del sistema, la complejidad operativa y los plazos académicos.
 - **ADR-003 — Selección del mecanismo de persistencia:** establece PostgreSQL como mecanismo de persistencia objetivo y fundamenta su elección a partir del modelo relacional de GanadApp.
+- **ADR-004 — Selección del stack de interfaz de usuario:** establece HTML, CSS y JavaScript como tecnologías de interfaz para el MVP, sin incorporar un framework SPA como dependencia obligatoria.
+- **ADR-005 — Selección de la estrategia web:** establece una arquitectura MPA con páginas independientes, frontend servido por FastAPI y comunicación mediante API REST.
 
 Estas decisiones restringen la incorporación de nuevas tecnologías y componentes arquitectónicos. La incorporación de un framework, base de datos, servicio externo o cambio significativo del estilo arquitectónico deberá estar respaldada por una decisión arquitectónica documentada mediante un ADR aprobado.
+
+La implementación de nuevos endpoints deberá respetar el contrato OpenAPI establecido en `docs/arquitectura/api-contracts.yaml`.
 
 ### Requisitos de interfaz y accesibilidad
 
@@ -137,85 +141,102 @@ Estos requisitos se aplican específicamente a las dos pantallas críticas del T
 
 ## 5. Contratos de Datos / Tipos
 
-Los contratos principales se basan en las entidades definidas actualmente en el modelo de dominio de GanadApp.
+Los contratos de datos utilizados para la comunicación entre el frontend y el backend se encuentran centralizados en:
 
-```typescript
-interface Usuario {
-  id_usuario: number;
-  nombre: string;
-  email: string;
-  contacto: string;
-  estado_activo: boolean;
-  ultimo_acceso: string;
-}
+`docs/arquitectura/api-contracts.yaml`
 
-interface Productor {
-  id_productor: number;
-  nombre: string;
-  documento: string;
-  contacto: string;
-  direccion: string;
-  estado: string;
-}
+Este archivo constituye la fuente de verdad para la definición de los contratos HTTP de GanadApp.
 
-interface Establecimiento {
-  id_establecimiento: number;
-  nombre: string;
-  ubicacion: string;
-  capacidad: number;
-  estado: string;
-  id_productor: number;
-}
+La especificación utiliza OpenAPI 3.1.0 y define los esquemas reutilizables dentro de `components.schemas`.
 
-interface Animal {
-  id_animal: number;
-  identificador: string;
-  especie: string;
-  raza: string;
-  sexo: string;
-  fecha_nacimiento: string;
-  estado_sanitario: string;
-  id_establecimiento: number;
-}
+La SPEC no duplica las estructuras de solicitudes y respuestas mediante definiciones paralelas. En su lugar, referencia los esquemas definidos en el contrato OpenAPI por su nombre.
 
-interface EventoSanitario {
-  id_evento: number;
-  tipo: string;
-  fecha: string;
-  descripcion: string;
-  dosis: string;
-  id_animal: number;
-  id_usuario: number;
-}
+### 5.1. Esquemas de datos
 
-interface StockInsumo {
-  id_stock: number;
-  tipo_insumo: string;
-  cantidad: number;
-  unidad: string;
-  ubicacion: string;
-  id_establecimiento: number;
-}
-```
+Los principales esquemas utilizados por las operaciones de la API son:
 
-Las relaciones principales del dominio son:
+| Esquema OpenAPI | Responsabilidad |
+|---|---|
+| `AnimalInput` | Define los datos de entrada para registrar o actualizar animales. |
+| `AnimalResponse` | Define la estructura de respuesta de los datos de un animal. |
+| `EventoSanitarioInput` | Define los datos necesarios para registrar un evento sanitario. |
+| `InsumoInput` | Define los datos de entrada para las operaciones de gestión de insumos. |
+| `MovimientoStockInput` | Define los datos necesarios para registrar movimientos de stock. |
+| `TrazabilidadResponse` | Define la estructura de respuesta de la información de trazabilidad. |
 
-* Un `Productor` puede tener múltiples `Establecimiento`.
-* Un `Establecimiento` puede contener múltiples `Animal`.
-* Un `Animal` puede tener múltiples `EventoSanitario`.
-* Un `Usuario` puede registrar múltiples `EventoSanitario`.
-* Un `Establecimiento` administra `StockInsumo`.
+Las referencias completas corresponden a los siguientes identificadores:
 
-Los objetos `Raza`, `Dosis`, `Estado sanitario`, `Ubicación` y `Contacto` se consideran Value Objects dentro del modelo de dominio.
+- `#/components/schemas/AnimalInput`
+- `#/components/schemas/AnimalResponse`
+- `#/components/schemas/EventoSanitarioInput`
+- `#/components/schemas/InsumoInput`
+- `#/components/schemas/MovimientoStockInput`
+- `#/components/schemas/TrazabilidadResponse`
 
-Las reglas principales asociadas a estos contratos son:
 
-* El identificador de un animal debe ser único.
-* Todo animal debe pertenecer a un establecimiento válido.
-* Todo evento sanitario debe estar asociado a un animal existente.
-* Los eventos sanitarios se gestionan a través del agregado `Animal`.
-* El stock no puede resultar negativo.
-* Los registros históricos deben conservar su trazabilidad.
+Los nombres indicados corresponden a los esquemas definidos en `components.schemas` dentro de `docs/arquitectura/api-contracts.yaml`. Las referencias completas permiten identificar cada esquema de manera unívoca dentro de la especificación OpenAPI.
+
+La incorporación, modificación o eliminación de estos esquemas deberá realizarse en el contrato OpenAPI y mantenerse sincronizada con las implementaciones correspondientes.
+
+
+### 5.2. Relaciones del dominio
+
+Las entidades principales del sistema mantienen las siguientes relaciones:
+
+- **Productor (1) — (N) Establecimiento:** un productor puede administrar varios establecimientos ganaderos.
+- **Establecimiento (1) — (N) Animal:** cada establecimiento puede contener varios animales y cada animal pertenece a un establecimiento.
+- **Animal (1) — (N) EventoSanitario:** un animal puede tener múltiples eventos sanitarios asociados.
+- **Establecimiento (1) — (N) StockInsumo:** cada establecimiento administra sus registros de stock de insumos.
+
+
+**Reglas del dominio:**
+
+- Cada animal debe tener un identificador único.
+- Todo animal debe pertenecer a un establecimiento existente.
+- Cada evento sanitario debe estar asociado a un animal existente.
+- Los eventos sanitarios se gestionan en relación con el animal correspondiente.
+- El stock de insumos no puede tener cantidades negativas.
+- Los movimientos y eventos deben conservar la información histórica necesaria para la trazabilidad.
+
+### 5.3. Reglas de consistencia
+
+Los contratos deberán respetar las siguientes reglas:
+
+- El frontend deberá enviar los datos de acuerdo con los esquemas de entrada definidos en OpenAPI.
+- El backend deberá validar los datos recibidos antes de ejecutar las operaciones de negocio.
+- Las respuestas deberán respetar los esquemas definidos para cada operación.
+- Los identificadores deberán cumplir los tipos y restricciones establecidos en el contrato.
+- Las fechas deberán utilizar los formatos documentados.
+- Los campos obligatorios y opcionales deberán coincidir con sus definiciones OpenAPI.
+- Los errores deberán utilizar los códigos de estado y estructuras de respuesta documentados.
+- Los cambios en los contratos deberán reflejarse primero en `api-contracts.yaml` y posteriormente en la implementación.
+- Las operaciones protegidas de la API, incluido el registro de eventos sanitarios, requieren autenticación mediante un token JWT Bearer válido. La autenticación controla el acceso, pero no implica que el usuario ejecutor quede registrado como autor del evento.
+
+### 5.4. Relación entre el dominio y los contratos de API
+
+Los esquemas OpenAPI representan los datos intercambiados mediante HTTP. No reemplazan el modelo de dominio ni las entidades utilizadas por la persistencia.
+
+Las entidades del dominio, sus relaciones y las reglas de integridad se mantienen definidas mediante los modelos, servicios y repositorios del backend.
+
+La separación de responsabilidades es la siguiente:
+
+| Componente | Responsabilidad |
+|---|---|
+| `api-contracts.yaml` | Define los contratos externos de la API. |
+| `src/schemas/` | Define los esquemas utilizados para validar y estructurar los datos de entrada y salida de las rutas que los incorporan. |
+| `src/models/` | Representa las entidades persistentes del dominio. |
+| `src/services/` | Implementa las reglas y operaciones de negocio. |
+| `src/repositories/` | Gestiona el acceso a la persistencia. |
+
+Esta separación evita duplicar definiciones y permite modificar la implementación interna sin alterar innecesariamente el contrato público de la API.
+
+### 5.5. Versionado y evolución
+
+Toda modificación de un esquema utilizado por la API deberá reflejarse en `docs/arquitectura/api-contracts.yaml`.
+
+Los cambios deberán validarse mediante Redocly y pruebas de contrato con Schemathesis.
+
+No se deberán introducir estructuras de solicitud o respuesta nuevas directamente en la implementación sin actualizar previamente la especificación OpenAPI.
 
 
 ## 6. Criterios de Aceptación en Gherkin
@@ -390,3 +411,7 @@ Scenario: Conservar registros históricos
 | v3.0 → v4.0 | 2026-11-03 | Se unificó el modelo de usuarios, eliminando la diferenciación por roles y estableciendo las mismas funcionalidades para todas las cuentas.                                                                     | Alinear los requerimientos funcionales y el modelo de dominio con la definición actual de usuarios de GanadApp                                                            |
 | v3.0 → v4.0 | 2026-11-03 | Se incorporaron los requerimientos RF-17, RF-18 y RF-19 para registrar productores, establecimientos asociados y seleccionar establecimientos existentes al registrar animales.                                                                     | Formalizar la gestión de productores y establecimientos como parte del dominio del sistema.                                                           |
 | v3.0 → v4.0 | 2026-11-03 | Se incorporó el sexo entre los datos básicos del animal en el RF-06 y en su contrato de datos.                                                                     | Completar la información contemplada para el registro y consulta de animales.                                                         |
+
+| v4.0 → v5.0 | 2026-11-11 | Se incorporó ADR-005 para formalizar la estrategia web MPA, estableciendo páginas independientes, frontend servido por FastAPI y comunicación mediante API REST. | Documentar la estrategia de presentación y navegación seleccionada para el MVP, justificando la elección frente a SPA, SSR y otras alternativas. |
+| v4.0 → v5.0 | 2026-11-11 | Se centralizaron los contratos de datos de la API en `docs/arquitectura/api-contracts.yaml`, reemplazando las definiciones duplicadas por referencias a los esquemas OpenAPI. | Evitar inconsistencias entre la especificación funcional, los contratos HTTP y la implementación del backend. |
+| v4.0 → v5.0 | 2026-11-11 | Se incorporaron reglas de consistencia y evolución de contratos, estableciendo la validación mediante Redocly y Schemathesis. | Formalizar el enfoque API-first y establecer mecanismos de verificación de los contratos de la API. |

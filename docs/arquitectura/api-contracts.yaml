@@ -1,0 +1,852 @@
+
+openapi: 3.1.0
+
+info:
+  title: GanadApp API
+  version: 1.0.0
+  description: |
+    Contrato de la API REST de GanadApp.
+    Documenta las operaciones de autenticación, animales,
+    sanidad, establecimientos, stock y trazabilidad.
+    Las operaciones protegidas requieren autenticación Bearer.
+    El registro de usuarios utiliza un formulario y redirige
+    al inicio de sesión ante resultados válidos o inválidos.
+    La contraseña debe cumplir con los requisitos de seguridad
+    establecidos por la aplicación.
+  license:
+    name: MIT
+    identifier: MIT
+    url: https://opensource.org/license/mit
+
+servers:
+  - url: /
+    description: Servidor relativo al entorno de ejecución.
+
+tags:
+  - name: Autenticación
+    description: Registro, inicio y cierre de sesión.
+  - name: Animales
+    description: Registro, consulta, listado y actualización de animales.
+  - name: Sanidad
+    description: Gestión de eventos y alertas sanitarias.
+  - name: Establecimientos
+    description: Consulta de establecimientos ganaderos.
+  - name: Stock
+    description: Gestión de insumos y movimientos de stock.
+  - name: Trazabilidad
+    description: Consulta del historial de trazabilidad de animales.
+
+paths:
+  /auth/registro:
+    post:
+      security: []
+      tags:
+        - Autenticación
+      summary: Registrar un usuario
+      description: |
+        Registra un usuario mediante un formulario.
+        Ante un registro válido o inválido, redirige a /login
+        con un parámetro que informa el resultado.
+        La aplicación exige una contraseña de al menos 12 caracteres.
+      operationId: registrarUsuario
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required:
+                - nombre
+                - email
+                - password
+                - password_confirmacion
+              properties:
+                nombre:
+                  type: string
+                email:
+                  type: string
+                password:
+                  type: string
+                password_confirmacion:
+                  type: string
+      responses:
+        "303":
+          description: Redirección al formulario de inicio de sesión.
+          headers:
+            Location:
+              schema:
+                type: string
+              description: URL de redirección.
+        "422":
+          $ref: "#/components/responses/ValidationError"
+
+  /auth/login:
+    post:
+      security: []
+      tags:
+        - Autenticación
+      summary: Iniciar sesión
+      operationId: iniciarSesion
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+      responses:
+        "200":
+          description: Autenticación exitosa.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TokenResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+
+  /auth/logout:
+    post:
+      security: []
+      tags:
+        - Autenticación
+      summary: Cerrar sesión
+      operationId: cerrarSesion
+      responses:
+        "204":
+          description: Sesión cerrada.
+
+  /auth/perfil:
+    get:
+      tags:
+        - Autenticación
+      summary: Obtener el perfil del usuario autenticado
+      operationId: obtenerPerfil
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Datos del perfil del usuario.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ObjetoJSON"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /api/animales:
+    get:
+      tags:
+        - Animales
+      summary: Listar animales
+      operationId: listarAnimales
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Listado de animales.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AnimalResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+    post:
+      tags:
+        - Animales
+      summary: Registrar un animal
+      operationId: crearAnimal
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AnimalInput"
+      responses:
+        "200":
+          description: Animal registrado.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AnimalResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+
+  /api/animales/{animal_id}:
+    parameters:
+      - $ref: "#/components/parameters/AnimalId"
+
+    get:
+      tags:
+        - Animales
+      summary: Obtener un animal
+      operationId: obtenerAnimal
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Datos del animal.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AnimalResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+
+    put:
+      tags:
+        - Animales
+      summary: Actualizar un animal
+      operationId: actualizarAnimal
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AnimalInput"
+      responses:
+        "200":
+          description: Animal actualizado.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AnimalResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+
+  /api/animales/{animal_id}/sanidad:
+    parameters:
+      - $ref: "#/components/parameters/AnimalId"
+
+    get:
+      tags:
+        - Sanidad
+      summary: Listar eventos sanitarios de un animal
+      operationId: listarEventosSanitarios
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Eventos sanitarios del animal.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ObjetoJSON"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+
+    post:
+      tags:
+        - Sanidad
+      summary: Registrar un evento sanitario
+      operationId: crearEventoSanitario
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EventoSanitarioInput"
+      responses:
+        "200":
+          description: Evento sanitario registrado.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ObjetoJSON"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+
+  /api/sanidad/{event_id}:
+    delete:
+      tags:
+        - Sanidad
+      summary: Anular un evento sanitario
+      operationId: anularEventoSanitario
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: event_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 2147483647
+        - name: motivo
+          in: query
+          required: false
+          description: Motivo de anulación.
+          schema:
+            type: string
+            default: Anulación administrativa
+      responses:
+        "200":
+          description: Evento sanitario anulado.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ObjetoJSON"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+
+  /api/sanidad/alertas:
+    get:
+      tags:
+        - Sanidad
+      summary: Listar alertas sanitarias
+      operationId: listarAlertasSanitarias
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Alertas sanitarias registradas.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ObjetoJSON"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /api/establecimientos:
+    get:
+      tags:
+        - Establecimientos
+      summary: Listar establecimientos
+      operationId: listarEstablecimientos
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Listado de establecimientos.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/EstablecimientoResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /api/stock:
+    get:
+      tags:
+        - Stock
+      summary: Listar insumos del stock
+      operationId: listarStock
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Listado de insumos.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ObjetoJSON"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+    post:
+      tags:
+        - Stock
+      summary: Registrar un insumo
+      operationId: crearInsumo
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/InsumoInput"
+      responses:
+        "201":
+          description: Insumo registrado.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ObjetoJSON"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+
+  /api/stock/{stock_id}:
+    put:
+      tags:
+        - Stock
+      summary: Actualizar un insumo
+      operationId: actualizarInsumo
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: stock_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 2147483647
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/InsumoInput"
+      responses:
+        "200":
+          description: Insumo actualizado.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ObjetoJSON"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+
+  /api/stock/{stock_id}/movimientos:
+    post:
+      tags:
+        - Stock
+      summary: Registrar un movimiento de stock
+      operationId: ajustarStock
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: stock_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 2147483647
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MovimientoStockInput"
+      responses:
+        "200":
+          description: Stock actualizado.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ObjetoJSON"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+
+  /api/animales/{animal_id}/trazabilidad:
+    get:
+      tags:
+        - Trazabilidad
+      summary: Consultar la trazabilidad de un animal
+      operationId: obtenerTrazabilidadAnimal
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/AnimalId"
+      responses:
+        "200":
+          description: Historial de trazabilidad del animal.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TrazabilidadResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  parameters:
+    AnimalId:
+      name: animal_id
+      in: path
+      required: true
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 2147483647
+
+  schemas:
+    LoginRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+
+    TokenResponse:
+      type: object
+      required:
+        - access_token
+        - token_type
+      properties:
+        access_token:
+          type: string
+        token_type:
+          type: string
+          const: bearer
+
+    AnimalInput:
+      type: object
+      required:
+        - identificador
+        - especie
+        - sexo
+        - raza
+        - fecha_nacimiento
+        - estado_sanitario
+        - id_establecimiento
+      properties:
+        identificador:
+          type: string
+          minLength: 1
+          maxLength: 100
+        especie:
+          type: string
+          minLength: 1
+          maxLength: 100
+        sexo:
+          type: string
+          minLength: 1
+          maxLength: 100
+        raza:
+          type: string
+          minLength: 1
+          maxLength: 100
+        fecha_nacimiento:
+          type: string
+          format: date
+        estado_sanitario:
+          type: string
+          minLength: 1
+          maxLength: 100
+        id_establecimiento:
+          type: integer
+          minimum: 1
+          maximum: 2147483647
+
+    AnimalResponse:
+      type: object
+      required:
+        - id_animal
+        - identificador
+        - especie
+        - sexo
+        - raza
+        - fecha_nacimiento
+        - estado_sanitario
+        - id_establecimiento
+      properties:
+        id_animal:
+          type: integer
+        identificador:
+          type: string
+        especie:
+          type: string
+        sexo:
+          type: string
+        raza:
+          type: string
+        fecha_nacimiento:
+          type:
+            - string
+            - "null"
+          format: date
+        estado_sanitario:
+          type: string
+        id_establecimiento:
+          type: integer
+
+    EventoSanitarioInput:
+      type: object
+      additionalProperties: true
+      required:
+        - tipo_evento
+        - descripcion
+        - fecha
+      properties:
+        tipo_evento:
+          type: string
+          minLength: 1
+          maxLength: 100
+        descripcion:
+          type: string
+          minLength: 1
+        fecha:
+          type: string
+          format: date
+        fecha_proxima:
+          type:
+            - string
+            - "null"
+          format: date
+
+    InsumoInput:
+      type: object
+      additionalProperties: true
+      required:
+        - tipo_insumo
+        - unidad
+        - ubicacion
+        - id_establecimiento
+        - cantidad
+      properties:
+        tipo_insumo:
+          type: string
+          minLength: 1
+          maxLength: 150
+        unidad:
+          type: string
+          minLength: 1
+          maxLength: 30
+        ubicacion:
+          type: string
+          minLength: 1
+          maxLength: 200
+        categoria:
+          type: string
+          enum:
+            - Alimentos
+            - Medicamentos
+            - Insumos generales
+          default: Insumos generales
+        stock_minimo:
+          type: number
+          minimum: 0
+          default: 10
+        stock_critico:
+          type: number
+          minimum: 0
+          default: 5
+        id_establecimiento:
+          type: integer
+          minimum: 1
+          maximum: 2147483647
+        cantidad:
+          type: number
+          minimum: 0
+
+    MovimientoStockInput:
+      type: object
+      additionalProperties: true
+      required:
+        - tipo_operacion
+        - cantidad
+      properties:
+        tipo_operacion:
+          type: string
+          enum:
+            - ingreso
+            - salida
+        cantidad:
+          type: number
+          exclusiveMinimum: 0
+
+    EstablecimientoResponse:
+      type: object
+      required:
+        - id_establecimiento
+        - nombre
+        - ubicacion
+      properties:
+        id_establecimiento:
+          type: integer
+        nombre:
+          type: string
+        ubicacion:
+          type: string
+
+    TrazabilidadResponse:
+      type: object
+      required:
+        - id_animal
+        - identificador
+        - sexo
+        - total_eventos
+        - eventos
+      properties:
+        id_animal:
+          type: integer
+        identificador:
+          type: string
+        sexo:
+          type: string
+        total_eventos:
+          type: integer
+        eventos:
+          type: array
+          items:
+            $ref: "#/components/schemas/ObjetoJSON"
+      additionalProperties: true
+
+    ObjetoJSON:
+      type: object
+      additionalProperties: true
+
+    ErrorResponse:
+      type: object
+      required:
+        - detail
+      properties:
+        detail:
+          type: string
+
+    ValidationError:
+      type: object
+      required:
+        - loc
+        - msg
+        - type
+      properties:
+        loc:
+          type: array
+          items:
+            oneOf:
+              - type: string
+              - type: integer
+        msg:
+          type: string
+        type:
+          type: string
+        input: {}
+        ctx:
+          type: object
+          additionalProperties: true
+
+  responses:
+    BadRequest:
+      description: Solicitud inválida o datos rechazados por las reglas de negocio.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+
+    Unauthorized:
+      description: Autenticación ausente, inválida o cuenta inactiva.
+      headers:
+        WWW-Authenticate:
+          schema:
+            type: string
+          description: Esquema de autenticación requerido.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+
+    NotFound:
+      description: Recurso o entidad relacionada no encontrada.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+
+    Conflict:
+      description: Conflicto con las reglas de negocio o el estado actual del recurso.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+
+    ValidationError:
+      description: Error de validación de los datos recibidos.
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - detail
+            properties:
+              detail:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ValidationError"

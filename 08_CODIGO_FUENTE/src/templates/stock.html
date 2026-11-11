@@ -50,7 +50,6 @@
             
             <div class="user-profile">
                 <span id="perfil-nombre"></span>
-                <span id="perfil-rol"></span>
             </div>
 
         
@@ -192,7 +191,8 @@
         © 2026 Ganadapp - Soluciones de Gestión Ganadera - Todos los derechos reservados
     </footer>
 
-    <script src="/static/js/stock-ui.js"></script>
+    <script src="/static/js/auth.js"></script>
+<script src="/static/js/stock-ui.js"></script>
 
     <script>
     document.addEventListener("DOMContentLoaded", async () => {
@@ -208,7 +208,6 @@
             const perfil = await respuesta.json();
 
             document.getElementById("perfil-nombre").textContent = perfil.nombre;
-            document.getElementById("perfil-rol").textContent = perfil.rol;
         } catch (error) {
             console.error("No se pudo cargar el perfil del usuario:", error);
         }

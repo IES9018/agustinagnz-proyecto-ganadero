@@ -11,20 +11,41 @@ class Usuario(Base):
     __tablename__ = "usuarios"
 
     id_usuario: Mapped[int] = mapped_column(
-        Integer, primary_key=True, autoincrement=True
+        Integer,
+        primary_key=True,
+        autoincrement=True,
     )
-    nombre: Mapped[str] = mapped_column(String(150), nullable=False)
+
+    nombre: Mapped[str] = mapped_column(
+        String(150),
+        nullable=False,
+    )
+
     email: Mapped[str] = mapped_column(
-        String(255), unique=True, nullable=False, index=True
+        String(255),
+        unique=True,
+        nullable=False,
+        index=True,
     )
-    password_hash: Mapped[str] = mapped_column(String(255), nullable=False)
-    rol: Mapped[str] = mapped_column(String(30), nullable=False)
+
+    password_hash: Mapped[str] = mapped_column(
+        String(255),
+        nullable=False,
+    )
+
     estado_activo: Mapped[bool] = mapped_column(
-        Boolean, nullable=False, default=True
+        Boolean,
+        nullable=False,
+        default=True,
     )
+
     ultimo_acceso: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True), nullable=True
+        DateTime(timezone=True),
+        nullable=True,
     )
+
     fecha_creacion: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), nullable=False, server_default=func.now()
+        DateTime(timezone=True),
+        nullable=False,
+        server_default=func.now(),
     )
