@@ -1,3 +1,4 @@
+
 from datetime import date
 
 from src.models.animal import Animal
@@ -36,7 +37,10 @@ class SanidadService:
 
             datos_texto[campo] = valor
 
-        fecha_evento = self._validar_fecha(data.get("fecha"), "fecha del evento")
+        fecha_evento = self._validar_fecha(
+            data.get("fecha"),
+            "fecha del evento"
+        )
 
         if fecha_evento > date.today():
             raise ValueError("La fecha del evento no puede ser futura.")
@@ -44,17 +48,20 @@ class SanidadService:
         fecha_proxima = None
         valor_fecha_proxima = data.get("fecha_proxima")
 
-        if valor_fecha_proxima not in (None, ""):
+        if valor_fecha_proxima is not None:
             fecha_proxima = self._validar_fecha(
                 valor_fecha_proxima,
                 "fecha próxima"
             )
 
-            if fecha_proxima < fecha_evento:
-                raise ValueError(
-                    "La fecha próxima no puede ser anterior "
-                    "a la fecha del evento."
-                )
+        if (
+            fecha_proxima is not None
+            and fecha_proxima < fecha_evento
+        ):
+            raise ValueError(
+                "La fecha próxima no puede ser anterior "
+                "a la fecha del evento."
+            )
 
         datos = {
             "tipo_evento": datos_texto["tipo_evento"],
