@@ -272,7 +272,7 @@ class TestAnimalServiceValidaciones(unittest.TestCase):
     def test_24_rechaza_establecimiento_inexistente(self):
         self.db.get.return_value = None
 
-        with self.assertRaisesRegex(ValueError, "no existe"):
+        with self.assertRaisesRegex(LookupError, "no existe"):
             self.service._validar(self.datos_validos())
 
 class TestSanidadServiceValidaciones(unittest.TestCase):
