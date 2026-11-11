@@ -516,6 +516,7 @@ class TestTrazabilidadRepository(unittest.TestCase):
         animal = SimpleNamespace(
             id_animal=10,
             identificador="AN-001",
+            sexo="Macho",
         )
 
         registro = SimpleNamespace(
@@ -557,6 +558,7 @@ class TestTrazabilidadRepository(unittest.TestCase):
         animal = SimpleNamespace(
             id_animal=10,
             identificador="AN-001",
+            sexo="Macho",
         )
 
         registro_antiguo = SimpleNamespace(
@@ -607,6 +609,7 @@ class TestTrazabilidadRepository(unittest.TestCase):
         animal = SimpleNamespace(
             id_animal=10,
             identificador="AN-001",
+            sexo="Macho",
         )
 
         evento = SimpleNamespace(
