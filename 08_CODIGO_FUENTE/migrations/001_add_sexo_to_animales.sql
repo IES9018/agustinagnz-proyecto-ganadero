@@ -1,0 +1,2 @@
+ALTER TABLE animales
+ADD COLUMN sexo VARCHAR(100);

@@ -2,49 +2,46 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from src.core.database import get_db
+from src.schemas.animal import AnimalInput, AnimalResponse
 from src.services.animal_service import AnimalService
 
-from src.core.security import usuario_actual
-from fastapi import Depends
+router = APIRouter()
 
 
-router = APIRouter(
-    dependencies=[Depends(usuario_actual)]
+@router.post(
+    "/api/animales",
+    response_model=AnimalResponse
 )
-
-@router.post("/api/animales")
 def crear_animal(
-    animal: dict,
+    animal: AnimalInput,
     db: Session = Depends(get_db)
 ):
     service = AnimalService(db)
 
     try:
-        return service.crear_animal(animal)
-
+        return service.crear_animal(animal.model_dump())
     except ValueError as error:
-        raise HTTPException(
-            status_code=400,
-            detail=str(error)
-        )
+        raise HTTPException(status_code=400, detail=str(error))
 
 
-@router.get("/api/animales")
-def listar_animales(
-    db: Session = Depends(get_db)
-):
+@router.get(
+    "/api/animales",
+    response_model=list[AnimalResponse]
+)
+def listar_animales(db: Session = Depends(get_db)):
     service = AnimalService(db)
-
     return service.listar_animales()
 
 
-@router.get("/api/animales/{animal_id}")
+@router.get(
+    "/api/animales/{animal_id}",
+    response_model=AnimalResponse
+)
 def obtener_animal(
     animal_id: int,
     db: Session = Depends(get_db)
 ):
     service = AnimalService(db)
-
     animal = service.obtener_animal(animal_id)
 
     if animal is None:
@@ -56,10 +53,13 @@ def obtener_animal(
     return animal
 
 
-@router.put("/api/animales/{animal_id}")
+@router.put(
+    "/api/animales/{animal_id}",
+    response_model=AnimalResponse
+)
 def actualizar_animal(
     animal_id: int,
-    animal: dict,
+    animal: AnimalInput,
     db: Session = Depends(get_db)
 ):
     service = AnimalService(db)
@@ -67,14 +67,10 @@ def actualizar_animal(
     try:
         resultado = service.actualizar_animal(
             animal_id,
-            animal
+            animal.model_dump()
         )
-
     except ValueError as error:
-        raise HTTPException(
-            status_code=400,
-            detail=str(error)
-        )
+        raise HTTPException(status_code=400, detail=str(error))
 
     if resultado is None:
         raise HTTPException(

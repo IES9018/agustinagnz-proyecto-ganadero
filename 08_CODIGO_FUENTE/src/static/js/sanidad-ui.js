@@ -103,7 +103,7 @@ async function cargarAnimales() {
             const id = animal.id_animal ?? animal.id;
             const identificador = animal.identificador || `Animal ${id}`;
 
-            return `<option value="${escapeHtml(id)}">${escapeHtml(identificador)} — ${escapeHtml(animal.especie || "")}</option>`;
+            return `<option value="${escapeHtml(id)}">${escapeHtml(identificador)} — ${escapeHtml(animal.especie || "")} — ${escapeHtml(animal.sexo || "")}</option>`;
         }).join("");
 
         selectAnimal.insertAdjacentHTML("beforeend", opciones);

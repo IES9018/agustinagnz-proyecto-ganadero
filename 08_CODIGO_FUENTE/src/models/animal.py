@@ -26,6 +26,11 @@ class Animal(Base):
         nullable=False
     )
 
+    sexo: Mapped[str] = mapped_column(
+        String(100),
+        nullable=False
+    )
+
     raza: Mapped[str] = mapped_column(
         String(100),
         nullable=False
