@@ -127,17 +127,31 @@ El sistema utiliza una arquitectura modular monolítica, organizada mediante sep
 El repositorio está organizado en módulos educativos y arquitectónicos:
 
 ```text
-00_REFERENCIAS/           análisis del dominio y requisitos
-01_PLAN_MAESTRO/          visión general y decisiones estratégicas
-02_CASOS_DE_USO/          modelado funcional del sistema
-03_ARQUITECTURA/          diseño arquitectónico (C4, ADR, patrones)
-04_MODELO_DATOS/          modelo de dominio y persistencia
-05_AGENTES_IA/            metodología de agentes de desarrollo
-06_INTERFAZ_USUARIO/      diseño UI/UX y prototipos
-07_IMPLEMENTACION/        guías técnicas y convenciones
-08_CODIGO_FUENTE/         implementación real del sistema
+ganadapp/
+├── README.md
+├── LICENSE
+├── SPEC.md
+├── .opencoderules
+├── .gitignore
+├── .github/workflows
+├── docs/
+│   ├── adr
+│   ├── arquitectura
+│   ├── auditoria
+│   ├── deploy
+|   ├── diseno
+|   ├── performance
+|   ├── pruebas
+│   └── seguridad
+└── 06_INTERFAZ_USUARIO/ 
+└── 08_CODIGO_FUENTE/ 
+
 ```
 
 ## 9. Gestión del proyecto
 
 Tablero del sprint: [Kanban](https://github.com/orgs/IES9018/projects/1)
+
+## 10. Despliegue
+
+**Sitio desplegado:** https://ganadapp.onrender.com/
