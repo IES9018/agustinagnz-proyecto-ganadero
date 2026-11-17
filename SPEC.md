@@ -36,15 +36,15 @@ En esta etapa, el objetivo es desarrollar un MVP que cubra las operaciones princ
 
 * [x] **RF-13:** El sistema deberá controlar que la cantidad de stock no resulte negativa.
 
-* [ ] **RF-14:** El sistema deberá generar alertas básicas cuando el stock alcance condiciones definidas como críticas o bajas.
+* [x] **RF-14:** El sistema deberá  generar alertas cuando el stock de un insumo alcance el umbral crítico establecido.
 
 * [x] **RF-15:** El sistema deberá generar alertas relacionadas con eventos sanitarios próximos o pendientes.
 
 * [x] **RF-16:** El sistema deberá mantener la trazabilidad de los registros históricos y evitar eliminaciones físicas de información histórica.
   
-* [ ] **RF-17**: El sistema deberá permitir registrar y consultar productores como entidades del dominio.
+* [x] **RF-17**: El sistema deberá permitir registrar y consultar productores como entidades del dominio.
   
-* [ ] **RF-18**: El sistema deberá permitir registrar y consultar establecimientos asociados a un productor.
+* [x] **RF-18**: El sistema deberá permitir registrar y consultar establecimientos asociados a un productor.
   
 * [x] **RF-19**: El sistema deberá permitir seleccionar un establecimiento previamente registrado al dar de alta un animal.
   
@@ -585,3 +585,4 @@ Scenario: Conservar registros históricos
 | v4.0 → v5.0 | 2026-11-12 | Se documentó el funcionamiento offline completo como Non-Goal del MVP y se establecieron criterios para comunicar errores de conectividad. | Delimitar el alcance de la estrategia mobile y evitar incorporar mecanismos de sincronización offline sin una necesidad validada. |
 | v4.0 → v5.0 | 2026-11-12 | Se incorporaron referencias a ADR-006, presupuestos de rendimiento, estrategia offline y wireframes responsive de las dos pantallas críticas. | Mantener la trazabilidad entre la especificación, las decisiones arquitectónicas y los entregables de TP5. |
 | v5.0 → vFinal | 2026-11-16 | Se consolidaron las restricciones arquitectónicas incorporando ADR-006 y se revisó la coherencia entre la especificación, los ADR, el contrato OpenAPI y la implementación vigente. | Cerrar la especificación del proyecto y mantener alineadas las decisiones arquitectónicas con los entregables desarrollados durante TP5 y TP6. |
+|vFinal | 2026-11-17 | Se marcaron como cumplidos RF-14, RF-17 y RF-18, correspondientes a las alertas críticas de stock y la gestión de productores y establecimientos. Se precisó RF-14 para especificar que las alertas se generan al alcanzar el umbral crítico establecido. | Actualizar el estado de los requerimientos funcionales de acuerdo con las funcionalidades implementadas y verificadas en el entorno de producción. |
