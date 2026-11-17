@@ -15,17 +15,29 @@ router = APIRouter(
 
 
 @router.get("/api/establecimientos")
-def listar_establecimientos(db: Session = Depends(get_db)):
-    statement = select(Establecimiento).order_by(
-        Establecimiento.nombre
-    )
+def listar_establecimientos(
+    activos: bool = False,
+    db: Session = Depends(get_db),
+):
+    statement = select(Establecimiento)
+
+    if activos:
+        statement = statement.where(
+            Establecimiento.estado == "activo"
+        )
+
+    statement = statement.order_by(Establecimiento.nombre)
+
     establecimientos = db.scalars(statement).all()
 
     return [
         {
             "id_establecimiento": item.id_establecimiento,
+            "id_productor": item.id_productor,
             "nombre": item.nombre,
-            "ubicacion": item.ubicacion
+            "ubicacion": item.ubicacion,
+            "capacidad": item.capacidad,
+            "estado": item.estado,
         }
         for item in establecimientos
     ]
@@ -35,6 +47,9 @@ def listar_establecimientos(db: Session = Depends(get_db)):
 def listar_stock(db: Session = Depends(get_db)):
     return StockService(db).listar()
 
+@router.get("/api/stock/alertas")
+def listar_alertas_stock(db: Session = Depends(get_db)):
+    return StockService(db).listar_alertas()
 
 @router.post("/api/stock", status_code=201)
 def crear_insumo(data: dict, db: Session = Depends(get_db)):

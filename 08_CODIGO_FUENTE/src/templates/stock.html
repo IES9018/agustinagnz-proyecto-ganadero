@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -24,40 +25,39 @@
                 <img src="/static/img/icon-inicio.png" alt="Inicio">
                 <span>Inicio de Sesión</span>
             </button>
-            
-            <button>
+
+            <button onclick="location.href='/productores'">
                 <img src="/static/img/icon-productores.png" alt="Productores">
                 <span>Productores</span>
             </button>
+
             <button onclick="location.href='/animales'">
                 <img src="/static/img/icon-animales.png" alt="Animales">
                 <span>Gestión de Animales</span>
             </button>
+
             <button onclick="location.href='/sanidad'">
                 <img src="/static/img/icon-vacunacion.png" alt="Sanidad">
                 <span>Vacunación</span>
             </button>
+
             <button class="active" onclick="location.href='/stock'" aria-current="page">
                 <img src="/static/img/icon-stock.png" alt="Stock">
                 <span>Stock de Insumos</span>
             </button>
+
             <button onclick="location.href='/trazabilidad'">
                 <img src="/static/img/icon-trazabilidad.png" alt="Trazabilidad">
                 <span>Trazabilidad</span>
             </button>
-            
 
-            
             <div class="user-profile">
                 <span id="perfil-nombre"></span>
             </div>
 
-        
-
             <form action="/auth/logout" method="post" id="nav-logout" hidden>
                 <button type="submit">Cerrar sesión</button>
             </form>
-
 
         </nav>
     </header>
@@ -105,52 +105,52 @@
                         <label for="stock-cantidad">Cantidad inicial</label>
                         <input id="stock-cantidad" name="cantidad" type="number" min="0" step="any" value="0" required>
                     </div>
-                    
+
                     <div class="form-group">
                         <label for="stock-unidad">Unidad</label>
                         <input id="stock-unidad" name="unidad" maxlength="30" placeholder="Ej.: kg, litros, unidades" required>
                     </div>
+
                     <div class="form-group">
                         <label for="stock-ubicacion">Ubicación</label>
                         <input id="stock-ubicacion" name="ubicacion" maxlength="200" placeholder="Ej.: depósito principal" required>
                     </div>
+
                     <div class="form-group stock-field-wide">
                         <label for="stock-establecimiento">Establecimiento</label>
                         <select name="id_establecimiento" id="stock-establecimiento" required>
                             <option value="">Cargando establecimientos...</option>
                         </select>
                     </div>
-                    
-                </div>
-                <div class="form-group">
-                    <label for="stock-minimo">Umbral de stock bajo</label>
-                        <input
-                            type="number"
-                            id="stock-minimo"
-                            name="stock_minimo"
-                            min="0"
-                            step="any"
-                            value="10"
-                            required
-                        >
                 </div>
 
                 <div class="form-group">
-                    <label for="stock-critico">Umbral de stock crítico</label>
-                        <input
-                            type="number"
-                            id="stock-critico"
-                            name="stock_critico"
-                            min="0"
-                            step="any"
-                            value="5"
-                            required
-                            >
+                    <label for="stock-minimo">
+                        Stock mínimo (umbral de alerta crítica)
+                    </label>
+                    <input
+                        type="number"
+                        id="stock-minimo"
+                        name="stock_minimo"
+                        min="0"
+                        step="any"
+                        value="10"
+                        required
+                    >
                 </div>
+
                 <div class="form-actions">
                     <button type="submit" class="btn-primary">Registrar insumo</button>
                 </div>
             </form>
+        </section>
+
+        <section class="animals-list-card">
+            <h2>Alertas de stock</h2>
+            <p id="mensaje-alertas-stock" role="status" aria-live="polite">
+                Cargando alertas...
+            </p>
+            <div id="lista-alertas-stock"></div>
         </section>
 
         <section class="animals-list-card">
@@ -192,7 +192,7 @@
     </footer>
 
     <script src="/static/js/auth.js"></script>
-<script src="/static/js/stock-ui.js"></script>
+    <script src="/static/js/stock-ui.js"></script>
 
     <script>
     document.addEventListener("DOMContentLoaded", async () => {
@@ -213,30 +213,29 @@
         }
     });
 
+    document.addEventListener("DOMContentLoaded", async () => {
+        const loginLink = document.getElementById("nav-login");
+        const logoutForm = document.getElementById("nav-logout");
 
-document.addEventListener("DOMContentLoaded", async () => {
-    const loginLink = document.getElementById("nav-login");
-    const logoutForm = document.getElementById("nav-logout");
+        if (!loginLink || !logoutForm) return;
 
-    if (!loginLink || !logoutForm) return;
+        try {
+            const response = await fetch("/auth/perfil", {
+                credentials: "same-origin",
+                cache: "no-store"
+            });
 
-    try {
-        const response = await fetch("/auth/perfil", {
-            credentials: "same-origin",
-            cache: "no-store"
-        });
+            const autenticado = response.ok;
 
-        const autenticado = response.ok;
+            loginLink.hidden = autenticado;
+            logoutForm.hidden = !autenticado;
 
-        loginLink.hidden = autenticado;
-        logoutForm.hidden = !autenticado;
-
-    } catch (error) {
-        loginLink.hidden = false;
-        logoutForm.hidden = true;
-    }
-});
-</script>
+        } catch (error) {
+            loginLink.hidden = false;
+            logoutForm.hidden = true;
+        }
+    });
+    </script>
 
 </body>
 </html>

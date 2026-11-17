@@ -5,30 +5,14 @@ const selectorEstablecimiento = document.querySelector(
 );
 const mensaje = document.querySelector("#stock-message");
 
+const mensajeAlertas = document.querySelector(
+    "#mensaje-alertas-stock"
+);
+const listaAlertas = document.querySelector(
+    "#lista-alertas-stock"
+);
+
 let establecimientos = [];
-
-
-function obtenerEstadoStock(insumo) {
-    if (Number(insumo.cantidad) <= Number(insumo.stock_critico)) {
-        return {
-            texto: "Crítico",
-            clase: "stock-estado-critico"
-        };
-    }
-
-    if (Number(insumo.cantidad) <= Number(insumo.stock_minimo)) {
-        return {
-            texto: "Stock bajo",
-            clase: "stock-estado-bajo"
-        };
-    }
-
-    return {
-        texto: "Normal",
-        clase: "stock-estado-normal"
-    };
-}
-
 
 function mostrarMensaje(texto, error = false) {
     mensaje.textContent = texto;
@@ -48,52 +32,19 @@ async function respuestaApi(url, opciones = {}) {
     const datos = await respuesta.json().catch(() => ({}));
 
     if (!respuesta.ok) {
-        throw new Error(datos.detail || "No se pudo completar la operación.");
+        throw new Error(
+            datos.detail || "No se pudo completar la operación."
+        );
     }
 
     return datos;
 }
 
-async function cargarEstablecimientos() {
-    establecimientos = await respuestaApi("/api/establecimientos");
-    selectorEstablecimiento.replaceChildren();
-
-    const opcionInicial = document.createElement("option");
-    opcionInicial.value = "";
-    opcionInicial.textContent = establecimientos.length
-        ? "Seleccione un establecimiento"
-        : "No hay establecimientos registrados";
-    selectorEstablecimiento.append(opcionInicial);
-
-    for (const establecimiento of establecimientos) {
-        const opcion = document.createElement("option");
-        opcion.value = establecimiento.id_establecimiento;
-        opcion.textContent = `${establecimiento.nombre} — ${establecimiento.ubicacion}`;
-        selectorEstablecimiento.append(opcion);
-    }
-
-    selectorEstablecimiento.disabled = establecimientos.length === 0;
-}
-
-function agregarCelda(fila, texto) {
-    const celda = document.createElement("td");
-    celda.textContent = texto ?? "";
-    fila.append(celda);
-    return celda;
-}
-
 function obtenerEstadoStock(item) {
-    if (item.cantidad <= item.stock_critico) {
+    if (Number(item.cantidad) <= Number(item.stock_minimo)) {
         return {
             texto: "Crítico",
             clase: "stock-estado-critico"
-        };
-    }
-
-    if (item.cantidad <= item.stock_minimo) {
-        return {
-            texto: "Stock bajo",
-            clase: "stock-estado-bajo"
         };
     }
 
@@ -101,6 +52,44 @@ function obtenerEstadoStock(item) {
         texto: "Normal",
         clase: "stock-estado-normal"
     };
+}
+
+async function cargarEstablecimientos() {
+    establecimientos = await respuestaApi(
+        "/api/establecimientos"
+    );
+
+    selectorEstablecimiento.replaceChildren();
+
+    const activos = establecimientos.filter(
+        item => item.estado === "activo"
+    );
+
+    const opcionInicial = document.createElement("option");
+    opcionInicial.value = "";
+    opcionInicial.textContent = activos.length
+        ? "Seleccione un establecimiento"
+        : "No hay establecimientos activos";
+
+    selectorEstablecimiento.append(opcionInicial);
+
+    for (const establecimiento of activos) {
+        const opcion = document.createElement("option");
+        opcion.value = establecimiento.id_establecimiento;
+        opcion.textContent =
+            `${establecimiento.nombre} — ${establecimiento.ubicacion}`;
+
+        selectorEstablecimiento.append(opcion);
+    }
+
+    selectorEstablecimiento.disabled = activos.length === 0;
+}
+
+function agregarCelda(fila, texto) {
+    const celda = document.createElement("td");
+    celda.textContent = texto ?? "";
+    fila.append(celda);
+    return celda;
 }
 
 function agregarEstadoStock(fila, item) {
@@ -115,9 +104,9 @@ function agregarEstadoStock(fila, item) {
     fila.append(celda);
 }
 
-
 function crearControlMovimiento(item) {
     const celda = document.createElement("td");
+
     const cantidad = document.createElement("input");
     cantidad.type = "number";
     cantidad.min = "0.001";
@@ -132,14 +121,22 @@ function crearControlMovimiento(item) {
     ingreso.type = "button";
     ingreso.textContent = "Ingreso";
     ingreso.addEventListener("click", () => {
-        registrarMovimiento(item.id_stock, "ingreso", cantidad.value);
+        registrarMovimiento(
+            item.id_stock,
+            "ingreso",
+            cantidad.value
+        );
     });
 
     const salida = document.createElement("button");
     salida.type = "button";
     salida.textContent = "Salida";
     salida.addEventListener("click", () => {
-        registrarMovimiento(item.id_stock, "salida", cantidad.value);
+        registrarMovimiento(
+            item.id_stock,
+            "salida",
+            cantidad.value
+        );
     });
 
     const controles = document.createElement("div");
@@ -149,7 +146,6 @@ function crearControlMovimiento(item) {
 
     return celda;
 }
-
 
 async function cargarStock() {
     lista.replaceChildren();
@@ -168,6 +164,7 @@ async function cargarStock() {
                 fila,
                 "Todavía no hay insumos registrados."
             ).colSpan = 8;
+
             lista.append(fila);
             return;
         }
@@ -183,9 +180,8 @@ async function cargarStock() {
             agregarCelda(fila, item.ubicacion);
 
             const establecimiento = establecimientos.find(
-                (e) =>
-                    Number(e.id_establecimiento) ===
-                    Number(item.id_establecimiento)
+                e => Number(e.id_establecimiento)
+                    === Number(item.id_establecimiento)
             );
 
             agregarCelda(
@@ -207,8 +203,61 @@ async function cargarStock() {
     }
 }
 
+async function cargarAlertasStock() {
+    listaAlertas.replaceChildren();
 
-async function registrarMovimiento(stockId, tipoOperacion, valor) {
+    try {
+        const alertas = await respuestaApi("/api/stock/alertas");
+
+        if (!alertas.length) {
+            mensajeAlertas.textContent =
+                "No hay insumos en estado crítico.";
+            return;
+        }
+
+        mensajeAlertas.textContent =
+            `Se encontraron ${alertas.length} alertas críticas.`;
+
+        for (const alerta of alertas) {
+            const tarjeta = document.createElement("article");
+            tarjeta.className =
+                "sanidad-alerta status-danger";
+
+            const titulo = document.createElement("strong");
+            titulo.textContent = alerta.tipo_insumo;
+
+            const establecimiento = document.createElement("p");
+            establecimiento.textContent =
+                `Establecimiento: ${alerta.establecimiento}`;
+
+            const existencia = document.createElement("p");
+            existencia.textContent =
+                `Existencia: ${alerta.cantidad} ${alerta.unidad}`;
+
+            const umbral = document.createElement("p");
+            umbral.textContent =
+                `Umbral crítico: ${alerta.stock_minimo} ${alerta.unidad}`;
+
+            tarjeta.append(
+                titulo,
+                establecimiento,
+                existencia,
+                umbral
+            );
+
+            listaAlertas.append(tarjeta);
+        }
+    } catch (error) {
+        mensajeAlertas.textContent =
+            `No se pudieron cargar las alertas: ${error.message}`;
+    }
+}
+
+async function registrarMovimiento(
+    stockId,
+    tipoOperacion,
+    valor
+) {
     const cantidad = Number(valor);
 
     if (!Number.isFinite(cantidad) || cantidad <= 0) {
@@ -234,21 +283,32 @@ async function registrarMovimiento(stockId, tipoOperacion, valor) {
         mostrarMensaje(
             `Stock actualizado. Nueva existencia: ${actualizado.cantidad} ${actualizado.unidad}.`
         );
-        await cargarStock();
+
+        await Promise.all([
+            cargarStock(),
+            cargarAlertasStock()
+        ]);
     } catch (error) {
         mostrarMensaje(error.message, true);
     }
 }
 
-form.addEventListener("submit", async (evento) => {
+form.addEventListener("submit", async evento => {
     evento.preventDefault();
 
-    const datos = Object.fromEntries(new FormData(form).entries());
-    datos.categoria = document.getElementById("stock-categoria").value;
-    datos.stock_minimo = Number(document.getElementById("stock-minimo").value);
-    datos.stock_critico = Number(document.getElementById("stock-critico").value);
+    const datos = Object.fromEntries(
+        new FormData(form).entries()
+    );
+
+    datos.categoria =
+        document.getElementById("stock-categoria").value;
+
+    datos.stock_minimo =
+        Number(document.getElementById("stock-minimo").value);
+
     datos.cantidad = Number(datos.cantidad);
-    datos.id_establecimiento = Number(datos.id_establecimiento);
+    datos.id_establecimiento =
+        Number(datos.id_establecimiento);
 
     try {
         const creado = await respuestaApi("/api/stock", {
@@ -256,9 +316,16 @@ form.addEventListener("submit", async (evento) => {
             body: JSON.stringify(datos)
         });
 
-        mostrarMensaje(`Insumo "${creado.tipo_insumo}" registrado.`);
+        mostrarMensaje(
+            `Insumo "${creado.tipo_insumo}" registrado.`
+        );
+
         form.reset();
-        await cargarStock();
+
+        await Promise.all([
+            cargarStock(),
+            cargarAlertasStock()
+        ]);
     } catch (error) {
         mostrarMensaje(error.message, true);
     }
@@ -266,13 +333,22 @@ form.addEventListener("submit", async (evento) => {
 
 document.querySelector("#stock-refresh").addEventListener(
     "click",
-    cargarStock
+    async () => {
+        await Promise.all([
+            cargarStock(),
+            cargarAlertasStock()
+        ]);
+    }
 );
 
 async function iniciarStock() {
     try {
         await cargarEstablecimientos();
-        await cargarStock();
+
+        await Promise.all([
+            cargarStock(),
+            cargarAlertasStock()
+        ]);
     } catch (error) {
         mostrarMensaje(
             `No se pudo iniciar el módulo de stock: ${error.message}`,
