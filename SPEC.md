@@ -113,6 +113,7 @@ Las decisiones arquitectónicas del sistema se encuentran formalizadas en los si
 - **ADR-003 — Selección del mecanismo de persistencia:** establece PostgreSQL como mecanismo de persistencia objetivo y fundamenta su elección a partir del modelo relacional de GanadApp.
 - **ADR-004 — Selección del stack de interfaz de usuario:** establece HTML, CSS y JavaScript como tecnologías de interfaz para el MVP, sin incorporar un framework SPA como dependencia obligatoria.
 - **ADR-005 — Selección de la estrategia web:** establece una arquitectura MPA con páginas independientes, frontend servido por FastAPI y comunicación mediante API REST.
+- **ADR-006 — Selección de la estrategia mobile:** establece Responsive Web Design como estrategia de adaptación de las pantallas críticas, manteniendo la arquitectura MPA y el stack tecnológico existente. No se adopta una aplicación móvil nativa ni una arquitectura frontend independiente.
 
 Estas decisiones restringen la incorporación de nuevas tecnologías y componentes arquitectónicos. La incorporación de un framework, base de datos, servicio externo o cambio significativo del estilo arquitectónico deberá estar respaldada por una decisión arquitectónica documentada mediante un ADR aprobado.
 
@@ -583,3 +584,4 @@ Scenario: Conservar registros históricos
 | v4.0 → v5.0 | 2026-11-12 | Se establecieron presupuestos de rendimiento para LCP inferior a 2,5 segundos en 4G, INP inferior a 200 ms en p75 y JavaScript inicial inferior a 200 KB gzip. | Definir objetivos medibles y procedimientos de verificación mediante Lighthouse CI, web-vitals y source-map-explorer. |
 | v4.0 → v5.0 | 2026-11-12 | Se documentó el funcionamiento offline completo como Non-Goal del MVP y se establecieron criterios para comunicar errores de conectividad. | Delimitar el alcance de la estrategia mobile y evitar incorporar mecanismos de sincronización offline sin una necesidad validada. |
 | v4.0 → v5.0 | 2026-11-12 | Se incorporaron referencias a ADR-006, presupuestos de rendimiento, estrategia offline y wireframes responsive de las dos pantallas críticas. | Mantener la trazabilidad entre la especificación, las decisiones arquitectónicas y los entregables de TP5. |
+| v5.0 → vFinal | 2026-11-16 | Se consolidaron las restricciones arquitectónicas incorporando ADR-006 y se revisó la coherencia entre la especificación, los ADR, el contrato OpenAPI y la implementación vigente. | Cerrar la especificación del proyecto y mantener alineadas las decisiones arquitectónicas con los entregables desarrollados durante TP5 y TP6. |
