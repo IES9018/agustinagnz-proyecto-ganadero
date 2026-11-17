@@ -33,8 +33,7 @@ class TestStockService(unittest.TestCase):
             "tipo_insumo": "  Alimento balanceado  ",
             "categoria": "Alimentos",
             "cantidad": 10,
-            "stock_minimo": 10,
-            "stock_critico": 5,
+            "stock_minimo": 5,
             "unidad": "kg",
             "ubicacion": "Depósito",
             "id_establecimiento": 1,
@@ -71,12 +70,15 @@ class TestStockService(unittest.TestCase):
         with self.assertRaises(ValueError):
             StockService._validar_datos(datos, incluir_cantidad=True)
 
-    def test_06_rechaza_umbral_critico_superior_al_minimo(self):
+    def test_06_rechaza_stock_minimo_negativo(self):
         datos = self.datos_validos()
-        datos["stock_minimo"] = 5
-        datos["stock_critico"] = 6
+        datos["stock_minimo"] = -1
+
         with self.assertRaises(ValueError):
-            StockService._validar_datos(datos, incluir_cantidad=True)
+            StockService._validar_datos(
+                datos,
+                incluir_cantidad=True,
+            )
 
     def test_07_crear_valida_establecimiento_y_guarda(self):
         self.repo.crear.return_value = {"id_stock": 1}
@@ -366,12 +368,23 @@ class TestStockServiceValidacionesAdicionales(unittest.TestCase):
             "tipo_insumo": "Alimento balanceado",
             "categoria": "Alimentos",
             "cantidad": 10,
-            "stock_minimo": 10,
-            "stock_critico": 5,
+            "stock_minimo": 5,
             "unidad": "kg",
             "ubicacion": "Depósito",
             "id_establecimiento": 1,
         }
+
+    def test_39_acepta_stock_minimo_cero(self):
+        datos = self.datos_validos()
+        datos["stock_minimo"] = 0
+
+        resultado = StockService._validar_datos(
+            datos,
+            incluir_cantidad=True,
+        )
+
+        self.assertEqual(resultado["stock_minimo"], 0.0)
+        self.assertNotIn("stock_critico", resultado)
 
     def test_34_rechaza_tipo_insumo_superior_a_150_caracteres(self):
         datos = self.datos_validos()

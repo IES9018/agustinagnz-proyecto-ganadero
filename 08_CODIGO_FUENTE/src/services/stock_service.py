@@ -1,3 +1,4 @@
+
 import math
 
 from src.models.establecimiento import Establecimiento
@@ -24,6 +25,9 @@ class StockService:
 
     def listar(self):
         return self.repo.listar()
+
+    def listar_alertas(self):
+        return self.repo.listar_alertas()
 
     def crear(self, data: dict):
         datos = self._validar_datos(data, incluir_cantidad=True)
@@ -124,18 +128,13 @@ class StockService:
         datos["categoria"] = categoria
 
         stock_minimo = cls._validar_cantidad(data.get("stock_minimo", 10))
-        stock_critico = cls._validar_cantidad(data.get("stock_critico", 5))
 
-        if stock_minimo < 0 or stock_critico < 0:
-            raise ValueError("Los umbrales de stock no pueden ser negativos.")
-
-        if stock_critico > stock_minimo:
+        if stock_minimo < 0:
             raise ValueError(
-                "El umbral crítico no puede superar el stock mínimo."
+                "El umbral de stock mínimo no puede ser negativo."
             )
 
         datos["stock_minimo"] = stock_minimo
-        datos["stock_critico"] = stock_critico
 
         establecimiento_id = cls._validar_id_establecimiento(
             data.get("id_establecimiento")

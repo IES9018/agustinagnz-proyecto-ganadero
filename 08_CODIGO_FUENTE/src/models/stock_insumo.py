@@ -62,9 +62,4 @@ class StockInsumo(Base):
         server_default="10",
     )
 
-    stock_critico: Mapped[float] = mapped_column(
-        Float,
-        nullable=False,
-        default=5,
-        server_default="5",
-    )
+   

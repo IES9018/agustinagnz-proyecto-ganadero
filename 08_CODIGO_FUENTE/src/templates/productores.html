@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Productores - Ganadapp</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <header class="topbar">
+        <div class="brand">
+            <img src="/static/img/logo.png" alt="Ganadapp" class="logo-main">
+            <span class="brand-name">Ganadapp</span>
+        </div>
+
+        <nav class="menu">
+            <button onclick="location.href='/'">
+                <img src="/static/img/icon-panel.png" alt="Inicio">
+                <span>Inicio</span>
+            </button>
+
+            <button class="active" onclick="location.href='/productores'">
+                <img src="/static/img/icon-productores.png" alt="Productores">
+                <span>Productores</span>
+            </button>
+
+            <button onclick="location.href='/animales'">
+                <img src="/static/img/icon-animales.png" alt="Animales">
+                <span>Gestión de Animales</span>
+            </button>
+
+            <button onclick="location.href='/sanidad'">
+                <img src="/static/img/icon-vacunacion.png" alt="Sanidad">
+                <span>Vacunación</span>
+            </button>
+
+            <button onclick="location.href='/stock'">
+                <img src="/static/img/icon-stock.png" alt="Stock">
+                <span>Stock de Insumos</span>
+            </button>
+
+            <button onclick="location.href='/trazabilidad'">
+                <img src="/static/img/icon-trazabilidad.png" alt="Trazabilidad">
+                <span>Trazabilidad</span>
+            </button>
+
+            <div class="user-profile">
+                <span id="perfil-nombre"></span>
+            </div>
+
+            <form action="/auth/logout" method="post" id="nav-logout" hidden>
+                <button type="submit">Cerrar sesión</button>
+            </form>
+        </nav>
+    </header>
+
+    <main class="animal-page">
+        <section class="page-header">
+            <div>
+                <span class="section-label">Gestión ganadera</span>
+                <h1>Productores</h1>
+                <p>Registre productores y administre los establecimientos vinculados a cada uno.</p>
+            </div>
+            <div class="page-header-icon">
+                <img src="/static/img/icon-productores.png" alt="Productores">
+            </div>
+        </section>
+
+        <section class="animal-form-card">
+            <div class="card-title">
+                <div class="title-icon">
+                    <img src="/static/img/icon-productores.png" alt="">
+                </div>
+                <div>
+                    <h2 id="titulo-form-productor">Registrar productor</h2>
+                    <p>Complete los datos del productor.</p>
+                </div>
+            </div>
+
+            <form id="productor-form">
+                <input type="hidden" id="productor-id">
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="productor-nombre">Nombre completo o razón social</label>
+                        <input id="productor-nombre" maxlength="150" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="productor-documento">Documento / CUIT</label>
+                        <input id="productor-documento" maxlength="30">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="productor-telefono">Teléfono</label>
+                        <input id="productor-telefono" maxlength="40">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="productor-email">Correo electrónico</label>
+                        <input id="productor-email" type="email" maxlength="255">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="productor-localidad">Localidad</label>
+                        <input id="productor-localidad" maxlength="120">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="productor-domicilio">Domicilio</label>
+                        <input id="productor-domicilio" maxlength="200">
+                    </div>
+
+                    <div class="form-group stock-field-wide">
+                        <label for="productor-observaciones">Observaciones</label>
+                        <textarea id="productor-observaciones" maxlength="2000"></textarea>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn-primary">
+                        Guardar productor
+                    </button>
+                    <button type="button" class="btn-secondary" id="cancelar-productor">
+                        Limpiar
+                    </button>
+                </div>
+
+                <p id="productor-mensaje" role="status" aria-live="polite"></p>
+            </form>
+        </section>
+
+        <section class="animals-list-card">
+            <div class="list-header">
+                <div>
+                    <span class="section-label">Registro</span>
+                    <h2>Productores registrados</h2>
+                    <p>Seleccione un productor para consultar sus establecimientos.</p>
+                </div>
+                <button type="button" class="btn-refresh" id="actualizar-productores">
+                    Actualizar
+                </button>
+            </div>
+
+            <p id="productores-mensaje" role="status" aria-live="polite"></p>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Productor</th>
+                            <th>Documento</th>
+                            <th>Teléfono</th>
+                            <th>Localidad</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="lista-productores"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="animals-list-card" id="panel-establecimientos" hidden>
+            <div class="list-header">
+                <div>
+                    <span class="section-label">Productor seleccionado</span>
+                    <h2 id="titulo-establecimientos"></h2>
+                    <p>Establecimientos asociados a este productor.</p>
+                </div>
+                <button type="button" class="btn-primary" id="nuevo-establecimiento">
+                    + Nuevo establecimiento
+                </button>
+            </div>
+
+            <p id="establecimientos-mensaje" role="status" aria-live="polite"></p>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Establecimiento</th>
+                            <th>Ubicación</th>
+                            <th>Capacidad</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="lista-establecimientos"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="animal-form-card" id="form-establecimiento-panel" hidden>
+            <div class="card-title">
+                <div>
+                    <h2 id="titulo-form-establecimiento">Nuevo establecimiento</h2>
+                    <p>El establecimiento quedará asociado al productor seleccionado.</p>
+                </div>
+            </div>
+
+            <form id="establecimiento-form">
+                <input type="hidden" id="establecimiento-id">
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="establecimiento-nombre">Nombre</label>
+                        <input id="establecimiento-nombre" maxlength="150" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="establecimiento-ubicacion">Ubicación</label>
+                        <input id="establecimiento-ubicacion" maxlength="200" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="establecimiento-capacidad">Capacidad</label>
+                        <input id="establecimiento-capacidad" type="number" min="1" step="1">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="establecimiento-estado">Estado</label>
+                        <select id="establecimiento-estado">
+                            <option value="activo">Activo</option>
+                            <option value="inactivo">Inactivo</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn-primary">Guardar establecimiento</button>
+                    <button type="button" class="btn-secondary" id="cancelar-establecimiento">
+                        Cancelar
+                    </button>
+                </div>
+            </form>
+        </section>
+    </main>
+
+    <footer>
+        © 2026 Ganadapp - Soluciones de Gestión Ganadera - Todos los derechos reservados
+    </footer>
+
+    <script src="/static/js/auth.js"></script>
+    <script src="/static/js/productores-ui.js"></script>
+</body>
+</html>

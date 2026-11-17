@@ -3,6 +3,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from src.models.stock_insumo import StockInsumo
+from src.models.establecimiento import Establecimiento
 
 
 class StockRepository:
@@ -64,6 +65,39 @@ class StockRepository:
 
         return self._to_dict(item)
 
+    def listar_alertas(self):
+        statement = (
+            select(StockInsumo, Establecimiento)
+            .join(
+                Establecimiento,
+                StockInsumo.id_establecimiento
+                == Establecimiento.id_establecimiento,
+            )
+            .where(
+                StockInsumo.cantidad <= StockInsumo.stock_minimo
+            )
+            .order_by(
+                StockInsumo.cantidad.asc(),
+                StockInsumo.tipo_insumo.asc(),
+            )
+        )
+
+        resultados = self.db.execute(statement).all()
+
+        return [
+            {
+                **self._to_dict(item),
+                "establecimiento": establecimiento.nombre,
+                "mensaje": (
+                    f"{item.tipo_insumo}: quedan "
+                    f"{item.cantidad} {item.unidad}; "
+                    f"el umbral crítico es "
+                    f"{item.stock_minimo} {item.unidad}."
+                ),
+            }
+            for item, establecimiento in resultados
+        ]
+
     @staticmethod
     def _to_dict(item: StockInsumo):
         return {
@@ -72,7 +106,6 @@ class StockRepository:
             "categoria": item.categoria,
             "cantidad": float(item.cantidad),
             "stock_minimo": float(item.stock_minimo),
-            "stock_critico": float(item.stock_critico),
             "unidad": item.unidad,
             "ubicacion": item.ubicacion,
             "id_establecimiento": item.id_establecimiento,
