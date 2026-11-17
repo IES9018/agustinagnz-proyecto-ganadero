@@ -6,7 +6,7 @@ info:
   version: 1.0.0
   description: |
     Contrato de la API REST de GanadApp.
-    Documenta las operaciones de autenticación, animales,
+    Documenta las operaciones de autenticación, animales, productores,
     sanidad, establecimientos, stock y trazabilidad.
     Las operaciones protegidas requieren autenticación Bearer.
     El registro de usuarios utiliza un formulario y redirige
@@ -35,6 +35,8 @@ tags:
     description: Gestión de insumos y movimientos de stock.
   - name: Trazabilidad
     description: Consulta del historial de trazabilidad de animales.
+  - name: Productores
+    description: Gestión de productores y sus establecimientos asociados.
 
 paths:
   /auth/registro:
@@ -535,6 +537,210 @@ paths:
         "422":
           $ref: "#/components/responses/ValidationError"
 
+    /api/productores:
+    get:
+      tags:
+        - Productores
+      summary: Listar productores
+      operationId: listarProductores
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Listado de productores.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ProductorResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+    post:
+      tags:
+        - Productores
+      summary: Registrar productor
+      operationId: crearProductor
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProductorInput"
+      responses:
+        "201":
+          description: Productor registrado.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProductorResponse"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+
+  /api/productores/{productor_id}:
+    parameters:
+      - name: productor_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          minimum: 1
+
+    get:
+      tags:
+        - Productores
+      summary: Consultar productor
+      operationId: obtenerProductor
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Datos del productor.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProductorResponse"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+    put:
+      tags:
+        - Productores
+      summary: Actualizar productor
+      operationId: actualizarProductor
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProductorInput"
+      responses:
+        "200":
+          description: Productor actualizado.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProductorResponse"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+
+  /api/productores/{productor_id}/estado:
+    patch:
+      tags:
+        - Productores
+      summary: Cambiar estado del productor
+      operationId: cambiarEstadoProductor
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: productor_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - estado
+              properties:
+                estado:
+                  type: string
+                  enum: [activo, inactivo]
+      responses:
+        "200":
+          description: Estado actualizado.
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /api/productores/{productor_id}/establecimientos:
+    get:
+      tags:
+        - Productores
+      summary: Listar establecimientos de un productor
+      operationId: listarEstablecimientosProductor
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: productor_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+      responses:
+        "200":
+          description: Establecimientos asociados.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/EstablecimientoResponse"
+
+    post:
+      tags:
+        - Productores
+      summary: Crear establecimiento para un productor
+      operationId: crearEstablecimientoProductor
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: productor_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EstablecimientoInput"
+      responses:
+        "201":
+          description: Establecimiento registrado.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EstablecimientoResponse"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /api/stock/alertas:
+    get:
+      tags:
+        - Stock
+      summary: Listar alertas críticas de stock
+      operationId: listarAlertasStock
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Insumos cuya cantidad es menor o igual al stock mínimo.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/StockAlertaResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
 components:
   securitySchemes:
     bearerAuth:
@@ -703,10 +909,6 @@ components:
         stock_minimo:
           type: number
           minimum: 0
-          default: 10
-        stock_critico:
-          type: number
-          minimum: 0
           default: 5
         id_establecimiento:
           type: integer
@@ -802,6 +1004,124 @@ components:
         ctx:
           type: object
           additionalProperties: true
+
+        ProductorInput:
+      type: object
+      required:
+        - nombre
+      properties:
+        nombre:
+          type: string
+          minLength: 1
+          maxLength: 150
+        documento:
+          type: string
+          maxLength: 30
+          nullable: true
+        telefono:
+          type: string
+          maxLength: 40
+          nullable: true
+        email:
+          type: string
+          format: email
+          maxLength: 255
+          nullable: true
+        localidad:
+          type: string
+          maxLength: 120
+          nullable: true
+        domicilio:
+          type: string
+          maxLength: 200
+          nullable: true
+        observaciones:
+          type: string
+          maxLength: 2000
+          nullable: true
+
+    ProductorResponse:
+      allOf:
+        - $ref: "#/components/schemas/ProductorInput"
+        - type: object
+          required:
+            - id_productor
+            - estado
+            - establecimientos
+          properties:
+            id_productor:
+              type: integer
+            estado:
+              type: string
+              enum: [activo, inactivo]
+            establecimientos:
+              type: array
+              items:
+                $ref: "#/components/schemas/EstablecimientoResponse"
+
+    EstablecimientoInput:
+      type: object
+      required:
+        - nombre
+        - ubicacion
+      properties:
+        nombre:
+          type: string
+          minLength: 1
+          maxLength: 150
+        ubicacion:
+          type: string
+          minLength: 1
+          maxLength: 200
+        capacidad:
+          type: integer
+          minimum: 1
+          nullable: true
+        estado:
+          type: string
+          enum: [activo, inactivo]
+          default: activo
+
+    EstablecimientoResponse:
+      allOf:
+        - $ref: "#/components/schemas/EstablecimientoInput"
+        - type: object
+          required:
+            - id_establecimiento
+            - id_productor
+          properties:
+            id_establecimiento:
+              type: integer
+            id_productor:
+              type: integer
+
+    StockAlertaResponse:
+      type: object
+      required:
+        - id_stock
+        - tipo_insumo
+        - cantidad
+        - stock_minimo
+        - unidad
+        - id_establecimiento
+        - establecimiento
+      properties:
+        id_stock:
+          type: integer
+        tipo_insumo:
+          type: string
+        cantidad:
+          type: number
+        stock_minimo:
+          type: number
+        unidad:
+          type: string
+        id_establecimiento:
+          type: integer
+        establecimiento:
+          type: string
+        mensaje:
+          type: string
 
   responses:
     BadRequest:
