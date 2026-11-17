@@ -537,7 +537,7 @@ paths:
         "422":
           $ref: "#/components/responses/ValidationError"
 
-    /api/productores:
+  /api/productores:
     get:
       tags:
         - Productores
@@ -934,20 +934,6 @@ components:
           type: number
           exclusiveMinimum: 0
 
-    EstablecimientoResponse:
-      type: object
-      required:
-        - id_establecimiento
-        - nombre
-        - ubicacion
-      properties:
-        id_establecimiento:
-          type: integer
-        nombre:
-          type: string
-        ubicacion:
-          type: string
-
     TrazabilidadResponse:
       type: object
       required:
@@ -1005,7 +991,7 @@ components:
           type: object
           additionalProperties: true
 
-        ProductorInput:
+    ProductorInput:
       type: object
       required:
         - nombre
@@ -1015,30 +1001,36 @@ components:
           minLength: 1
           maxLength: 150
         documento:
-          type: string
+          type:
+            - string
+            - "null"
           maxLength: 30
-          nullable: true
         telefono:
-          type: string
+          type:
+            - string
+            - "null"
           maxLength: 40
-          nullable: true
         email:
-          type: string
+          type:
+            - string
+            - "null"
           format: email
           maxLength: 255
-          nullable: true
         localidad:
-          type: string
+          type:
+            - string
+            - "null"
           maxLength: 120
-          nullable: true
         domicilio:
-          type: string
+          type:
+            - string
+            - "null"
           maxLength: 200
-          nullable: true
         observaciones:
-          type: string
+          type:
+            - string
+            - "null"
           maxLength: 2000
-          nullable: true
 
     ProductorResponse:
       allOf:
@@ -1074,9 +1066,10 @@ components:
           minLength: 1
           maxLength: 200
         capacidad:
-          type: integer
+          type:
+            - integer
+            - "null"
           minimum: 1
-          nullable: true
         estado:
           type: string
           enum: [activo, inactivo]
