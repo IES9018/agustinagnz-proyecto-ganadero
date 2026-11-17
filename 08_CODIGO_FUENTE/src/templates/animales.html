@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="es">
 
@@ -19,7 +20,6 @@
     <header class="topbar">
 
         <div class="brand">
-
             <img
                 src="/static/img/logo.png"
                 alt="Ganadapp"
@@ -27,7 +27,6 @@
             >
 
             <span class="brand-name">Ganadapp</span>
-
         </div>
 
         <nav class="menu">
@@ -37,14 +36,12 @@
                 <span>Inicio</span>
             </button>
 
-
             <button onclick="location.href='/login'">
                 <img src="/static/img/icon-inicio.png" alt="Inicio">
                 <span>Inicio de Sesión</span>
             </button>
 
-
-            <button>
+            <button onclick="location.href='/productores'">
                 <img src="/static/img/icon-productores.png" alt="Productores">
                 <span>Productores</span>
             </button>
@@ -68,9 +65,6 @@
                 <img src="/static/img/icon-trazabilidad.png" alt="Trazabilidad">
                 <span>Trazabilidad</span>
             </button>
-
-
-
 
             <div class="user-profile">
                 <span id="perfil-nombre"></span>
@@ -189,7 +183,8 @@
 
                     </div>
 
-                                        <div class="form-group">
+
+                    <div class="form-group">
 
                         <label for="sexo">
                             Sexo
@@ -204,7 +199,6 @@
                         >
 
                     </div>
-
 
 
                     <div class="form-group">
@@ -222,6 +216,7 @@
 
                     </div>
 
+
                     <div class="form-group">
 
                         <label for="fecha_nacimiento">
@@ -236,21 +231,24 @@
 
                     </div>
 
+
                     <div class="form-group">
 
                         <label for="id_establecimiento">
                             Establecimiento
                         </label>
 
-                        <input
+                        <select
                             id="id_establecimiento"
-                            type="number"
-                            min="1"
-                            placeholder="Ej. 1"
                             required
                         >
+                            <option value="">
+                                Cargando establecimientos...
+                            </option>
+                        </select>
 
                     </div>
+
 
                     <div class="form-group">
 
@@ -261,7 +259,7 @@
                         <input
                             id="edad"
                             type="text"
-                            placeholder="Se calcula automáticamente" 
+                            placeholder="Se calcula automáticamente"
                             readonly
                         >
 
@@ -327,11 +325,14 @@
 
             </form>
 
-            <p id="animal-message"
-               class="animal-message"
-               role="status"
-               aria-live="polite"
-               aria-atomic="true"></p>
+
+            <p
+                id="animal-message"
+                class="animal-message"
+                role="status"
+                aria-live="polite"
+                aria-atomic="true"
+            ></p>
 
         </section>
 
@@ -373,7 +374,12 @@
 
             <div class="animal-count">
 
-                <span id="animal-count" role="status" aria-live="polite" aria-atomic="true">
+                <span
+                    id="animal-count"
+                    role="status"
+                    aria-live="polite"
+                    aria-atomic="true"
+                >
                     0 animales registrados
                 </span>
 
@@ -455,7 +461,8 @@
     ========================== -->
 
     <script src="/static/js/auth.js"></script>
-<script>
+
+    <script>
 
         const API = "/api/animales";
 
@@ -493,7 +500,9 @@
 
         }
 
+
         function calcularEdad(fechaNacimiento) {
+
             if (!fechaNacimiento) {
                 return "";
             }
@@ -513,9 +522,12 @@
             }
 
             return edad >= 0 ? edad : "";
+
         }
 
+
         function actualizarEdad() {
+
             const fechaNacimiento =
                 document.getElementById("fecha_nacimiento").value;
 
@@ -527,23 +539,31 @@
 
             campoEdad.value =
                 edad === "" ? "" : `${edad} años`;
-        }
 
+        }
 
 
         function mostrarMensajeAnimal(texto, error = false) {
+
             const mensaje = document.getElementById("animal-message");
+
             mensaje.textContent = texto;
+
             mensaje.setAttribute("role", error ? "alert" : "status");
+
             mensaje.setAttribute("aria-live", error ? "assertive" : "polite");
+
             mensaje.className = error
                 ? "animal-message animal-message-error"
                 : "animal-message animal-message-success";
+
         }
+
 
         async function guardarAnimal() {
 
             const estabaEditando = editandoId !== null;
+
             const payload = obtenerDatos();
 
             if (
@@ -557,55 +577,8 @@
                 payload.id_establecimiento < 1
             ) {
 
-                mostrarMensajeAnimal("Complete correctamente todos los campos.", true);
-
-                return;
-
-            }
-
-        try {
-
-            let response;
-
-            if (editandoId === null) {
-
-                response = await fetch(API, {
-
-                    method: "POST",
-
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-
-                    body: JSON.stringify(payload)
-
-                });
-
-            } else {
-
-                response = await fetch(
-                    `${API}/${editandoId}`,
-                    {    
-                        method: "PUT",
-
-                        headers: {
-                            "Content-Type": "application/json"
-                        },
-
-                        body: JSON.stringify(payload)
-                    }
-                );
-
-            }
-
-            if (!response.ok) {
-
-                const errorData = await response.json();
-
-                console.error(errorData);
-
                 mostrarMensajeAnimal(
-                    errorData.detail || "No fue posible guardar el animal.",
+                    "Complete correctamente todos los campos.",
                     true
                 );
 
@@ -613,28 +586,78 @@
 
             }
 
-            cancelarEdicion();
+            try {
 
-            mostrarMensajeAnimal(
-                estabaEditando
-                    ? "Cambios del animal guardados correctamente."
-                    : "Animal registrado correctamente."
-            );
+                let response;
 
-            await listar();
+                if (editandoId === null) {
 
-        } catch (error) {
+                    response = await fetch(API, {
 
-            console.error(error);
+                        method: "POST",
 
-            mostrarMensajeAnimal(
-                "No se pudo conectar con el servidor.",
-                true
-            );
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+
+                        body: JSON.stringify(payload)
+
+                    });
+
+                } else {
+
+                    response = await fetch(
+                        `${API}/${editandoId}`,
+                        {
+                            method: "PUT",
+
+                            headers: {
+                                "Content-Type": "application/json"
+                            },
+
+                            body: JSON.stringify(payload)
+                        }
+                    );
+
+                }
+
+                if (!response.ok) {
+
+                    const errorData = await response.json();
+
+                    console.error(errorData);
+
+                    mostrarMensajeAnimal(
+                        errorData.detail || "No fue posible guardar el animal.",
+                        true
+                    );
+
+                    return;
+
+                }
+
+                cancelarEdicion();
+
+                mostrarMensajeAnimal(
+                    estabaEditando
+                        ? "Cambios del animal guardados correctamente."
+                        : "Animal registrado correctamente."
+                );
+
+                await listar();
+
+            } catch (error) {
+
+                console.error(error);
+
+                mostrarMensajeAnimal(
+                    "No se pudo conectar con el servidor.",
+                    true
+                );
+
+            }
 
         }
-
-    }
 
 
         async function listar() {
@@ -651,14 +674,49 @@
 
                 }
 
-
                 const data = await response.json();
 
-                const respuestaEstablecimientos = await fetch("/api/establecimientos");
+                const respuestaEstablecimientos =
+                    await fetch("/api/establecimientos");
 
                 const establecimientos = respuestaEstablecimientos.ok
                     ? await respuestaEstablecimientos.json()
                     : [];
+
+                const establecimientosActivos = establecimientos.filter(
+                    establecimiento => establecimiento.estado === "activo"
+                );
+
+                const selectorEstablecimientos =
+                    document.getElementById("id_establecimiento");
+
+                selectorEstablecimientos.innerHTML = `
+                    <option value="">
+                        Seleccione un establecimiento
+                    </option>
+                `;
+
+                establecimientosActivos.forEach(establecimiento => {
+
+                    const opcion = document.createElement("option");
+
+                    opcion.value = establecimiento.id_establecimiento;
+
+                    opcion.textContent = establecimiento.nombre;
+
+                    selectorEstablecimientos.appendChild(opcion);
+
+                });
+
+                if (establecimientosActivos.length === 0) {
+
+                    selectorEstablecimientos.innerHTML = `
+                        <option value="">
+                            No hay establecimientos activos disponibles
+                        </option>
+                    `;
+
+                }
 
                 const establecimientosPorId = new Map(
                     establecimientos.map(e => [
@@ -729,7 +787,7 @@
                             </td>
 
                             <td>
-                                ${calcularEdad(animal.fecha_nacimiento)} años 
+                                ${calcularEdad(animal.fecha_nacimiento)} años
                             </td>
 
                             <td>
@@ -740,7 +798,6 @@
 
                             </td>
 
-                            
                             <td>
                                 ${escapeHtml(
                                     establecimientosPorId.get(Number(animal.id_establecimiento))
@@ -766,8 +823,6 @@
                                         Sanidad
                                     </button>
 
-                                    
-
                                 </div>
 
                             </td>
@@ -782,6 +837,7 @@
             } catch (error) {
 
                 console.error(error);
+
                 mostrarMensajeAnimal(
                     "No fue posible cargar los animales.",
                     true
@@ -808,15 +864,20 @@
 
 
         async function editarAnimal(id) {
+
             try {
+
                 const response =
                     await fetch(`${API}/${id}`);
 
                 if (!response.ok) {
+
                     alert(
                         "No fue posible obtener los datos del animal."
                     );
+
                     return;
+
                 }
 
                 const animal =
@@ -864,38 +925,36 @@
                     behavior: "smooth"
                 });
 
-        } catch (error) {
-            console.error(error);
+            } catch (error) {
 
-            alert(
-                "No fue posible cargar el animal."
-            );
-    }
-}
+                console.error(error);
 
+                alert(
+                    "No fue posible cargar el animal."
+                );
+
+            }
+
+        }
 
 
         function cancelarEdicion() {
 
             editandoId = null;
 
-
             document
                 .getElementById("animal-form")
                 .reset();
-
 
             document
                 .getElementById("form-title")
                 .textContent =
                 "Registrar Animal";
 
-
             document
                 .getElementById("save-button")
                 .textContent =
                 "Guardar Animal";
-
 
             document
                 .getElementById("cancel-button")
@@ -911,7 +970,6 @@
                 String(estado || "")
                     .toLowerCase();
 
-
             if (
                 valor.includes("sano")
             ) {
@@ -919,7 +977,6 @@
                 return "status-ok";
 
             }
-
 
             if (
                 valor.includes("observ")
@@ -929,7 +986,6 @@
 
             }
 
-
             if (
                 valor.includes("trat")
             ) {
@@ -938,7 +994,6 @@
 
             }
 
-
             if (
                 valor.includes("enfer")
             ) {
@@ -946,7 +1001,6 @@
                 return "status-danger";
 
             }
-
 
             return "status-default";
 
@@ -984,6 +1038,7 @@
             listar
         );
 
+
         document
             .getElementById("fecha_nacimiento")
             .addEventListener(
@@ -993,51 +1048,67 @@
 
     </script>
 
-<script>
-    document.addEventListener("DOMContentLoaded", async () => {
-        try {
-            const respuesta = await fetch("/auth/perfil", {
-                credentials: "same-origin"
-            });
 
-            if (!respuesta.ok) {
-                return;
+    <script>
+
+        document.addEventListener("DOMContentLoaded", async () => {
+
+            try {
+
+                const respuesta = await fetch("/auth/perfil", {
+                    credentials: "same-origin"
+                });
+
+                if (!respuesta.ok) {
+                    return;
+                }
+
+                const perfil = await respuesta.json();
+
+                document.getElementById("perfil-nombre").textContent =
+                    perfil.nombre;
+
+            } catch (error) {
+
+                console.error("No se pudo cargar el perfil del usuario:", error);
+
             }
 
-            const perfil = await respuesta.json();
-
-            document.getElementById("perfil-nombre").textContent = perfil.nombre;
-        } catch (error) {
-            console.error("No se pudo cargar el perfil del usuario:", error);
-        }
-    });
-
-document.addEventListener("DOMContentLoaded", async () => {
-    const loginLink = document.getElementById("nav-login");
-    const logoutForm = document.getElementById("nav-logout");
-
-    if (!loginLink || !logoutForm) return;
-
-    try {
-        const response = await fetch("/auth/perfil", {
-            credentials: "same-origin",
-            cache: "no-store"
         });
 
-        const autenticado = response.ok;
 
-        loginLink.hidden = autenticado;
-        logoutForm.hidden = !autenticado;
+        document.addEventListener("DOMContentLoaded", async () => {
 
-    } catch (error) {
-        loginLink.hidden = false;
-        logoutForm.hidden = true;
-    }
-});
+            const loginLink = document.getElementById("nav-login");
 
-</script>
+            const logoutForm = document.getElementById("nav-logout");
 
+            if (!loginLink || !logoutForm) return;
 
+            try {
+
+                const response = await fetch("/auth/perfil", {
+                    credentials: "same-origin",
+                    cache: "no-store"
+                });
+
+                const autenticado = response.ok;
+
+                loginLink.hidden = autenticado;
+
+                logoutForm.hidden = !autenticado;
+
+            } catch (error) {
+
+                loginLink.hidden = false;
+
+                logoutForm.hidden = true;
+
+            }
+
+        });
+
+    </script>
 
 </body>
 

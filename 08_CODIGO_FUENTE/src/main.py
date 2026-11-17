@@ -19,12 +19,14 @@ from src.models.establecimiento import Establecimiento
 from src.models.evento_sanitario import EventoSanitario
 from src.models.historial_animal import HistorialAnimal
 from src.models.stock_insumo import StockInsumo
+from src.models.productor import Productor
 
 from src.routes.auth_routes import router as auth_router
 from src.routes.animal_routes import router as animal_router
 from src.routes.sanidad_routes import router as sanidad_router
 from src.routes.trazabilidad_routes import router as trazabilidad_router
 from src.routes.stock_routes import router as stock_router
+from src.routes.productor_routes import router as productor_router
 
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -86,7 +88,7 @@ app.include_router(sanidad_router)
 app.include_router(trazabilidad_router)
 app.include_router(stock_router)
 app.include_router(auth_router)
-
+app.include_router(productor_router)
 
 @app.options("/api/animales", include_in_schema=False)
 def options_animales():
@@ -144,3 +146,7 @@ def pagina_protegida(nombre_archivo: str):
         BASE_DIR / "templates" / nombre_archivo,
         headers={"Cache-Control": "no-store, no-cache, must-revalidate"},
     )
+
+@app.get("/productores")
+def productores_page():
+    return pagina_protegida("productores.html")

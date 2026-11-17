@@ -1,4 +1,4 @@
-from sqlalchemy import Integer, String
+from sqlalchemy import ForeignKey, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column
 
 from src.core.database import Base
@@ -10,26 +10,34 @@ class Establecimiento(Base):
     id_establecimiento: Mapped[int] = mapped_column(
         Integer,
         primary_key=True,
-        autoincrement=True
+        autoincrement=True,
+    )
+
+    id_productor: Mapped[int] = mapped_column(
+        Integer,
+        ForeignKey("productores.id_productor"),
+        nullable=False,
+        index=True,
     )
 
     nombre: Mapped[str] = mapped_column(
         String(150),
-        nullable=False
+        nullable=False,
     )
 
     ubicacion: Mapped[str] = mapped_column(
         String(200),
-        nullable=False
+        nullable=False,
     )
 
     capacidad: Mapped[int | None] = mapped_column(
         Integer,
-        nullable=True
+        nullable=True,
     )
 
     estado: Mapped[str] = mapped_column(
         String(50),
         nullable=False,
-        default="activo"
+        default="activo",
+        server_default="activo",
     )
