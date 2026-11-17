@@ -1,5 +1,8 @@
 # GanadApp
 
+[![CI](https://github.com/IES9018/agustinagnz-proyecto-ganadero/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/IES9018/agustinagnz-proyecto-ganadero/actions/workflows/ci.yml)
+
+
 Sistema web de gestión ganadera para pequeños y medianos productores rurales de Malargüe, Mendoza, Argentina.
 
 ## 1. Descripción del sistema
