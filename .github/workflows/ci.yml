@@ -2,14 +2,21 @@ name: CI
 
 on:
   push:
+    branches:
+      - main
+
   pull_request:
+    branches:
+      - main
 
 permissions:
   contents: read
 
 jobs:
   build:
+    name: Build, tests and contract validation
     runs-on: ubuntu-latest
+    timeout-minutes: 15
 
     steps:
       - name: Checkout
@@ -22,21 +29,27 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Install dependencies
+      - name: Install Python dependencies
         working-directory: 08_CODIGO_FUENTE
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements-dev.txt
+          pip install pytest
 
       - name: Compile Python files
         working-directory: 08_CODIGO_FUENTE
         run: |
           python -m compileall -q src tests
 
-      - name: Run automated tests with coverage
+      - name: Run automated tests
         working-directory: 08_CODIGO_FUENTE
         run: |
-          python -m coverage run --source=src -m unittest discover -s tests -v
+          python -m pytest -q
+
+      - name: Generate coverage report
+        working-directory: 08_CODIGO_FUENTE
+        run: |
+          python -m coverage run --source=src -m pytest -q
           python -m coverage report -m
 
       - name: Setup Node.js
@@ -44,9 +57,15 @@ jobs:
         with:
           node-version: "24"
 
+      - name: Validate OpenAPI contract
+        run: |
+          npx --yes @redocly/cli lint docs/arquitectura/api-contracts.yaml
+
       - name: Install commitlint
         run: |
-          npm install --no-save --no-package-lock @commitlint/cli@21.2.2 @commitlint/config-conventional@21.2.2
+          npm install --no-save --no-package-lock \
+            @commitlint/cli@21.2.2 \
+            @commitlint/config-conventional@21.2.2
 
       - name: Determine commit range
         id: commit-range
@@ -67,9 +86,7 @@ jobs:
           TO="${{ steps.commit-range.outputs.to }}"
 
           if [ "$FROM" = "0000000000000000000000000000000000000000" ]; then
-            echo "Validando el commit actual..."
             npx commitlint --from "$TO^" --to "$TO" --verbose
           else
-            echo "Validando commits desde $FROM hasta $TO..."
             npx commitlint --from "$FROM" --to "$TO" --verbose
           fi
