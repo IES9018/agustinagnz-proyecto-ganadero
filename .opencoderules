@@ -1,138 +1,250 @@
-# Reglas de OpenCode - GanadApp
+# Reglas de desarrollo asistido por IA — GanadApp
 
-## 1. Alcance permitido
+## 1. Contexto del proyecto
 
-El agente puede modificar únicamente archivos dentro de:
+GanadApp es un sistema web de gestión ganadera orientado a pequeños y
+medianos productores rurales de Malargüe, Mendoza.
 
-* `08_CODIGO_FUENTE/`
+El sistema permite gestionar información relacionada con productores,
+establecimientos, animales, eventos sanitarios, trazabilidad y stock de
+insumos.
 
-El agente puede consultar como referencia, sin modificarlos, los contenidos de:
+Es un proyecto académico de la Tecnicatura Superior en Desarrollo de
+Software.
 
-* `07_IMPLEMENTACION/`
-* `04_MODELO_DATOS/`
-* `03_ARQUITECTURA/`
-* `02_CASOS_DE_USO/`
-* `06_INTERFAZ_USUARIO/`
+La implementación debe respetar la especificación funcional y técnica
+definida en `SPEC.md`.
 
-No modificar automáticamente documentación, diagramas, ADR, modelo de dominio, casos de uso ni prototipos ubicados fuera de `08_CODIGO_FUENTE/`.
-
-## 2. Tipos de archivos permitidos
-
-### Backend
-
-* `.py`
-* `.toml`
-* `.txt` cuando sea necesario para dependencias o configuración
-
-### Frontend
-
-* `.html`
-* `.css`
-* `.js`
-
-Los archivos de configuración adicionales solo pueden modificarse cuando sean necesarios para ejecutar o configurar la implementación existente.
-
-## 3. Estándares técnicos obligatorios
+## 2. Stack tecnológico obligatorio
 
 ### Backend
 
-* Utilizar Python.
-* Utilizar FastAPI para la API REST.
-* Mantener la arquitectura hexagonal definida en `07_IMPLEMENTACION/`.
-* Mantener separadas las capas de dominio, aplicación, infraestructura y presentación.
-* El dominio no debe depender de FastAPI, SQLAlchemy ni otros frameworks de infraestructura.
-* La capa de aplicación debe contener los casos de uso y coordinar los procesos.
-* La infraestructura debe implementar persistencia y adaptadores externos.
-* La presentación debe encargarse de exponer la API REST.
-* Utilizar `snake_case` para nombres de variables, funciones y módulos.
-* Mantener un archivo por entidad o caso de uso cuando corresponda.
-* Evitar lógica de negocio dentro de los controladores o rutas.
+- Python 3.12.
+- FastAPI.
+- SQLAlchemy 2.x.
+- API REST.
+- Autenticación JWT mediante HTTP Bearer.
 
-### Frontend
+### Persistencia
 
-* Utilizar HTML5, CSS3 y JavaScript vanilla para el MVP.
-* Mantener separadas la presentación y la lógica de interacción.
-* Utilizar componentes reutilizables cuando corresponda.
-* El frontend no debe contener lógica de negocio.
-* El frontend debe consumir la API REST del backend.
-* Priorizar una implementación simple, liviana y compatible con dispositivos básicos.
+- PostgreSQL como base de datos objetivo.
+- SQLAlchemy para el acceso a datos.
+- Migraciones SQL versionadas cuando corresponda.
 
-### Base de datos
+### Interfaz
 
-* Mantener el modelo relacional definido para el proyecto.
-* Utilizar PostgreSQL como base de datos del proyecto, conforme a ADR-001 y ADR-003.
-* Mantener la persistencia aislada mediante la capa de infraestructura.
-* No acoplar las entidades del dominio directamente al mecanismo de persistencia.
+- HTML5.
+- CSS3.
+- JavaScript.
+- Arquitectura Multiple Page Application (MPA).
+- Responsive Web Design (RWD).
 
-## 4. Prácticas prohibidas
+No incorporar frameworks SPA ni aplicaciones frontend independientes
+sin una decisión arquitectónica aprobada.
 
-* No utilizar el tipo `any` ni introducir tipado dinámico innecesario cuando exista una alternativa explícita.
-* No agregar dependencias externas sin autorización.
-* No introducir React, Vue, TypeScript u otros frameworks como parte del MVP sin una decisión explícita.
-* No modificar la arquitectura hexagonal establecida sin autorización.
-* No colocar lógica de negocio en rutas, controladores o código de presentación.
-* No mezclar dominio con infraestructura.
-* No acceder directamente a la base de datos desde la capa de presentación.
-* No duplicar lógica existente cuando pueda reutilizarse.
-* No eliminar funcionalidades existentes sin justificación.
-* No modificar archivos fuera del alcance permitido.
-* No modificar ADR, diagramas, documentación arquitectónica o modelo de dominio como consecuencia de una tarea de implementación.
-* No instalar dependencias ni ejecutar cambios destructivos sin autorización explícita.
+## 3. Arquitectura
 
-## 5. Reglas de modificación
+La aplicación utiliza una arquitectura monolítica modular organizada
+mediante separación de responsabilidades por capas.
 
-Antes de realizar cambios, el agente debe:
+Se deben mantener separadas las responsabilidades de:
 
-1. Revisar la estructura existente de `08_CODIGO_FUENTE/`.
-2. Consultar las convenciones y decisiones documentadas en `07_IMPLEMENTACION/`.
-3. Reutilizar las estructuras, componentes y funciones existentes cuando sea posible.
-4. Realizar cambios mínimos y directamente relacionados con la tarea solicitada.
-5. Mantener compatibilidad con la arquitectura y el stack tecnológico definidos para el MVP.
-6. Informar cualquier conflicto entre la tarea solicitada y las reglas arquitectónicas existentes.
+- Dominio.
+- Aplicación y servicios.
+- Infraestructura y persistencia.
+- Presentación y API.
 
-## 6. Criterio de consistencia
+La lógica de negocio no debe implementarse directamente en las rutas
+HTTP ni en los componentes de interfaz.
 
-Ante cualquier conflicto entre una implementación propuesta y las decisiones documentadas del proyecto, se debe priorizar:
+El dominio no debe depender de FastAPI ni de SQLAlchemy.
 
-1. Decisiones arquitectónicas aceptadas.
-2. Modelo de dominio y casos de uso.
-3. Convenciones y stack definidos en `07_IMPLEMENTACION/`.
-4. Estructura existente de `08_CODIGO_FUENTE/`.
-5. Requerimiento específico de la tarea.
+No introducir microservicios ni infraestructura distribuida sin una
+decisión arquitectónica documentada.
 
-No asumir cambios tecnológicos o arquitectónicos que no estén documentados o autorizados.
+## 4. Decisiones arquitectónicas
 
-## 7. Coherencia arquitectónica
+Las decisiones arquitectónicas vigentes se encuentran documentadas en:
 
-* PROHIBIDO introducir frameworks, bases de datos o servicios externos que no estén declarados en un ADR aprobado. Ante duda, proponer ADR nuevo.
+- `docs/adr/ADR-001-stack-tecnologico.md`
+- `docs/adr/ADR-002-estilo-arquitectonico.md`
+- `docs/adr/ADR-003-persistencia.md`
+- `docs/adr/ADR-004-stack-ui.md`
+- `docs/adr/ADR-005-estrategia-web.md`
+- `docs/adr/ADR-006-estrategia-mobile.md`
 
+No modificar el stack, la arquitectura, el mecanismo de persistencia ni
+la estrategia de interfaz sin justificar el cambio mediante un ADR nuevo
+o la actualización formal de uno existente.
 
-## Seguridad y protección de datos
+## 5. Modelo de usuarios y autenticación
 
-- PROHIBIDO hardcodear secrets, tokens, claves privadas, contraseñas o credenciales. Utilizar variables de entorno y mantener los archivos sensibles fuera del control de versiones.
+El sistema permite registrar múltiples usuarios.
 
-- OBLIGATORIO validar y sanear toda entrada externa en el borde del sistema antes de utilizarla en la lógica de negocio o persistencia. La validación debe contemplar tipos, formatos, longitudes, rangos y valores permitidos.
+Todos los usuarios tienen las mismas funcionalidades y no existen roles
+ni permisos diferenciados por rol.
 
-- OBLIGATORIO: todo endpoint nuevo debe estar documentado en `docs/arquitectura/api-contracts.yaml` ANTES de implementarse. La implementación debe respetar el método HTTP, parámetros, esquemas de entrada, respuestas y códigos de estado definidos en el contrato.
+No introducir roles de productor, administrador o personal de campo
+como tipos de cuenta.
 
-- OBLIGATORIO exigir autenticación en todos los endpoints privados mediante los mecanismos definidos en `src/core/security.py`.
+El productor es una entidad del dominio y no un rol de usuario.
 
-- OBLIGATORIO verificar autorización sobre el recurso solicitado. La autenticación del usuario no implica autorización automática para consultar o modificar cualquier animal, evento sanitario o registro de stock.
+La autenticación debe utilizar el mecanismo JWT Bearer definido en
+`08_CODIGO_FUENTE/src/core/security.py`.
 
-- PROHIBIDO confiar en identificadores enviados por el cliente sin comprobar la existencia y pertenencia del recurso al ámbito autorizado del usuario.
+No implementar mecanismos de autenticación alternativos sin una
+decisión aprobada.
 
-- OBLIGATORIO utilizar consultas parametrizadas mediante SQLAlchemy. PROHIBIDO construir consultas SQL concatenando valores provenientes de entradas externas.
+## 6. Contrato API
 
-- OBLIGATORIO mantener las contraseñas mediante algoritmos de hash seguros. PROHIBIDO almacenar o registrar contraseñas en texto plano.
+El contrato oficial se encuentra en:
 
-- OBLIGATORIO no exponer tokens, contraseñas, secretos ni información sensible en respuestas HTTP, mensajes de error o registros de aplicación.
+`docs/arquitectura/api-contracts.yaml`
 
-- OBLIGATORIO mantener la integridad de las operaciones de negocio mediante validaciones en los servicios y restricciones de persistencia cuando corresponda.
+Todo endpoint nuevo debe documentarse en el contrato antes de
+implementarse.
 
-- OBLIGATORIO conservar trazabilidad de las operaciones críticas, incluyendo identidad del usuario, fecha, operación y motivo cuando corresponda.
+La implementación debe respetar:
 
-- OBLIGATORIO incorporar pruebas negativas para entradas inválidas, usuarios no autenticados, recursos inexistentes y accesos no autorizados.
+- Método HTTP.
+- Parámetros.
+- Esquemas de entrada.
+- Esquemas de respuesta.
+- Códigos de estado.
+- Requisitos de autenticación.
 
-- OBLIGATORIO revisar las dependencias y configuraciones de seguridad antes de incorporar nuevas bibliotecas o servicios externos.
+No crear estructuras de solicitud o respuesta incompatibles con
+OpenAPI.
 
-- PROHIBIDO considerar una operación segura únicamente porque el endpoint requiere autenticación. Deben verificarse también autorización, validación de entradas y protección de los datos.
+Los cambios del contrato deben validarse mediante Redocly.
+
+## 7. Seguridad y protección de datos
+
+- No incluir contraseñas, tokens, claves privadas ni credenciales
+  directamente en el código.
+- Utilizar variables de entorno para los secretos.
+- No incorporar archivos `.env` al repositorio.
+- Validar los datos externos antes de procesarlos.
+- Aplicar validaciones de tipos, formatos, longitudes y rangos.
+- Utilizar consultas parametrizadas mediante el ORM.
+- No exponer información sensible en mensajes de error.
+- Exigir autenticación en los endpoints privados.
+- No considerar que la autenticación por sí sola garantiza autorización
+  o aislamiento de datos.
+- Revisar las operaciones que modifican o eliminan información histórica.
+- Mantener la trazabilidad de los registros.
+
+## 8. Reglas de desarrollo
+
+Antes de modificar código:
+
+1. Revisar la estructura existente del repositorio.
+2. Leer la especificación y los ADR relacionados con la tarea.
+3. Identificar las implementaciones existentes.
+4. Reutilizar servicios, modelos y componentes cuando corresponda.
+5. Delimitar los archivos afectados.
+6. Verificar que el cambio no contradiga los requisitos vigentes.
+
+Los cambios deben ser mínimos y estar relacionados directamente con
+la tarea solicitada.
+
+No reemplazar archivos completos cuando una modificación puntual sea
+suficiente.
+
+No eliminar funcionalidades existentes sin justificación.
+
+## 9. Pruebas y calidad
+
+Toda modificación debe contar con verificaciones acordes con su alcance.
+
+Se deben ejecutar las pruebas automatizadas pertinentes.
+
+Los cambios de lógica de negocio deben incorporar pruebas que cubran
+los resultados esperados y los casos de error.
+
+Los cambios de API deben respetar el contrato OpenAPI.
+
+No afirmar que una prueba fue ejecutada si no existe evidencia de su
+ejecución.
+
+No considerar una tarea terminada únicamente porque el código compila.
+
+La integración continua debe aprobarse antes de integrar un Pull Request
+en `main`.
+
+## 10. Interfaz y experiencia de usuario
+
+Mantener la arquitectura MPA y el stack HTML, CSS y JavaScript.
+
+La adaptación mobile debe utilizar Responsive Web Design.
+
+No desarrollar una aplicación móvil nativa ni una arquitectura
+frontend independiente.
+
+Las pantallas críticas son:
+
+- Gestión de Animales.
+- Vacunación.
+
+Conservar la información, los campos y las acciones funcionales al
+adaptar la distribución visual.
+
+Mantener los criterios de accesibilidad documentados.
+
+No presentar una operación como exitosa si el servidor no confirmó
+su ejecución.
+
+El funcionamiento offline completo y la sincronización automática
+quedan fuera del alcance del MVP.
+
+## 11. Restricciones de alcance
+
+No incorporar funcionalidades que no estén contempladas en `SPEC.md`
+sin una solicitud explícita y su correspondiente actualización formal.
+
+No incorporar integraciones externas, dispositivos IoT, procesamiento
+financiero ni analítica predictiva como parte del MVP.
+
+No inventar datos de productores ni presentar datos de prueba como
+datos reales.
+
+No afirmar que una funcionalidad está implementada si no existe
+evidencia en el código y en las pruebas correspondientes.
+
+## 12. Uso responsable de IA
+
+La IA funciona como herramienta de asistencia y no como autoridad
+para aceptar cambios.
+
+Toda propuesta debe contrastarse con:
+
+1. La consigna específica.
+2. `SPEC.md`.
+3. Los ADR vigentes.
+4. El contrato OpenAPI.
+5. La implementación real.
+6. Las pruebas automatizadas.
+
+No aceptar propuestas únicamente por su apariencia formal.
+
+No inventar requisitos, funcionalidades, resultados de pruebas,
+decisiones arquitectónicas ni evidencias.
+
+Ante información insuficiente, indicar qué no puede verificarse.
+
+La aceptación final de los cambios corresponde a la persona
+responsable del proyecto.
+
+## 13. Restricciones de modificación
+
+No modificar documentación, ADR, diagramas, especificaciones,
+wireframes ni modelos de dominio cuando la tarea solicite únicamente
+cambios de implementación.
+
+No modificar archivos ajenos al alcance autorizado.
+
+No instalar dependencias ni ejecutar operaciones destructivas
+sin autorización explícita.
+
+No realizar commits, merges, pushes ni publicaciones sin autorización
+expresa de la responsable del repositorio.
